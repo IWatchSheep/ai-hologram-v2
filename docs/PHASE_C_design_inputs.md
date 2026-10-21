@@ -1,0 +1,216 @@
+# Phase C design inputs: spatial agent and temporal-spatial witness
+
+**Status:** design inputs, agreed in discussion between the owner, ChatGPT and Claude on October 20, 2026. **Not approved protocol text.** They will be turned into draft Phase C rules for C2–C4 after the `stage-3` tag, then reviewed independently. Nothing here changes Phase A, Phase B or the C1 baseline.
+
+## The owner's architecture
+- **Spatial agent:** mainly performs actions and spatial planning.
+- **Temporal-spatial witness:** mainly examines how observations, predictions and events relate across time, and helps the spatial agent.
+- **Overlap:** both keep overlapping spatial and temporal-spatial reasoning, so that each can check the other.
+- **Reciprocal checking is essential:** the spatial agent must also be able to catch the witness's mistakes.
+
+## 1. The common relative zero
+- **Shared frame:** grid coordinates (x, y) plus the decision step t.
+- **Local reference:** for each agent i, Z_i = (x_i, y_i, t_i).
+- **Converting an event:** for an event E = (x, y, t), relative_i(E) = (x − x_i, y − y_i, t − t_i). Converting back to the shared frame adds Z_i.
+- **Two kinds of reference:** a fixed initial reference must be kept separate from a moving current reference.
+- **Offsets are signed in space and time.** Positive and negative values describe displacement only; they never mean authority or superiority.
+- **Tests:** zero, positive and negative offsets; boundaries; round trips; agreement after conversion to the shared frame.
+
+## 2. Claims, and disagreement between them
+- **A claim records:** element (wall, object or agent), value, cell, time step, source agent, evidence channel, and the evidence itself (which observation or prediction it came from).
+- **Comparing claims:** two claims are compared only after normalising their spatial references, time references, element identities and observation times.
+- **What a disagreement means:** a reason to investigate, never proof of which agent is wrong. The evidence and source of both claims are kept.
+- **Tests:** stale observations, different reference moments, wrong conversions, and genuine contradictions.
+
+## 3. Channels (the "senses")
+- **Abstract senses:** channels such as eyes or touch are an abstract representation, acceptable in this grid world.
+- **Evidence, not access:** a channel names **which evidence a claim uses**. It never limits what an agent receives; every reasoner still receives the complete observations required by Phase B.
+- **No privileged observations** for either agent.
+
+## 4. Fairness
+- **Equal budgets:** each two-agent condition's total model-evaluation budget equals C1's.
+- **Costs are defined and counted:** message costs, and any extra computation for building, converting and comparing claims.
+- **No unbounded free reasoning.**
+- **Same accounting** for C2, C3 and C4.
+
+## 5. Meaningful comparisons
+- **What each condition tests:**
+  - C2 tests duplication;
+  - C3 tests different methods with overlapping responsibilities;
+  - C4 tests divided responsibilities without the same reciprocal checking.
+- **No special advantage for C3:** the shared-frame mechanism is available to every two-agent condition.
+- **Deliberate failure checks cover four cases:**
+  - the spatial agent is wrong;
+  - the witness is wrong;
+  - both are wrong, including common-mode faults;
+  - neither can resolve the disagreement.
+
+## 6. Process
+- **When:** written as draft Phase C rules after the `stage-3` tag and completion gate.
+- **How it is checked:** exact reference values and deliberate failure checks, as in Stage 3.
+- **No early tag:** no `protocol-1-approved` tag until Phase C and the complete protocol have been independently reviewed and approved.
+
+## 7. Owner's observations from the Stage 3 gate (design goals for the witness)
+- **A reflex, not only a checklist.**
+  - **What C1 lacks:** C1 notices errors only after they happen, once per step, in a fixed order.
+  - **The goal:** the witness should give the system anticipatory, continuous sensing, like a cat's whiskers working with its tail, so that a problem can be sensed **before contact**.
+  - **Limits:** it must still be measurable and run within the same budget.
+- **Awareness beyond the route.**
+  - **What C1 lacks:** C1 compares only the footprint, the cells along its own route.
+  - **The goal:** the witness should monitor the area a change could affect, not just the spatial agent's path.
+  - **Tests:** include faults placed **outside** the route, and measure whether the witness detects them before the spatial agent reaches them (the cat sees the snake before stepping near it).
+- **Paired estimates instead of one fixed heuristic.**
+  - **What C1 lacks:** C1's A* uses a single spatial estimate (h), computed by a fixed formula from one perspective and never corrected.
+  - **The goal:** groups of paired spatial and temporal-spatial evaluators, one per sense or evidence channel. Each group measures offsets (added or subtracted) from the shared relative zero, and the two parts adjust each other.
+  - **Constraint:** an adjustment must never make the planner's estimate overestimate the true remaining cost. Otherwise A*'s shortest-plan guarantee is lost. This needs explicit tests.
+  - **Same total budget.**
+- **A hierarchy of groups sharing the same budget.**
+  - **What C1 lacks:** C1 has one central pool of B predictions per step, one level, and a fixed priority order.
+  - **The goal:** part-level groups (a paw, an eye), each with its own array of paired spatial and temporal-spatial groups predicting locally, plus whole-level groups (the mind) that help and coordinate them. Together they solve the problem as one larger group.
+  - **Budget rules:**
+    - each group gets a share of the **same total B** as C1;
+    - each part-level group keeps a local reserve for reflex predictions;
+    - coordination between levels has a counted cost, taken from the same total.
+  - **How B is divided** is fixed in advance and checked by pilots under the Phase A rules, never tuned to make any condition win.
+- **Zero and "greater than zero" kept separate.**
+  - **What C1 lacks:** C1 accepts being trapped as an outcome.
+  - **The goal:**
+    - keep "zero" (the current reference) and "greater than zero" (the reachable room to act) as separate, measured quantities;
+    - watch the room to act every step, so that a shrinking space is sensed before the trap closes;
+    - treat its collapse as a contradiction that triggers explanation and escape (check beliefs, look for a way out), not as an accepted outcome.
+  - **Tests:** layouts where the room to act shrinks step by step, measuring how early each condition notices.
+- **Trading zero locations versus being merged.**
+  - **What C1 lacks:** C1 changes its reference only when a mismatch forces it to.
+  - **The goal:**
+    - **a voluntary trade:** an agent adopts another agent's reference when independent evidence supports it, or when it is worth it for the goal (the reward);
+    - **an imposed merge:** copying another's view without evidence must be resisted, as in the previous point.
+  - **Tests:** check that agents adopt each other's views only with evidence, and keep their own otherwise.
+- **Graded trust built from measured rewards.**
+  - **What C1 lacks:** verification is one all-or-nothing event, and all history counts fully forever.
+  - **The goal:**
+    - confidence that grows with repeated, measured confirmations;
+    - a change that began as imposed (a bad trade) can become the accepted, and finally the only, reference once enough evidence accumulates;
+    - old references fade **in weight**, but records and provenance are kept.
+  - **Tests:**
+    - follow how confidence changes over a run;
+    - check that fading never erases what is needed to detect a fault that reverts.
+- **Confirmation through the other agent's experience.**
+  - **What C1 lacks:** C1 confirms only through its own predictions, or active tests it carries out itself (only for walls).
+  - **The goal:**
+    - one agent's observations and outcomes can count as confirming evidence for the other, under the independence rules (a trade, not a merge), reducing the risk each agent takes;
+    - the source of a confirmed change is kept on record, even when it no longer matters to reasoning (don't forget the stranger).
+  - **Tests:** compare confirmation through the other agent with self-testing, in steps taken and in risk.
+- **Safe ground, unsafe ground and retreat.**
+  - **What C1 lacks:** C1's safe stop freezes the agent where the trouble arose.
+  - **The goal:**
+    - when danger is detected, retreat to a known safe earlier reference instead of freezing;
+    - build a map of safe and unsafe ground from repeated history;
+    - more checking on unsafe ground and less on safe ground, within the same total budget;
+    - leave safe ground only once trust has reached a threshold (the graded confidence above).
+  - **Tests:**
+    - retreat behaviour;
+    - how vigilance is spread by ground;
+    - no move leaves safe ground without enough trust.
+- **More than one group active, and low trust in danger zones.**
+  - **What C0 and C1 lack:** C0 sees only its plan. C1 checks only along its route and only for known kinds of error; an unexplained surprise (S5) doesn't lower its trust.
+  - **The goal:**
+    - several groups active at once, including at least one watching for dangers unrelated to the current goal;
+    - unexplained surprises mark the area as low-trust, and trust in trades of zero there is lowered.
+  - **Tests:** faults unrelated to the current goal, measuring whether they are noticed.
+  - **For later experiments (outside Experiment 1's scope):** worlds with third-party dangers and new kinds of hazard (mud, another animal), to test whether the architecture notices dangers it was never told about.
+- **Nested jobs judged by real effect.**
+  - **The goal:**
+    - each group's array holds mini-jobs inside a larger job;
+    - every mini-job's result is judged by its real effect on the job above it (zero versus greater than zero), using the other agent's view as a check.
+  - **What C0 and C1 show:** C0 counted progress that never happened. C1 checks real effect but has only two levels (step and goal).
+  - **Tests:** cases where a mini-job "succeeds" internally while the larger job makes no real progress, measuring whether that is caught.
+- **Records that cannot be made to forget.**
+  - **The risk:** making a system forget its past and live only in the present is a way to manipulate it (the feral cat that traded its freedom for candy).
+  - **The goal:**
+    - the witness's records resist being erased or rewritten, whether by faults or by the other agent;
+    - weight may fade, records may not.
+  - **Tests:** attempts to make one agent "forget", such as faults that overwrite history, measuring whether the system notices.
+- **Adapting to survive, and trust amplified by independent agreement** (owner's note, after the Phase C v0.9 draft).
+  - **The owner's image:**
+    - the dissenter who adapts is not reckless: the one who trusts and lives is followed by the one who did not trust;
+    - those who keep judgements built on logical errors fade;
+    - when the spatial and the temporal-spatial agents both agree on changing the location of zero, the change is amplified gradually, like water poured into a cup: a feral cat becoming tame and living, rather than staying wild and being killed (a lion in a city, versus a domestic cat).
+  - **In Experiment 1 (Phase C):** an agent moves its zero only through its own evidence, and the safe test lets the world decide, so adapting to evidence is what succeeds. Agreement is never used as proof (Brief R3).
+  - **For a later experiment:**
+    - trust that grows gradually when the two agents reach the same change **independently**, each from its own evidence, and never when one copies the other;
+    - it must be tested against common-mode faults (both wrong together), to show that amplification helps more than it misleads.
+- **Sacrifice for the larger job** (owner's note: chess).
+  - **The owner's image:** if a member of a mini-group (spatial, temporal-spatial) acknowledges the greater truth and acts on it, the king may not be caught. It may not be good for the pawn, but it lets the game continue.
+  - **In Experiment 1:**
+    - cautious actions and safe stops give up progress to avoid a trap (Brief 4.2, step 4b: acting is not always better than not acting);
+    - a reasoner gives up its own belief when its own evidence shows it was wrong.
+  - **For a later experiment (with groups and nested jobs):** a group member that recognises the larger job's truth may act against its own mini-job's interest, so that the larger job survives. Tests should measure whether such sacrifices help the whole more than they cost, and whether a member can be wrongly persuaded to sacrifice itself (a common-mode or false-alarm risk).
+- **Learning from lost games, passed up through the groups** (owner's note, at the protocol approval).
+  - **The owner's image (chess):**
+    - the temporal-spatial agent learns from losing games (pushing too far);
+    - it then helps the spatial agent not to lose the same way;
+    - the lesson moves up through the groups, from pawns to higher pieces, up to the king (for example, castling early);
+    - vigilance and curiosity arise when mini-groups "invent" the zero position that identifies a threat to the king.
+  - **In Experiment 1:** none. Every run starts fresh, with no learning between runs, which keeps the comparison fair.
+  - **For a later experiment:** learning across episodes, with lessons propagated from part-level groups to whole-level groups. It must be tested with fair baselines that are allowed the same learning, and with held-out layouts.
+- **Different confidence for the one who assesses and the one who does the work** (owner's qualification of A2, at the protocol approval).
+  - **The owner's words:** "a2 is not necessarily true because of confidence of testing boundaries for one person vs the confidence of the person doing the work being low because its hazardous."
+  - **The meaning (agreed with ChatGPT):** the temporal-spatial witness may be confident in its assessment of an action, while the spatial agent that must perform it has lower confidence because it recognises a hazard. The observer's confidence must not automatically override the acting agent's concern.
+  - **In Experiment 1:** respected without any confidence numbers. No action is taken because one reasoner believes it is safe. The acting agent's own judgement is always required, and unresolved disputes keep the cautious-action or safe-stop protection (protocol 13.4c, item 4).
+  - **For a later experiment:**
+    - independent confidence estimates for each agent;
+    - explicit risk assessment;
+    - the acting agent's right to withhold a hazardous action, even when its partner is confident.
+
+    Tests should measure when withholding prevents harm, and when it only causes delay.
+- **Tolerable danger: act on what is logically true until a result shows danger** (owner's clarification of A2).
+  - **The owner's words:** "That's not true with people its about tolerable danger doing what's logically true is true then only then when there is a result showing danger is the danger avoided for a new method."
+  - **The meaning (confirmed by the owner):**
+    - do not freeze because something might be dangerous;
+    - act on what is logically right, accepting tolerable danger;
+    - only when a result shows danger, avoid it and find a new method.
+  - **In Experiment 1:** recoverable disputes are settled by a safe test, so the result decides. Unrecoverable danger (a push that could trap the object permanently) is not gambled on while disputed, because there would be no later chance to try a new method (protocol 13.4c, item 4).
+  - **For a later experiment:** an explicit tolerance for danger, so that agents may accept some risks, and a world where some losses are recoverable, so that a "new method" can be tried after a bad result. Tests should measure when risk-taking pays off and when it ends the task.
+- **A limit is true information: "not false" is true** (owner's note, at the protocol approval).
+  - **The owner's words:** "if (!(dog == false)) // the dog is false, on a chain, or the man hits a wall, it is made true, because the dog is relating to the idea of a group of relative zero that being false being chained up being behind a fence is true because that affects the reasoning of other people or things on the dogs land being a reasonable place to locate their new zero location."
+  - **The meaning:** a constraint (a chain, a fence, a wall) is itself a fact. It shapes where others reasonably place their own zero.
+  - **In Experiment 1:**
+    - a Blocked outcome is evidence that corrects a reasoner's own belief;
+    - between two reasoners, the alert lets one point at a limit and the other confirm it with its own evidence;
+    - the testers' fault records are never visible to agents (Brief 11.5.2).
+  - **For a later experiment:** a shared map of limits (where zero cannot or should not be placed), built and used by a group of agents. Each entry keeps its source, and is confirmed by each user's own evidence.
+- **Anticipation weakens away from a familiar zero** (owner's note on I1).
+  - **The owner's words:** "I1: works in one zero location the safe one but eventually as it moves to a new zero location it fails this is logically true. A cat may domesticate itself but if it moves out and runs away and tries to domesticate itself again it might die of starvation or predators or hazards."
+  - **In Experiment 1:** the look-ahead is limited (L = 10, it stops at the first disagreement, and stale plans are not announced). Anticipatory detection is reported separately (I1), so its successes and failures are visible.
+  - **For a later experiment:** measure how anticipation degrades with distance from familiar ground, and how agents re-establish a safe zero in new territory.
+
+## 8. Owner's observations during Stage 4 (fault injection and scoring)
+Recorded on October 20, 2026, while the owner reviewed Stage 4 (instrumentation exception IE-1, and scoring readings D-042 to D-045 and SC2). His words are quoted exactly. **None of them changes Experiment 1**; where an idea is already respected, that is said.
+
+- **Anything attached to the collar can pull** (owner's question on IE-1).
+  - **The owner's words:** "The dog collar is tied to a chain the chain has the capacity to tow the dog the chain can be replaced by the camera logically do you agree?"
+  - **The meaning (agreed):** an instrument attached at the same point as a control can, in principle, also control. Watching must be built so that it *cannot* pull.
+  - **In Experiment 1 (Stage 4):** the fault hook and the F3 switch (IE-1 H1, H2) pull on purpose, only in listed ways, and pull nothing when no fault is scheduled. The observers (H3, H4) only watch: they receive read-only copies, return nothing, and no agent reads from them. Tests prove identical behaviour with them on and off.
+  - **For a later experiment:** whenever agents observe or monitor each other, check that the monitoring channel cannot become a hidden control channel.
+- **A record is not a pointer: the stale address** (owner's note on D-042).
+  - **The owner's words:** "rule 1 can be a error that happens because the box was in front of him then he states the box was in front of him so that's why it moved forward? That's like taking a variable into a memory location and the memory location is moved and now the variable is filling up a different memory location and then somebody uses that memory location, is that right?"
+  - **And:** "yes the rule is there was a box but logically its a pointer stack using the wrong address on the heap, the address can then be called by something else and create a bug for what was using that memory address."
+  - **The meaning (agreed):** a statement about where something *was* must never be used as where it *is*. After a push, the old square is reused (the agent now stands on it), so using the old address as current would be a use-after-free bug.
+  - **In Experiment 1:** C1 moves its belief to the new square in the same step; the referee reads an object correction only with its timestamp (D-042) and checks the current belief separately at every step; A3 forbids remembering the object on the agent's square.
+  - **For a later experiment:** when agents share memories, every shared record should carry the time it refers to, so a partner never treats an old location as a current one.
+- **Stay with the car: the desert at night** (owner's image for D-043, and his condition for SC2).
+  - **The owner's words:** "that's like walking in the desert at night you see a mile away but you start going down into a slope and lose sight of where you were going then you get lost. Your supposed to stay with the car they say."
+  - **And:** "I agree if the desert at night rule is used and there is no reason to stay in one spot. If there is reason to stay in one spot the visibility is bad and errors of judgement happen."
+  - **The meaning (agreed):** keep one fixed reference point. Change only one thing at a time when asking "what caused this?", and leave no blind spots ("dips") where something can happen unseen. Where visibility is bad, do not make a judgement call; hand it on for investigation.
+  - **In Experiment 1:** the referee's shadow changes only the faulted element, with the same model (D-043); all six places where a dead square is read are watched; a mistake the referee did not plant is not explained away but flagged as a possible bug (SC2, Phase A 8.4).
+  - **For a later experiment:** agents that lose their reference (a new zero location, poor visibility) should return to a known fixed point, or ask for confirmation, before acting on their judgement.
+- **Tame or feral: two possibilities for staying in one spot** (owner's note on D-044).
+  - **The owner's words:** "that sounds like an error of zero location. The user thinks there is a lot of zero locations that gives a false sense of security and is like comparing feral and tame. The tame thinks there is a lot to go to but its in the same spot. If its meant to be feral then not good but if its meant to be tame then thats a optimal solution theres two possibilities."
+  - **The meaning (agreed):** staying put is optimal when the spot is right (tame), and a false sense of security when it is wrong (it should have been feral). Records must not fill up with fake "zero locations" that make things look more checked than they are.
+  - **In Experiment 1:** after a rejected object correction, C1 stays with its belief (frozen Stage 3 behaviour). The referee records the two cases differently: right belief = Corrected, with REJECTED shown and no credit; wrong belief = still active. Events that never happened have empty fields, not 0.
+  - **For a later experiment:** compare a "tame" agent (keeps its belief after a failed confirmation) with a "feral" one (goes back to check), and measure when each choice helps.
+- **The witness redirects the spatial agent; and knowing when to stop** (owner's note during D-045).
+  - **The owner's words:** "the two agents one spatial then one temporal-spatial in chess, the move the temporal-spatial does refers to the other spatial agent like array math. The spatial does an algorithm and might be wrong because its countered so the algorithm is interrupted.  So the temporal-spatial shows the spatial to look elsewhere at other pieces and move on. If you want to eat supper and have enough for 3 plates because there's so much food you have to stop eating before that."
+  - **The meaning:** the witness's view is relative to the spatial agent's (like array arithmetic on the same board). When the spatial agent's line is countered and interrupted, the witness points it to other pieces so it can move on, instead of persisting. And having enough for more does not mean taking more: knowing when to stop is part of doing well.
+  - **In Experiment 1:** in C3, Agent 2 looks ahead at Agent 1's plan, objects when it sees trouble, and may offer a different move; Agent 1 then chooses again (protocol 13.4a, 13.6). The run stops when the goal is reached, and the final check adds no new step (D-045).
+  - **For a later experiment:** a witness that steers attention across the whole board (other pieces, other sub-goals), and agents that stop spending budget once the goal is safe.

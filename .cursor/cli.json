@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(cmake)",
+      "Shell(ctest)",
+      "Shell(powershell -ExecutionPolicy Bypass -File .\\run_checks.ps1)",
+      "Shell(.\\run_checks.ps1)"
+    ],
+    "deny": [
+      "Shell(git)",
+      "Shell(rm)",
+      "Shell(del)",
+      "Shell(Remove-Item)",
+      "Shell(Move-Item)",
+      "Shell(Rename-Item)",
+      "Write(docs/**)",
+      "Write(tools/reference/**)",
+      "Write(.cursor/**)",
+      "Write(LICENSE)",
+      "Write(.gitignore)",
+      "Write(.gitattributes)",
+      "Write(.clang-format)",
+      "Write(AGENTS.md)"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+# Formatting rules for the project's own C++ code (rule R2). Run in CLion with
+# Code > Reformat Code. This file is NOT relied on to enforce braces or one
+# statement per line: the project's own style checker does that (rule R2).
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 80
+AccessModifierOffset: -4
+PointerAlignment: Left
+DerivePointerAlignment: false
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+InsertBraces: true
+IncludeBlocks: Preserve
+SortIncludes: true

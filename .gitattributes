@@ -1,0 +1,11 @@
+# Every text file is stored and checked out with LF line endings (rule R16),
+# so committed bytes and working-copy bytes are identical on every computer
+# and the provenance hashes (rule R19) can be checked directly.
+* text=auto eol=lf
+
+# Windows PowerShell scripts also use LF; PowerShell 5.1 and later read them correctly.
+*.ps1 text eol=lf
+
+# Binary files are never changed.
+*.png binary
+*.zip binary

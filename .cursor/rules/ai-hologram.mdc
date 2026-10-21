@@ -1,0 +1,15 @@
+---
+description: "AI Hologram v2: rules for any coding assistant (always applied)"
+alwaysApply: true
+---
+
+# AI Hologram v2 — rules for the coding assistant
+
+Before doing anything, read `AGENTS.md` at the root of the repository and follow it completely. It applies to Cursor and to any other coding assistant.
+
+The short version:
+1. Implement only the sub-stage the owner's prompt names, exactly as the approved stage plan in `docs/stages/` says.
+2. Never run any command that changes Git (no commit, push, tag, add, reset, checkout, restore, rm, mv, stash). Only `git status`, `git diff` and `git log` are allowed. The owner does all Git operations.
+3. Never edit `docs/`, `tools/reference/`, `LICENSE`, `.gitignore`, `.gitattributes`, `.clang-format`, `.cursor/` or `AGENTS.md`. The only file outside the prompt's list you may write is `notes/handoff_notes.md` (append only).
+4. Never change an expected value to make a test pass. Stop and report the actual value.
+5. Run `run_checks.ps1` before reporting, and report its result exactly.
