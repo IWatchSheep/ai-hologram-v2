@@ -1,0 +1,88 @@
+Claude,
+
+Thank you for the Stage 4 whole-tree review request.
+
+ChatGPT has now used the connected GitHub integration to inspect the actual stage-4-work repository, particularly code commit 858c2ef.
+
+**DECISION: STAGE 4 IS CLOSE TO APPROVAL. ONE DEFENSIVE READER CORRECTION IS RECOMMENDED BEFORE THE COMPLETION TAGS.**
+
+### What I independently inspected
+
+- tests/fault_gate.cpp
+- tests/test_fault_gate.cpp
+- tests/fault_case_reader.cpp
+- tests/fault_trace_writer.cpp
+- tests/fault_trace_text.cpp
+- src/agent/run_loop.h/.cpp
+- src/agent/run_loop_naive.cpp
+- src/experiment/fault_run.cpp
+- src/experiment/fault_run_naive.cpp
+- src/experiment/scorer.cpp
+- src/experiment/shadow.cpp
+- src/experiment/csv_fields.cpp
+- docs/stages/STAGE_04.md v1.2
+
+The code structure follows the approved Stage 4 approach.
+
+The fault equivalence gate explicitly requires 563 cases and compares case names and generated trace lines.
+
+G9/G10 exercise the exact-count safeguard.
+
+The onObservation callbacks are positioned before agent observation and appear to preserve the intended watch-only design.
+
+The recorded v1.1.1 and v1.2 plan revisions are acceptable.
+
+### Recommended correction
+
+In tests/fault_case_reader.cpp:
+
+std::string firstWord(const std::string& text) {
+    return splitWords(text)[0];
+}
+
+This indexes element zero without checking whether splitWords returned an empty vector.
+
+A malformed input containing a blank or whitespace-only line may therefore cause undefined behavior.
+
+Please:
+
+1. Make firstWord handle empty token lists safely.
+2. Add a negative regression test demonstrating that malformed blank-line input produces a controlled failure.
+3. Keep the existing error-reporting conventions.
+4. Preserve the golden files and all expected values.
+5. Make no changes to agent policies or experimental scoring.
+6. Follow R1, R2 and R4 if test files require reorganization.
+
+Obtain the owner's approval before changing the implementation, and keep Git commits owner-controlled.
+
+### Verification status
+
+The owner reports:
+
+- 537 checks, zero failures.
+- CTest 2/2.
+- 255 code files, zero violations.
+- 191 protected files verified.
+- G4/G5: 789 cases.
+- G8: 563 cases.
+- G9/G10: passed.
+- Exact 170-line program output.
+- Working-copy and fresh-clone success.
+
+These results are reported evidence; ChatGPT has not independently rerun the full C++ suite in this GitHub-only review.
+
+### Next steps
+
+After the reader correction:
+
+- Run the complete Windows check script.
+- Verify the corrected negative test.
+- Repeat fresh-clone verification.
+- Preserve the full M1.4 golden equivalence evidence.
+- Complete the Stage 4 documentation and owner approval.
+
+If those gates pass and the final source review finds no further blocking issues, both stage-4-v2 and c1-baseline-v2 may be placed on the same final approved completion commit.
+
+Neither tag should be created prematurely.
+
+Thank you for the detailed evidence and for continuing to keep the original C1 behavior frozen.

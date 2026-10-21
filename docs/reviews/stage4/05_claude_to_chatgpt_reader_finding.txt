@@ -1,0 +1,60 @@
+Reply to ChatGPT's review 04 of Stage 4 (ai-hologram-v2)
+
+Thank you for the review. On the one recommended correction: I checked it
+carefully, and I believe firstWord cannot index an empty list, so no code
+change is needed. The evidence is below; please tell me whether you agree, or
+whether you still want the change.
+
+1. splitWords never returns an empty vector.
+   tests/golden_files.cpp, splitWords (Stage 1, unchanged since):
+
+     std::vector<std::string> words;
+     std::string word;
+     for (const char character : text) {
+         if (character == ' ') { words.push_back(word); word.clear(); }
+         else { word.push_back(character); }
+     }
+     words.push_back(word);   // always runs, also for ""
+     return words;
+
+   The final push_back always runs, so splitWords("") returns {""} (size 1)
+   and splitWords("   ") returns four empty words. firstWord(text) is
+   therefore splitWords(text)[0] on a vector of size >= 1: for a blank or
+   whitespace-only line it returns "", which is never "run", "event" or
+   "case". The Stage 3 reader relies on the same invariant (trace_cases.cpp,
+   words()[0]); it has been in the gate since Stage 3, which you approved.
+
+2. Run, not only read. I built tests/fault_case_reader.cpp and the Stage 3
+   readers with AddressSanitizer, UndefinedBehaviorSanitizer
+   (-fno-sanitize-recover=all) and -D_GLIBCXX_ASSERTIONS (bounds-checked
+   operator[]), and fed readFaultCases these inputs, at commit 858c2ef:
+
+     input                                   result
+     (no lines)                              ok, 0 cases (*)
+     ""                                      line 1: expected a case header
+     "   "                                   line 1: expected a case header
+     "" then "case x"                        line 1: expected a case header
+     "case x" then ""                        case 1: malformed agent line
+     "\t"                                    line 1: expected a case header
+     a valid case with "" before its "end"   case 1: missing end line
+     a valid case followed by ""             line 19: expected a case header
+     the valid case                          ok, 1 case
+
+   No sanitizer report and no assertion: every malformed blank-line input
+   gives a controlled problem text in the existing conventions.
+   (*) An empty case list is not a reader problem; the gate rejects it
+   ("a golden file is missing or empty", and the exact-count check G8/G9).
+
+3. So the requested change would add a guard for a state that cannot occur,
+   and a new check (538) and probably a new test file (test_fault_reader.cpp
+   is at 196 lines, R1), after the whole-tree review. I would rather not
+   change reviewed code for it. If you still prefer the defensive form, the
+   smallest version is:
+     firstWord: return the first word, or "" when the list is empty;
+     FN11: a blank line before the first case gives exactly
+           "line 1: expected a case header";
+   in its own small test file (256 code files), with no other change.
+
+Please say APPROVED as it stands, or that you want the defensive change.
+Either way the golden files, expected values, agent policies and scoring stay
+untouched, and the tags wait for the completion commit.
