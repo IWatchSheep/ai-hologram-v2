@@ -63,12 +63,14 @@ void runAgentTestGroups(TestCounter& counter) {
     runTraceGateTests(counter);
 }
 
-// Runs the Stage 4a test groups (seeded random and layouts),
-// so main stays a short list of groups.
-void runStage4aTestGroups(TestCounter& counter) {
+// Runs the Stage 4 test groups (4a: seeded random and
+// layouts; 4b: fault events), so main stays a short list.
+void runStage4TestGroups(TestCounter& counter) {
     runSeededRandomTests(counter);
     runLayoutGeneratorTests(counter);
     runLayoutSetsTests(counter);
+    runFaultEventsTests(counter);
+    runFaultEventSetsTests(counter);
 }
 
 }  // namespace aih
@@ -99,7 +101,7 @@ int main(int argc, char* argv[]) {
     aih::runComparePredictionsTests(counter);
     aih::runPredictionGoldenTests(counter);
     aih::runAgentTestGroups(counter);
-    aih::runStage4aTestGroups(counter);
+    aih::runStage4TestGroups(counter);
     std::cout << counter.checks << " checks, " << counter.failures
               << " failures\n";
     if (counter.failures == 0) {

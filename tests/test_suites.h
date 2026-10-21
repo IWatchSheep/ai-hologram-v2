@@ -159,6 +159,13 @@ void runLayoutGeneratorTests(TestCounter& counter);
 // Runs the layout set tests (LY5, LY6).
 void runLayoutSetsTests(TestCounter& counter);
 
+// Runs the fault event tests (FE1, FE4 demonstration, FE5, FE6).
+void runFaultEventsTests(TestCounter& counter);
+
+// Runs the fault event set tests (FE2, FE3, FE4 pilot and
+// confirmatory; material only, D-080).
+void runFaultEventSetsTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,
