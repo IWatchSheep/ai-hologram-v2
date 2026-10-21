@@ -37,6 +37,8 @@ endfunction()
 add_library(ai_hologram_core STATIC
             src/core/project_info.cpp
             src/world/action.cpp
+            src/world/environment.cpp
+            src/world/rules.cpp
             src/world/world_parse.cpp
             src/world/world_render.cpp
             src/world/world_state.cpp)
@@ -70,15 +72,20 @@ ai_hologram_apply_warnings(code_checker)
 # up by accident.
 add_executable(ai_hologram_tests
                tests/golden_files.cpp
+               tests/golden_parse_reader.cpp
+               tests/golden_rules_reader.cpp
                tests/test_code_checker_architecture.cpp
                tests/test_code_checker_declarations.cpp
                tests/test_code_checker_size.cpp
                tests/test_code_checker_style.cpp
+               tests/test_environment.cpp
                tests/test_layouts.cpp
                tests/test_main.cpp
                tests/test_project_info.cpp
+               tests/test_rules.cpp
                tests/test_support.cpp
                tests/test_world_golden.cpp
+               tests/test_world_golden_rules.cpp
                tests/test_world_parse.cpp
                tests/test_world_render.cpp
                tests/test_world_state.cpp)

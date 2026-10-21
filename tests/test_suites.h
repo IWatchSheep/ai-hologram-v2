@@ -46,8 +46,17 @@ void runWorldRenderTests(TestCounter& counter);
 // Runs the world state tests (V1 to V5, V6a to V6d, N1).
 void runWorldStateTests(TestCounter& counter);
 
-// Runs the world golden tests (G2 in Stage 1a; G1 in 1b).
+// Runs the world golden tests (G2 in Stage 1a; GN1 to GN6 in 1b).
 void runWorldGoldenTests(TestCounter& counter);
+
+// Runs the rules tests (R1a to R11b and N2).
+void runRulesTests(TestCounter& counter);
+
+// Runs the environment tests (E1 to E4).
+void runEnvironmentTests(TestCounter& counter);
+
+// Runs the world golden rules tests (G1 and GR1 to GR5).
+void runWorldGoldenRulesTests(TestCounter& counter);
 
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
