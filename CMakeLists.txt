@@ -68,6 +68,9 @@ add_library(ai_hologram_core STATIC
             src/demo/agent_demo.cpp
             src/demo/prediction_demo.cpp
             src/demo/scripted_demo.cpp
+            src/experiment/layout_generator.cpp
+            src/experiment/seeded_random.cpp
+            src/experiment/true_search.cpp
             src/compare/difference_text.cpp
             src/compare/state_difference.cpp
             src/model/budget_counter.cpp
@@ -152,6 +155,9 @@ add_executable(ai_hologram_tests
                tests/test_footprint.cpp
                tests/test_footprint_rows.cpp
                tests/test_layouts.cpp
+               tests/test_layout_generator.cpp
+               tests/test_layout_sets.cpp
+               tests/test_seeded_random.cpp
                tests/test_budget_counter.cpp
                tests/test_compare_predictions.cpp
                tests/test_compare_states.cpp

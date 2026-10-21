@@ -150,6 +150,15 @@ void runTraceReaderTests(TestCounter& counter);
 // Runs the trace gate tests (MC1 to MC5, TW1, G4, G5).
 void runTraceGateTests(TestCounter& counter);
 
+// Runs the seeded random tests (RN1 to RN8).
+void runSeededRandomTests(TestCounter& counter);
+
+// Runs the layout generator tests (LY1 to LY4).
+void runLayoutGeneratorTests(TestCounter& counter);
+
+// Runs the layout set tests (LY5, LY6).
+void runLayoutSetsTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,
