@@ -1,0 +1,53 @@
+STAGE 0b FOLLOW-UP 1 (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_00.md version 1.4.
+
+Thank you for Stage 0b. Claude reviewed it: the checker gives exactly the
+reference's output on all tests, on the original repository (141 files, 125
+violations) and on 400 randomly mutated files. Your NEEDS THE OWNER report on
+DF0b-3 was correct: it was Claude's prediction error, now fixed in plan v1.4.
+This follow-up makes three small changes. Follow AGENTS.md and
+.cursor/rules/ai-hologram.mdc as before (no Git changes, no edits to docs/,
+tools/reference/ or other protected files, no new files).
+
+First read docs/stages/STAGE_00.md v1.4: the revision history row 1.4, the
+"One shared helper per job" paragraph under Section 4, row CK53 in 6.2, and
+DF0b-3 in Section 7. Read tools/reference/stage0/snippets.py for CK53's text.
+
+CHANGE 1 - one set of character classes (R4, D-059)
+- text_cleaner.h/.cpp: export isLetter(char), isWordChar(char) and
+  isSpaceChar(char) (space, tab, '\r', '\f', '\v'), exactly as plan Section 4
+  says. They move out of text_cleaner.cpp's unnamed namespace.
+- Remove every private copy and use these instead:
+  architecture_rule.cpp (isSpace, isWordChar), declaration_rule.cpp
+  (isAlphaNumeric), size_rules.cpp (the letter/digit/_ part of isNameChar,
+  and isBlank). size_rules may keep a small isNameChar that returns
+  isWordChar(c) || c == '-'. size_rules' whitespace test becomes isSpaceChar.
+- Behaviour must not change: all existing tests must still pass unchanged.
+
+CHANGE 2 - CK53 (a '<' at the first character of a file)
+- In declaration_rule.cpp, the backward searches with find_last_not_of start
+  at (position - 1). At position 0 that becomes std::string::npos, which
+  searches the WHOLE text. Make both places treat "nothing before position 0"
+  as empty text, as the reference does (cleaned[:0] is empty).
+- Add CK53 to tests/test_code_checker_declarations.cpp, text exactly as in
+  snippets.py, expected exactly [(2, STYLE-DECLARATIONS)]. Description starts
+  with "CK53:". Expected total: 70 checks, 0 failures.
+
+CHANGE 3 - comments
+- Where you shortened comments to fit the 200-line limit in Stage 0b, the
+  files now have a little more room after change 1. Restore short,
+  beginner-friendly comments for any helper that has none
+  (for example inEnum, headHas, headHasClassWord). Do not exceed 200 lines;
+  never squeeze code. If a file cannot hold its code and comments cleanly,
+  stop and tell the owner.
+
+THEN
+1. Run CLion's clang-format with -i on every file printed by
+   cmake-build-checks\code_checker.exe --list-cpp .  (nothing else).
+2. Run DF0b-3 again (isLambdaIntroducer always false). Expected failing:
+   exactly CK29, CK31, CK32, CK33, CK34, CK50, CK51, CK52. Undo it exactly.
+3. Run powershell -ExecutionPolicy Bypass -File .\run_checks.ps1. It must end:
+   ALL CHECKS PASSED (83 preserved files, 70 checks, 32 code files checked, formatting checked)
+4. Append a short handoff note (follow-up 1): what changed, line counts of
+   every changed file (all lines), the DF0b-3 result, the final line.
+5. Report to the owner with the full run_checks.ps1 output. Do not commit.

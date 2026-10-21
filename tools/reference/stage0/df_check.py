@@ -27,8 +27,18 @@ def never_lambda(head):
     return False
 
 
+# The C++ checker has ONE lambda-introducer test, used by the function rule and
+# the declaration rule (plan 4, R4). Disabling it disables both uses, so the
+# reference disables both of its uses too (corrected in plan v1.4).
+original_intro = ref.is_lambda_intro
+original_closes = ref.closes_lambda_intro
+ref.is_lambda_intro = lambda prev: False
+ref.closes_lambda_intro = lambda cleaned, j: False
+print('DF0b-3 (isLambdaIntroducer always false) failing:', snippets.failing())
+ref.is_lambda_intro = original_intro
+ref.closes_lambda_intro = original_closes
 ref.lambda_in_head = never_lambda
-print('DF0b-3 (lambda bodies not recognised) failing:', snippets.failing())
+print('DF0b-3a (only the function rule loses lambdas) failing:', snippets.failing())
 ref.lambda_in_head = original_lambda
 
 

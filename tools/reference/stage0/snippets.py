@@ -54,6 +54,7 @@ S = [
  ('CK49', 'src/agent_tools/a.cpp', '#include "experiment/x.h"\n'),
  ('CK51', 'src/a.cpp', 'auto f = []() noexcept(false) {\n' + '    h();\n' * 39 + '};\n'),
  ('CK52', 'src/a.cpp', 'auto g = [](int x) mutable noexcept(true) -> decltype(x) {\n' + '    h();\n' * 39 + '};\nauto k = [](int x) noexcept(false) {\n    int p, q;\n};\n'),
+ ('CK53', 'src/a.cpp', '<\nint p, q;\ntemplate\n'),
  ('CK50', 'src/a.cpp', 'auto make() {\n    return [](int x) {\n' + '        h();\n' * 39 + '    };\n}\nauto g() {\n    return [a, b] {\n        int p, q;\n    };\n}\n'),
 ]
 PS = [
@@ -87,6 +88,7 @@ EXPECTED = {
  'CK48': [(5, 'ARCH-INCLUDE')], 'CK49': [],
  'CK51': [(1, 'SIZE-FUNCTION')],
  'CK52': [(1, 'SIZE-FUNCTION'), (43, 'STYLE-DECLARATIONS')],
+ 'CK53': [(2, 'STYLE-DECLARATIONS')],
  'CK50': [(1, 'SIZE-FUNCTION'), (2, 'SIZE-FUNCTION'), (46, 'STYLE-DECLARATIONS')],
 }
 
