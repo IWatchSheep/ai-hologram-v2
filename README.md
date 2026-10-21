@@ -6,11 +6,11 @@
 
 ## Current status
 
-**Starting the rebuild (October 20, 2026).** This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude.
+**Stage 0 of the rebuild: project skeleton, test program, code checker and run script.** This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude. Stage 0a (project skeleton, test program and run script) is built; the code checker follows in Stage 0b.
 
 Carried over unchanged, with recorded provenance ([`docs/PROVENANCE.md`](docs/PROVENANCE.md)): the project brief, the **frozen** Experiment 1 protocol v1.0 and its validation record, the owner's design inputs, the Python reference implementations, and the full history of the original repository's plans, decisions and prompts.
 
-Migration Addendum M1 ([`docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md`](docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md)), approved on October 20, 2026, sets the condition under which the rebuilt C1 may serve as the experiment's baseline: it must pass an automated behavioural-equivalence gate against the original, and is then tagged `c1-baseline-v2`. **No C++ code exists yet in this repository, no two-agent reasoning exists, and no experiment has been run.**
+Migration Addendum M1 ([`docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md`](docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md)), approved on October 20, 2026, sets the condition under which the rebuilt C1 may serve as the experiment's baseline: it must pass an automated behavioural-equivalence gate against the original, and is then tagged `c1-baseline-v2`. **Only the Stage 0a C++ skeleton exists in this repository so far, no two-agent reasoning exists, and no experiment has been run.**
 
 ## Where to start reading
 - [AGENTS.md](AGENTS.md): how any AI assistant or person works on this project.
