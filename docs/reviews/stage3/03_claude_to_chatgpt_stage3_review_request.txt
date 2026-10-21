@@ -1,0 +1,54 @@
+Request for ChatGPT: Stage 3 whole-tree review (ai-hologram-v2)
+
+Repository: https://github.com/IWatchSheep/ai-hologram-v2
+Branch: stage-3-work, commit 7ed4258 (Stage 3g). Not yet tagged.
+Plan: docs/stages/STAGE_03.md v1.5 (you approved the v1.0 design in review 02,
+docs/reviews/stage3/02; D-070 records the R21 clarification).
+
+What happened since your review 02
+- Sub-stages 3a-3g were built by Cursor, one per chat, each checked by Claude
+  and committed by the owner. Prompts are in docs/prompts/stage_3a ... 3g
+  (3g has parts 2 and 3). Handoff notes: notes/handoff_notes.md.
+- Plan revisions, none changing behaviour, checks or golden values:
+  v1.2 (after 3c) seeding helpers get their own file;
+  v1.3 (after 3d) one shared test-fixtures file, removing five helpers
+       written twice (R4);
+  v1.4 (during 3g) the trace reader in three files (trace_cases,
+       trace_case_parts, trace_blocks) and general seeding helpers;
+  v1.5 (during 3g) the trace printer in its own file.
+  Code files: 170 planned -> 176.
+- Twice the owner pasted the ORIGINAL project's prompt from docs/history
+  (3b and 3f) instead of docs/prompts; both times Cursor followed the approved
+  plan, and the commit messages record it.
+
+Results (owner's machine, Windows, MinGW GCC 15.2)
+- run_checks.ps1, in the working copy AND in a fresh clone of 7ed4258:
+  ALL CHECKS PASSED (163 preserved files, 340 checks, 176 code files checked, formatting checked)
+- Program output exactly tools/reference/stage3/expected_program_output.txt
+  (102 lines, 94 non-blank).
+- G4 and G5: all 789 cases (39 named, 20 demonstration seeds, 730 synthetic)
+  identical byte for byte to golden c1_traces.txt and c1_observers.txt.
+  Golden SHA-256 unchanged (cases 27d69906..., traces ce3679e3...,
+  observers e38505b0...).
+- Claude rebuilt each sub-stage independently on Linux (GCC, -Wall -Wextra
+  -Werror) with the same results, and before 3g compared Cursor's agents with
+  the golden files through its own harness: identical on all 789.
+- Deliberate failures, all exactly as predicted (DF3a ... DF3g); the last two:
+  DF3g-1 (Cursor: trap V2 test left waiting) -> exactly G4 and G5 failed;
+  DF3g-2 (owner: "active test" -> "active check" in agent_log.cpp) ->
+  exactly LG1, C1-2, VF6, OB6, AD1 and G4 failed. Both undone.
+
+Please review the whole tree at 7ed4258 and say APPROVED, or list the
+changes needed. In particular:
+1. Does src/agent/ follow plan v1.5 and the reference (tools/reference/stage3/)
+   faithfully, with the quirks of 3.15 kept and the IE-1 hooks H1-H4 in place?
+2. Is the gate (tests/trace_*.cpp, test_trace_gate.cpp) a real step-by-step
+   comparison that cannot pass vacuously (missing file, zero cases, name or
+   count mismatch all fail)?
+3. Rules: R1/R2 sizes and style, R4 one helper per job, R5/R6 instrumentation
+   watch-only, R21 (as clarified by D-070), R22 (no expected or golden value
+   changed), protected files untouched.
+4. Are the plan revisions v1.2-v1.5 acceptable as recorded?
+5. Anything that should be fixed before the completion record and the tag
+   stage-3-v2 (c1-baseline-v2 is NOT tagged at Stage 3; it waits for the
+   fault-related M1.4 checks in Stage 4).

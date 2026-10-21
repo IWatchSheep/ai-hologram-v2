@@ -1,0 +1,88 @@
+STAGE 3g CORRECTION PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.6.
+This file is docs/prompts/stage_3g_fix_prompt.txt. There is no such prompt in
+docs/history/; if you were given any other text, stop and tell the owner.
+
+You are making ONE narrow correction to the Stage 3g equivalence gate, asked
+for by ChatGPT's review (docs/reviews/stage3/04_chatgpt_review_stage3_7ed4258.txt).
+Stages 3a-3g are finished and committed (7ed4258 and later). The agents, the
+instrumentation, the golden files and every existing expected value stay
+exactly as they are.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop). Do not run
+   Python.
+2. Read docs/stages/STAGE_03.md v1.6: the G4/G5 paragraph of section 3.14
+   (with the v1.6 bullets on runTraceGate, G6 and G7), the Section 4 rows for
+   tests/trace_gate and tests/test_trace_gate.cpp, Section 5, the G rows of
+   6.7, step 8 of Section 7 (DF3g-3) and the revision history row 1.6.
+3. Read ChatGPT's review 04, tests/test_trace_gate.cpp (checkGate),
+   tests/trace_blocks.h, tests/trace_cases.h, tests/trace_writer.h and
+   tools/reference/stage3/ref_trace_reader.py (gate).
+4. Tell the owner briefly what is in each file you will change.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD
+Create exactly:
+  tests/trace_gate.h   tests/trace_gate.cpp
+    - constexpr std::size_t kGoldenCaseCount = 789;
+    - std::string runTraceGate(const std::vector<std::string>& caseLines,
+                               const std::vector<std::string>& goldenLines,
+                               bool observers, std::size_t requiredCases);
+      Returns "" when every case matches, otherwise the FIRST failure, in
+      this order (texts exactly):
+        a golden file is missing or empty          (either input empty)
+        <readTraceCases' problem>
+        <splitTraceBlocks' problem>
+        case file has <n> cases, required <r>      (NEW)
+        trace file has <n> cases, the case file <m>
+        trace <name>: expected case <name>
+        <firstTraceDifference's message>
+      This is the logic now inside checkGate, moved as it is, plus the one new
+      count check. Never throw.
+Change exactly:
+  tests/test_trace_gate.cpp
+    - checkGate reads the two golden files (as now) and calls
+      runTraceGate(..., kGoldenCaseCount); the G4/G5 descriptions stay
+      "G4: all 789 golden blocks are identical" / "G5: ..." with the failure
+      in brackets as now.
+    - G6: take the lines of c1_cases.txt up to and including the third "end"
+      line, and the lines of c1_traces.txt up to and including the third
+      "end" line (a small local helper). runTraceGate(those, false,
+      kGoldenCaseCount) must give exactly
+        case file has 3 cases, required 789
+    - G7: the same truncated inputs with requiredCases 3 must give "".
+    Descriptions start with "G6: " and "G7: ".
+  CMakeLists.txt     add tests/trace_gate.cpp to ai_hologram_tests (do NOT
+                     run clang-format on CMakeLists.txt).
+  notes/handoff_notes.md   append one note at the end.
+Nothing else: no change in src/, in any other test, or to any expected or
+golden value. If test_trace_gate.cpp cannot hold this cleanly within 200
+lines, stop and tell the owner (do not squeeze).
+
+Three-part header in the new files (Introduced in: Stage 3g (rebuild),
+correction of plan v1.6). Beginner comment: why the gate requires the exact
+number of cases (coverage: matching but truncated files must not pass).
+Format the new and changed C++ files with CLion's clang-format -i.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (163 preserved files, 342 checks, 178 code files checked, formatting checked)
+with the program output unchanged (102 lines, 94 non-blank).
+
+DELIBERATE FAILURE CHECK YOU DO:
+  DF3g-3  remove the required-count check from runTraceGate.
+          Expected failing: exactly G6 (G4, G5 and G7 still pass).
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note: what you changed, every file with its line count,
+   the DF3g-3 result, the exact final line of run_checks.ps1.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

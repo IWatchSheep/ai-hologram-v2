@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 3 of the rebuild (Brief Section 10, Stage 3: the competent single agent) |
-| **Plan version** | 1.5 (during 3g: the trace printer gets its own file) |
+| **Plan version** | 1.6 (after ChatGPT's Stage 3 review: the gate requires exactly 789 cases) |
 | **Date** | October 21, 2026 |
-| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). v1.2 (after 3c: one more test file) agreed by the owner: "sure I agree." v1.3 (after 3d: the shared test fixtures, R4) agreed by the owner: "yes I agree." v1.4 (during 3g: the trace reader in three files, general seeding helpers) committed by the owner (`43f47eb`) and given to Cursor. **v1.5 (during 3g: the trace printer in its own file) awaits the owner's agreement.** |
+| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). v1.2 (after 3c: one more test file) agreed by the owner: "sure I agree." v1.3 (after 3d: the shared test fixtures, R4) agreed by the owner: "yes I agree." v1.4 (during 3g: the trace reader in three files, general seeding helpers) committed by the owner (`43f47eb`) and given to Cursor. v1.5 (during 3g: the trace printer in its own file) agreed by the owner: "yes I agree". **v1.6 (after ChatGPT's review 04: the gate requires exactly 789 cases; G6, G7) awaits the owner's agreement.** |
 | **Governing documents** | The brief v1.1; the frozen protocol v1.0 (Phase B Sections 10–12 define C1 and C0); **Migration Addendum M1** (M1.3, M1.4); `docs/RULES.md` (R1–R24); `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 2, complete and tagged `stage-2-v2` (`a1a32d9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 3 (plan `docs/history/ai-hologram/docs/stages/STAGE_03.md` v1.2, tag `stage-3`, commit `7587f38`) **plus the IE-1 instrumentation hooks H1–H4 as built at `89ea9b6`** (M1.3 item 1; R5: instrumentation is designed in from the start). The original's `src/agent/` is the frozen C1 baseline. |
@@ -569,6 +569,8 @@ These are the reports since the previous such line, from an observer attached to
 **G4 and G5.** For every case, in order, the test builds the agent from the case, runs it with the watchers, writes the trace (or the observer lines), and compares it with the golden block of the same name.
 - The **first** difference fails the check and prints its message (M1.4: "the gate fails on the first difference; it prints the case, the step and the field").
 - Different case counts or names are also failures.
+- v1.6 (ChatGPT, review 04): the gate also requires **exactly 789 cases** in the case file (`kGoldenCaseCount`), so truncated but matching files cannot pass. The gate is one function, `runTraceGate(caseLines, goldenLines, observers, requiredCases)` in `tests/trace_gate.h/.cpp`, giving the empty string or the first failure, in this order: `a golden file is missing or empty`; the reader's problem; the split problem; `case file has <n> cases, required <r>`; `trace file has <n> cases, the case file <m>`; a name; the first difference. G4 and G5 read the two files and call it with 789. The reference `gate` in `ref_trace_reader.py` is not changed (the reference stays as approved in review 02); the count rule is the C++ gate's addition.
+- **G6** (negative regression): the first three cases of `c1_cases.txt` with their three golden blocks of `c1_traces.txt` (they match) fail with exactly `case file has 3 cases, required 789`. **G7** (its control): the same truncated inputs with `requiredCases` 3 give the empty string, so G6 fails only because of the count.
 - G4 passes only with all 789 traces identical, and G5 only with all 789 observer blocks identical.
 - **The gate runs in every test run** (R20).
 
@@ -668,11 +670,12 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 | `tests/trace_printer.h` / `.cpp` | 50 / 195 | v1.5: the printer (`C1Printer` of `ref_trace.py`), its tally, the counting observer and the plan-kind word: it turns the watchers' reports into trace lines and only reads the agent's state (R6) | 3g |
 | `tests/trace_writer.h` / `.cpp` | 50 / 195 | building and seeding an agent from a case, running it with watchers (C1 and C0), and the two public write functions (trace and observer lines) | 3g |
 | `tests/test_trace_reader.cpp` | 170 | TN1–TN15 | 3g |
-| `tests/test_trace_gate.cpp` | 170 | MC1–MC5, TW1, G4, G5 | 3g |
+| `tests/trace_gate.h` / `.cpp` | 40 / 90 | v1.6: `kGoldenCaseCount` (789) and `runTraceGate`, the gate on supplied lines | 3g |
+| `tests/test_trace_gate.cpp` | 170 | MC1–MC5, TW1, G4, G5; v1.6: G6, G7 | 3g |
 | `tests/test_suites.h`, `test_main.cpp`, `test_project_info.cpp`, `test_layouts.h`/`.cpp` (if a layout helper is needed), `CMakeLists.txt` | — | new groups and files; P2 checks 3 from 3f | 3a–3g (changed) |
 | `tools/reference/stage3/` | — | the reference, the golden files, the original-code tools (committed with this plan) | plan |
 
-**97 new code files** (v1.5; 95 in v1.4, 91 before). The code checker sees 79 → 92 (3a) → 103 (3b) → 116 (3c) → 132 (3d) → 153 (3e) → 160 (3f) → **176** (3g).
+**99 new code files** (v1.6; 97 in v1.5, 95 in v1.4, 91 before). The code checker sees 79 → 92 (3a) → 103 (3b) → 116 (3c) → 132 (3d) → 153 (3e) → 160 (3f) → 176 (3g) → **178** (3g, v1.6 correction).
 
 **One shared helper per job (R4):**
 - `positionText` and `blockedText` live only in `text_words`;
@@ -706,10 +709,11 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
   | 3e | `309 checks, 0 failures` | C1 (18), SP7-B1…B11 (11), RL1, OB5, OB6 … 32 |
   | 3f | `317 checks, 0 failures` | C0 (6), OB7, AD1 … 8 |
   | 3g | `340 checks, 0 failures` | TN1–TN15, MC1–MC5, TW1, G4, G5 … 23 |
+  | 3g, v1.6 | `342 checks, 0 failures` | G6, G7 … 2 |
 
-  The 340 are the 177 Stage 2 checks (P2 now checks 3) and the 163 of Section 6. `checks.py` mirrors all 163: `failing: none (163 checks)`.
+  The 342 are the 177 Stage 2 checks (P2 now checks 3), the 163 of Section 6 and G6, G7 (v1.6). `checks.py` mirrors all 163: `failing: none (163 checks)`.
 - **CTest:** 2/2. **Code checker:** 0 violations (the file counts above).
-- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (163 preserved files, 340 checks, 176 code files checked, formatting checked)`.
+- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (163 preserved files, 342 checks, 178 code files checked, formatting checked)`.
 
 ## 6. Tests
 Each description starts with its id. Every fixture is a valid world unless the check is about invalid states. D is the demo layout; D2 is D with a wall at (4, 3). LP, L2, LT, LG, LTa, BOXED and SMALL are the layouts in `checks.py`, the same as the original's tests. `checks.py` holds the exact data of every check. Where this table and `checks.py` differ, `checks.py` wins, and Claude must be told.
@@ -865,6 +869,8 @@ Each description starts with its id. Every fixture is a valid world unless the c
 | TW1 | The walls of D are `ffe0180601806018c601807ff`, and D's state text is exactly `agent (3, 3) object (5, 3) destination (8, 3) walls ffe0180601806018c601807ff` |
 | G4 | All 789 cases of `c1_cases.txt`, traced by the rebuilt agents, equal `c1_traces.txt` |
 | G5 | All 789 observer blocks equal `c1_observers.txt` |
+| G6 | v1.6: three matching but incomplete cases and blocks fail with exactly `case file has 3 cases, required 789` |
+| G7 | v1.6: the same three with 3 required pass (the control for G6) |
 
 A missing golden file is a FAIL with a clear message. The golden files are found through `AIH_SOURCE_DIR`.
 
@@ -878,7 +884,7 @@ A missing golden file is a FAIL with a clear message. The golden files are found
 | 5 | **3d** | records, history checks, investigation, consequence, model V1, verification | IV, VF, HC1, AT1, RC1 (277) | **Cursor, DF3d-1:** the investigation checks an object candidate against `history.front()` instead of *before*. Exactly VF2 must fail. |
 | 6 | **3e** | C1's decision step, the run loop with watchers | C1, SP7, RL1, OB5, OB6 (309) | **Cursor, DF3e-1:** `reserveFor` always returns 1. Exactly C1-2, C1-6c-2, VF6, SP7-B2–B7, SP7-B10 and OB6 must fail (11). |
 | 7 | **3f** | C0, the C0 run loop, the agent demonstrations, main, `currentStage()` = 3, README | C0, OB7, AD1 (317) | **Cursor, DF3f-1:** C0 clears its plan at the start of every decision, so it searches every step. Exactly C0-2, C0-4, C0-5 and OB7 must fail. |
-| 8 | **3g** | the trace readers, the model catalogue, the trace text and writer, the gate | TN, MC, TW1, G4, G5 (340) | **Cursor, DF3g-1:** after a consequence mismatch, the trap V2 test is left waiting for the next step instead of being tried at once. **Exactly G4 and G5 must fail:** only the gate catches it. **Owner, DF3g-2:** in `agent_log.cpp`, change `"Plan: active test of correction "` to `"Plan: active check of correction "`. `run_checks.ps1` must stop at `[tests]` with exactly LG1, C1-2, VF6, OB6, AD1 and G4 failing. |
+| 8 | **3g** | the trace readers, the model catalogue, the trace text and writer, the gate | TN, MC, TW1, G4, G5 (340) | **Cursor, DF3g-1:** after a consequence mismatch, the trap V2 test is left waiting for the next step instead of being tried at once. **Exactly G4 and G5 must fail:** only the gate catches it. **Owner, DF3g-2:** in `agent_log.cpp`, change `"Plan: active test of correction "` to `"Plan: active check of correction "`. `run_checks.ps1` must stop at `[tests]` with exactly LG1, C1-2, VF6, OB6, AD1 and G4 failing. **v1.6, Cursor, DF3g-3:** remove the required-count check from `runTraceGate`. **Exactly G6 must fail** (G4, G5 and G7 still pass). |
 | 9 | — | Fresh clone of `stage-3-work`: `run_checks.ps1` passes | | |
 | 10 | — | ChatGPT reviews the **whole buildable tree** of the final commit; the completion gate; tag `stage-3-v2`; merge into `main` | | |
 
@@ -910,8 +916,8 @@ Each sub-stage is committed by the owner on `stage-3-work`, after Claude's revie
 ## 10. Completion checklist (owner verification gate)
 - [ ] The plan was agreed and committed before any Stage 3 code.
 - [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
-- [ ] The program output is exactly 3.12, at 102 lines; the tests show `340 checks, 0 failures`; CTest 2/2; 0 checker violations (176 files).
-- [ ] G4 and G5 pass all 789 cases, and TN1–TN15 pass.
+- [ ] The program output is exactly 3.12, at 102 lines; the tests show `342 checks, 0 failures`; CTest 2/2; 0 checker violations (178 files).
+- [ ] G4 and G5 pass all 789 cases (exactly 789 required), G6 and G7 pass, and TN1–TN15 pass.
 - [ ] All deliberate failure checks gave exactly the predicted failures.
 - [ ] D-068 to D-072 recorded (D-070 with the owner's approval of the R21 clarification); handoff notes appended; prompts and review notes saved.
 - [ ] ChatGPT reviewed the whole buildable tree of the final commit.
@@ -951,3 +957,4 @@ Every prompt says:
 | 1.3 | 2026-10-21 | After 3d (277 checks). An R4 finding in Claude's review: five small test helpers are written twice. `makeObservation`, `twoObservations` and `eastHistory` are in two 3d test files; `pushNorth` and `alwaysBlocked` are in a 3c and a 3d file (`agent_test_support` was full, and Cursor kept them local). In 3e, the file planned in v1.2 for the seeding helpers becomes `tests/agent_test_fixtures.h/.cpp` and also holds these five; the copies are deleted. No change to behaviour, checks, counts or golden values. |
 | 1.4 | 2026-10-21 | During 3g, before any 3g file was finished. Cursor stopped, as R1 requires, and reported that a faithful, unsqueezed `readTraceCases` alone is about 240 lines, so `trace_cases.cpp` cannot also hold `splitTraceBlocks` and `firstTraceDifference` within 200 lines. The reader is split at its natural seams into `trace_cases` (the case stages), `trace_case_parts` (the line and word readers) and `trace_blocks` (the golden-file blocks and the first difference). Cursor also found that the seeding helpers of v1.3 cover only one (new, old) pair for all wall seeds and only the demo world for V1 seeds; they gain general forms that the existing helpers call (R4), instead of renumbering after repeated calls. 95 new code files; the final line says 174 code files. No change to behaviour, checks (340), reader texts or golden values. |
 | 1.5 | 2026-10-21 | During 3g. With everything else finished, Cursor stopped again (R1): `trace_writer.cpp` is 331 lines after formatting. At that point the tests showed 340 checks and 0 failures, G4 and G5 identical on all 789 cases, DF3g-1 failing exactly G4 and G5, and the program output unchanged (confirmed independently by Claude). The writer splits at its natural seam: `trace_printer` (turning the watchers' reports into lines) and `trace_writer` (building, seeding and running the agents). The code moves as whole functions. 97 new code files; the final line says 176 code files. No change to behaviour, checks (340) or golden values. |
+| 1.6 | 2026-10-21 | After ChatGPT's review of the whole tree at `7ed4258` (review 04: build, 340 checks, CTest, checker, program output, G4/G5 all confirmed independently; v1.2–v1.5 accepted). One required correction: the gate compared the block count with the case count but did not require 789, so truncated matching files could pass. The gate moves into `runTraceGate` (`tests/trace_gate.h/.cpp`) with the required count; G6 proves truncated inputs fail, G7 is its control; DF3g-3 removes the count check (exactly G6 fails). 99 new code files; 342 checks; the final line says 178 code files. No change to the agents, the instrumentation, the golden files or any existing expected value. |

@@ -1,0 +1,73 @@
+Claude,
+
+Thank you for the complete Stage 3 repository at commit 7ed4258.
+
+ChatGPT independently extracted the repository, verified the commit, compiled the C++ project on Linux with warnings treated as errors, and executed the Stage 3 tests.
+
+**DECISION: STAGE 3 IMPLEMENTATION PASSES THE INDEPENDENT BUILD AND BEHAVIORAL TESTS. ONE SMALL TRACE-GATE CORRECTION IS REQUIRED BEFORE FINAL TAG APPROVAL.**
+
+### Independent verification
+
+- Git commit: 7ed4258.
+- C++ build: PASSED.
+- Unit tests: 340 checks, 0 failures.
+- CTest: 2/2 passed.
+- Code checker: 176 files, 0 violations.
+- Program output: 102 lines, byte-identical to expected_program_output.txt.
+- G4/G5: PASSED.
+- Golden case file: 789 case records.
+- Golden C1 trace file: 789 case records.
+- Golden observer file: 789 case records.
+
+### Source review
+
+The supplied architecture follows the approved division of responsibilities.
+
+I accept the recorded file-organization revisions v1.2–v1.5.
+
+The trace gate compares actual replayed behavior against the preserved records. Its comparison includes trace lines, case identities and ordering.
+
+I found no blocking behavioral discrepancy in the tested implementation.
+
+### Required correction: explicitly enforce 789 cases
+
+In tests/test_trace_gate.cpp, checkGate currently verifies that the number of golden blocks equals the number of parsed cases.
+
+However, it does not independently enforce the required total of 789.
+
+Consequently, matching truncated inputs could theoretically satisfy the comparison even though the coverage requirement was not met.
+
+Please add an explicit check that exactly 789 cases were parsed before the gate can pass.
+
+Add a negative regression test demonstrating that matching but incomplete case and trace inputs fail.
+
+Keep the existing missing-file, malformed-file, name-mismatch and line-difference checks.
+
+Do not change the golden files, expected traces, agent behavior or instrumentation.
+
+If this requires a small helper for testing the gate with supplied inputs, separate it by responsibility and follow R1/R4. Do not squeeze code to stay within 200 lines.
+
+### Completion sequence
+
+1. Record this narrow correction in the Stage 3 plan and review history.
+2. Obtain the owner's approval for the correction.
+3. Have Cursor implement and test only the approved change.
+4. Require the updated unit-test total and zero failures.
+5. Require CTest 2/2 and zero checker violations.
+6. Reconfirm G4/G5 against all 789 cases.
+7. Run the full Windows run_checks.ps1 gate.
+8. Perform a fresh-clone verification.
+9. Review and commit the final completion record.
+10. Have the owner approve and tag stage-3-v2.
+
+**Do not tag c1-baseline-v2 yet.** The fault-related M1.4 checks still belong to Stage 4.
+
+No additional agent-policy or architecture changes are requested.
+
+Thank you for preserving the original C1 behavior and maintaining detailed equivalence evidence throughout the rebuild.
+
+Closing words (as relayed by the owner):
+"My recommendation
+Your Stage 3 implementation is very close to formal completion. The 340 passing checks and exact golden traces are substantial evidence of progress.
+I recommend fixing the explicit case-count requirement now, while the Stage 3 gate is still being finalized.
+Once that correction passes, I would support completing Stage 3 and tagging `stage-3-v2`. The project can then proceed toward Stage 4's fault-related equivalence checks, which are required before freezing the new C1 baseline."
