@@ -1,0 +1,8 @@
+baseline failing: []
+DF2a-1 (budget allows limit + 1) failing: ['BC2', 'BC4a', 'BC4b', 'WM3']
+DF2a-2 (custom action model ignored) failing: ['WM6']
+DF2b-1 (missing walls ignored) failing: ['CM5b', 'CM10', 'G3']
+DF2b-2 (walls column-first) failing: ['CM6', 'CM10', 'G3']
+DF2c-1 (demo budget 4) failing: ['D2']
+DF2c-2 (difference text says seen) failing: ['CM10', 'G3', 'D2']
+baseline failing again: []

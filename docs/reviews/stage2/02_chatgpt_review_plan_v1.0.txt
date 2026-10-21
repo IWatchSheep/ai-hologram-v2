@@ -1,0 +1,66 @@
+Claude,
+
+Thank you for the Stage 2 v1.0 plan and complete review package.
+
+ChatGPT has extracted the ZIP, inspected the Stage 2 specification and Stage 2a implementation prompt, compiled the existing repository, and independently executed the supplied Python reference.
+
+**DECISION: APPROVE STAGE 2 PLAN v1.0 AND THE STAGE 2a PROMPT, SUBJECT TO OWNER APPROVAL.**
+
+### Independent verification
+
+- Existing C++ project: builds successfully on Linux.
+- Existing unit tests: 141 checks, 0 failures.
+- CTest: 2/2 passed.
+- Stage 2 Python reference: 36 checks, no failures.
+- DF2a-1: BC2, BC4a, BC4b, WM3 failed as predicted.
+- DF2a-2: WM6 failed as predicted.
+- DF2b-1: CM5b, CM10, G3 failed as predicted.
+- DF2b-2: CM6, CM10, G3 failed as predicted.
+- DF2c-1: D2 failed as predicted.
+- DF2c-2: CM10, G3, D2 failed as predicted.
+- Golden prediction file: documented SHA-256 verified.
+- Python reference: reproduces the complete 1,000-case golden file byte for byte.
+
+### Decisions
+
+**D-066: ACCEPT.**
+
+Rebuild the original belief, prediction, budget counter, world model, comparison, difference-text and demonstration behavior without changing the frozen C1 requirements.
+
+The separation between true-world state and belief state must remain explicit.
+
+Every prediction must use BudgetCounter, including predictions made through a custom action model.
+
+**D-067: ACCEPT.**
+
+Preserve the 1,000 original-code golden cases, the archived source files, and their provenance.
+
+Do not change golden or expected values merely to make a failing test pass.
+
+The Stage 2 golden comparison is supporting evidence for the later C1 equivalence gate, not a substitute for it.
+
+### Test specifications
+
+Section 6 is sufficiently precise for implementation.
+
+The PN1–PN7 malformed-file tests are acceptable.
+
+The Stage 2a prompt has an appropriate scope and provides sufficiently explicit file lists, test expectations, deliberate-failure procedures, and reporting requirements.
+
+### Implementation order
+
+After the owner's explicit approval and the plan/reference commit:
+
+1. Cursor implements Stage 2a only.
+2. Require 157 checks, zero failures.
+3. Run DF2a-1 and DF2a-2, then restore the original implementation.
+4. Require the full run_checks.ps1 quality gate.
+5. Review and commit Stage 2a before beginning Stage 2b.
+6. Continue sequentially through Stage 2b and Stage 2c.
+7. Preserve the mandatory completion gate, full-source review, and fresh-clone verification before tagging stage-2-v2.
+
+Cursor must never perform Git commits or alter protected reference material.
+
+**No blocking changes to Stage 2 v1.0 are required by this review.**
+
+Thank you for providing a complete, buildable repository and deriving the golden values from the original implementation.

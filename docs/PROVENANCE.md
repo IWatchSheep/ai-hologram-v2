@@ -127,3 +127,23 @@ Copied **byte for byte** from `IWatchSheep/ai-hologram` commit `7587f38` (tag `s
 | `tools/reference/stage1/orig_trace/original_src/world/world_state.h` | `src/world/world_state.h` | `50af28b5eb3ab3be77f055630a8e5bfb8a98cc8e418486b108f8bce6198e1130` |
 | `tools/reference/stage1/orig_trace/original_src/world/world_text.cpp` | `src/world/world_text.cpp` | `b3a227b06ed12ff06dbda0bb5b99ce0de84a11099952502e9238afb27cd0c30b` |
 | `tools/reference/stage1/orig_trace/original_src/world/world_text.h` | `src/world/world_text.h` | `ce8398ac6a57867aa1b0a21f53c4fac045a59a6f6adce6cd5ced8757e5680ff4` |
+
+## Stage 2 of the rebuild: golden values and original source files (D-067)
+
+`tools/reference/stage2/golden/prediction_golden.txt` was **generated** on October 20, 2026 by a tool compiled only from the original repository's code at commit `7587f38` (`src/model`, `src/compare`, `src/demo/prediction_demo`, plus the original `src/world` kept for Stage 1). The tool, the commands and the case generator are in `tools/reference/stage2/`. The Python reference reproduces the file byte for byte; test G3 binds the rebuilt C++ to it. The 12 original files below were copied byte for byte, and each hash was verified against `git show 7587f38:src/<file> | sha256sum`; they are identical at `stage-2` and `89ea9b6`.
+
+| File here | Source | SHA-256 |
+|---|---|---|
+| `tools/reference/stage2/golden/prediction_golden.txt` | generated from the original code at `7587f38` | `5e44df6977bcb5a261766f7445c000db86075ef8180a3fcc581aac9a8bc9f2cf` |
+| `tools/reference/stage2/orig_trace/original_src/compare/difference_text.cpp` | `src/compare/difference_text.cpp` at `7587f38` | `1288f442cf753d66726dfc5c6e81a23c3e3885346dec94023e1aa0a833655ad3` |
+| `tools/reference/stage2/orig_trace/original_src/compare/difference_text.h` | `src/compare/difference_text.h` at `7587f38` | `9d57e5613681f507e7dea575b8b6531cb7fb54fc8365fce968922d97b6ffa0b6` |
+| `tools/reference/stage2/orig_trace/original_src/compare/state_difference.cpp` | `src/compare/state_difference.cpp` at `7587f38` | `eef8e91a02f0f698bdf3187045951f5c39f80b5a02f5021eb6836fc9e2fdd124` |
+| `tools/reference/stage2/orig_trace/original_src/compare/state_difference.h` | `src/compare/state_difference.h` at `7587f38` | `84679f96a44d2eee11a47bedc383772a480bddeb6081bc8d6ad466b57d180ecd` |
+| `tools/reference/stage2/orig_trace/original_src/demo/prediction_demo.cpp` | `src/demo/prediction_demo.cpp` at `7587f38` | `822c0822104515a261f34d73eedd4af9e4c2fe1efd94170571091d7de36d9c67` |
+| `tools/reference/stage2/orig_trace/original_src/demo/prediction_demo.h` | `src/demo/prediction_demo.h` at `7587f38` | `6b5e75ed262534f01e14339459e92144d8c4f69c24810fcd606f40d7603ce39f` |
+| `tools/reference/stage2/orig_trace/original_src/model/belief.h` | `src/model/belief.h` at `7587f38` | `feaccae79180dbabbd9de9cdc178a94fc711e85c418672a57f372e1375452146` |
+| `tools/reference/stage2/orig_trace/original_src/model/budget_counter.cpp` | `src/model/budget_counter.cpp` at `7587f38` | `48e9fdb61c8cb9e4bbf2bed5d9d7cc61e681336e91f3e1bc516c84f57f0c3743` |
+| `tools/reference/stage2/orig_trace/original_src/model/budget_counter.h` | `src/model/budget_counter.h` at `7587f38` | `900aa805985d00cc4ae458deef052d733431563ad991b4e2c271a1705687b10a` |
+| `tools/reference/stage2/orig_trace/original_src/model/prediction.h` | `src/model/prediction.h` at `7587f38` | `1e1fc9bbf02f6b125de3a847b4e67e3b2508d73cc7890d7ddec0ca449e44e7db` |
+| `tools/reference/stage2/orig_trace/original_src/model/world_model.cpp` | `src/model/world_model.cpp` at `7587f38` | `8ae0fd940f3aa901c5fbd32b9eca3cdf14d8686fc9be697aa4a312c3ea992b5a` |
+| `tools/reference/stage2/orig_trace/original_src/model/world_model.h` | `src/model/world_model.h` at `7587f38` | `f7a0cd33834c18f67f14bbd207fa58e634ef572e4d6591e1a7fc092fc893bbee` |
