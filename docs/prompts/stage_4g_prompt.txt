@@ -1,0 +1,159 @@
+STAGE 4g PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_04.md version 1.2.
+This file is docs/prompts/stage_4g_prompt.txt. (The file with a similar name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 4g of the rebuild, and ONLY Stage 4g: the
+fault-case reader, the fault trace text and writer, and the equivalence gate
+part 2 (G8-G10), which replays the 563 golden fault runs recorded from the
+ORIGINAL code and compares every line. Stages 4a-4f are committed. Do not
+change their behaviour or Stage 3's. This is the last sub-stage of Stage 4.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/; read the reference files instead.
+   The golden files tools/reference/stage4_rebuild/golden/fault_cases.txt and
+   fault_traces.txt are PROTECTED: never edit, regenerate, reformat or
+   re-save them (provenance checks their fingerprints and LF line endings).
+2. Read docs/stages/STAGE_04.md: sections 1, 2, 3.15, 3.16, 4 (the 4g rows and
+   the R4 list), 5, 6.6, 7 (steps 8-10), 8 (D-074), 9, 10 and 13.
+3. Read tools/reference/stage4_rebuild/ref_fault_reader.py (all of it),
+   ref_fault_trace.py (all of it), and checks.py section "4g" (BASE,
+   EVENTS_ALL, case_lines, READER_CASES, check_reader, first_blocks,
+   check_gate). Read orig_trace/orig_fault_trace.cpp to see how the golden
+   traces were produced. They are the authority where the plan uses words.
+   Read the Stage 3 trace tools you will reuse (R4): tests/trace_cases.*,
+   trace_case_parts.*, trace_models.*, trace_blocks.*, trace_text.*,
+   trace_printer.*, trace_writer.*, trace_gate.*, golden_files.h and
+   tests/test_trace_gate.cpp.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 8)
+Create exactly these files, and no others:
+  tests/trace_agents.h            tests/trace_agents.cpp
+                                  applyTraceSeeds: the seeding of a built C1
+                                  agent from its trace case, MOVED unchanged
+                                  from the private applySeeds of
+                                  tests/trace_writer.cpp (R4), so the Stage 3
+                                  and the fault trace writers seed agents in
+                                  exactly one way
+  tests/fault_case_reader.h       tests/fault_case_reader.cpp
+                                  FaultCase, readFaultCases,
+                                  parseFaultEventLine (plan 3.15, "The reader")
+  tests/fault_trace_text.h        tests/fault_trace_text.cpp
+                                  the activation and score lines
+  tests/fault_trace_writer.h      tests/fault_trace_writer.cpp
+                                  runs one fault case with runWithFaults and
+                                  its extra watchers and writes its trace
+  tests/fault_gate.h              tests/fault_gate.cpp
+                                  kGoldenFaultCaseCount (563), runFaultGate
+  tests/test_fault_reader.cpp     (FN1-FN10, FT1, FT2)
+  tests/test_fault_gate.cpp       (G8, G9, G10)
+Change exactly these existing files:
+  tests/trace_writer.cpp          use applyTraceSeeds from tests/trace_agents
+                                  instead of its private copy. Nothing else:
+                                  G4-G7 must still pass unchanged.
+  tests/stage4_suites.h, tests/test_main.cpp   add the new groups.
+  CMakeLists.txt                  add the seven new test .cpp files
+                                  (trace_agents, fault_case_reader,
+                                  fault_trace_text, fault_trace_writer,
+                                  fault_gate, test_fault_reader,
+                                  test_fault_gate) to ai_hologram_tests (no
+                                  new src file). Do NOT
+                                  run clang-format on it.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT change any src/ file, any expected value, or any Stage 3 test.
+
+DETAILS
+A. readFaultCases(lines) -> {ok, cases, problem}, bounds-safe, never throws,
+   exactly as plan 3.15 and ref_fault_reader.read_fault_cases: the Stage 3
+   reader readTraceCases (UNCHANGED) reads the file without its run and event
+   lines, and its problem, if any, is the result; then, case by case, the
+   checks and the exact problem texts of 3.15 ("line <n>: expected a case
+   header" with n in the REAL file, "case <k>: missing run line",
+   "case <k>: malformed run line", "case <k>: malformed event line").
+   parseFaultEventLine accepts exactly the event line of 3.15 (types, targets,
+   directions, rotations and actions only from the shared names: fault_event's
+   name functions and actionName, R4).
+B. Fault trace text exactly as ref_fault_trace: activation lines
+   ("activation <id> scheduled|applied at <t>|not-applicable|pending", with
+   " | <reason>" when there is one) and score lines ("score <id> activated
+   <yes|no> at <t> active <yes|no> end <none|corrected|overwritten> <step> by
+   <id> opportunity <t|-> revealing <yes|no> mismatch <t|-> strict <t|->"),
+   using the Stage 3 text helpers (yes/no and the rest, R4).
+C. The fault trace writer, exactly as ref_fault_trace.trace: build the agent
+   from the case as the Stage 3 trace writer does (and applyTraceSeeds for
+   C1); run runWithFaults with observe true and the extra watchers
+   (FaultRunWatchers / NaiveFaultRunWatchers); after every decision step, the
+   Stage 3 trace lines of that step (the Stage 3 trace printer for C1; for C0
+   the six lines of ref_fault_trace.c0_step_lines, which are the Stage 3 C0
+   step lines - reuse the Stage 3 code that prints them), then every
+   activation line and every score line whose text CHANGED since it was last
+   printed; the same after C1's final check; then the Stage 3 result line,
+   "csv run <row>", one "csv event <row>" per event, "observed <n>" and "end".
+   CSV rows come from the 4f csv_output functions (R4).
+D. runFaultGate(caseLines, goldenLines, requiredCases) in the order of the
+   Stage 3 runTraceGate (plan 3.15, "The gate"): "a golden file is missing or
+   empty"; the reader's problem; the split problem (splitTraceBlocks); "case
+   file has <n> cases, required <r>"; "trace file has <n> cases, the case file
+   <m>"; "trace <name>: expected case <name>"; the first difference
+   (firstTraceDifference). Reuse the Stage 3 block and difference helpers
+   (R4). The golden files are read from
+   AIH_SOURCE_DIR + "/tools/reference/stage4_rebuild/golden/" with the Stage 3
+   golden-file helper, as tests/test_trace_gate.cpp does.
+E. Tests exactly as plan 6.6 and checks.py section 4g: FN1-FN10 (10), FT1, FT2,
+   G8, G9, G10 = 15 new checks. FN1-FN9 expect exactly the READER_CASES
+   problem texts; FN10 is the positive control (every field exact); G8
+   requires exactly 563 cases and all 563 blocks identical; G9 expects
+   exactly "case file has 3 cases, required 563"; G10 is its control. On a
+   G8 failure the description must show the case, step and line with the
+   expected and actual text (as G4/G5 do). Each check's description starts
+   with its id. Expected after 4g: 537 checks, 0 failures.
+F. Three-part header in every new file (Introduced in: Stage 4g (rebuild)).
+   Beginner comments: what the equivalence gate proves (the rebuild does
+   exactly what the original code did, line by line, for 563 fault runs);
+   why the golden files come from the original C++ and are never edited; why
+   G9 and G10 exist (to prove the case count is enforced).
+G. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (191 preserved files, 537 checks, 255 code files checked, formatting checked)
+and the program output must be unchanged from 4f (170 lines, 152 non-blank,
+exactly tools/reference/stage4_rebuild/expected_program_output.txt). The test
+program now takes longer (about 15 seconds in Debug: G8 replays 563 fault
+runs). If any expected value or golden line does not match, do NOT change
+anything to make it match: stop and report the check id, and for G8 the case,
+step, line, expected and actual text (rule R22). A G8 difference means the
+rebuild differs from the original; it is reported, never "fixed" in the
+golden files.
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 8):
+  DF4g-1  in Scorer::onDeadRead (src/experiment/scorer_observe.cpp), compare
+          dead-status reads for F4 events only, not for F1.
+          Expected failing: exactly G8 (only the gate catches it). Nothing
+          else.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly (src/ must end
+unchanged), and confirm with run_checks.ps1 that everything passes again.
+(The owner's own check, DF4g-2, comes after your work; do not do it.)
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, the test run time,
+   anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
