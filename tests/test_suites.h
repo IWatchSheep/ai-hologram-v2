@@ -76,6 +76,15 @@ void runComparePredictionsTests(TestCounter& counter);
 // Runs the prediction golden tests (G3, PN1 to PN7).
 void runPredictionGoldenTests(TestCounter& counter);
 
+// Runs the footprint tests (FP1, FP10 to FP13).
+void runFootprintTests(TestCounter& counter);
+
+// Runs the footprint row tests (FP2 to FP9).
+void runFootprintRowsTests(TestCounter& counter);
+
+// Runs the agent log tests (LG1 to LG7).
+void runAgentLogTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

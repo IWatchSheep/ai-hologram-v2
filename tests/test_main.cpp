@@ -62,6 +62,9 @@ int main(int argc, char* argv[]) {
     aih::runCompareStatesTests(counter);
     aih::runComparePredictionsTests(counter);
     aih::runPredictionGoldenTests(counter);
+    aih::runFootprintTests(counter);
+    aih::runFootprintRowsTests(counter);
+    aih::runAgentLogTests(counter);
     std::cout << counter.checks << " checks, " << counter.failures
               << " failures\n";
     if (counter.failures == 0) {

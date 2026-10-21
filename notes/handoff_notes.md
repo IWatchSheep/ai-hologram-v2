@@ -180,3 +180,21 @@ What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from t
 The final run showed `177 checks, 0 failures`, CTest 2/2, `code checks: 79 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 55 lines, 50 non-blank`.
 
 Unsure about: nothing. The program output is exactly plan 3.8 (55 lines, 50 non-blank), D2 passes as predicted, and DF2c-1 failed exactly D2 as predicted.
+
+## Stage 3a (rebuild) — 2026-10-21
+
+What was built: Stage 3a only (plan Section 7, step 2). The shared text helpers `positionText` / `blockedText` in `src/core/text_words` (moved from `difference_text.cpp`, whose output is unchanged: CM10, G3 and D2 still pass); `Observation` exactly as plan 3.1; the footprint of plan 3.2 (`computeFootprint`, `compareFootprint`, `computeFootprintForTwoPredictions`, `applyFootprintUpdate`, plus the shared `observedOutcome`, `footprintAfter` and `isFootprintMatch`); every log-line function of the plan 3.12 table, split between `agent_log.cpp` (plan, step, safe-stop, V2 and result lines) and `agent_log_findings.cpp` (investigation, correction, consequence and anomaly lines), using only the shared text helpers (R4); and the test support (the demo world from `demoLayout()`, copies with the agent, object or a wall changed, the named layouts LP, L2, LT, LG, LTa, BOXED and SMALL exactly as in `checks.py`, and `linesEqual`, which prints the first differing line). Tests FP1, FP10, FP11a, FP11b, FP12a, FP12b, FP13, FP2–FP9 (one check per row, each difference with all six values) and LG1–LG7. Nothing of 3b–3g was created, `currentStage()` and the program output are unchanged, no expected value was changed, and no Git operation other than the `git status` inside `run_checks.ps1` was run; nothing was committed. No Stage 3-baseline files exist yet in this part of the rebuild, so none were touched.
+
+Files created, with line counts (all lines, after clang-format): `src/core/text_words.h` (25), `src/core/text_words.cpp` (28), `src/agent/observation.h` (34), `src/agent/footprint.h` (91), `src/agent/footprint.cpp` (130), `src/agent/agent_log.h` (63), `src/agent/agent_log.cpp` (79), `src/agent/agent_log_findings.cpp` (91), `tests/agent_test_support.h` (51), `tests/agent_test_support.cpp` (122), `tests/test_footprint.cpp` (187), `tests/test_footprint_rows.cpp` (168), `tests/test_agent_log.cpp` (139).
+
+Files changed, with line counts (all lines, after clang-format): `src/compare/difference_text.cpp` (53, uses `positionText` and `blockedText` from `core/text_words.h`; its private `positionText` and `wallText` are deleted, no other change), `CMakeLists.txt` (125, adds the four new src .cpp files to `ai_hologram_core` and the four new test .cpp files to `ai_hologram_tests`), `tests/test_suites.h` (101, three new group declarations), `tests/test_main.cpp` (74, three new group calls), and this file (this note appended only). CLion's clang-format was run with `-i` on every new or changed C++ file and on nothing else.
+
+Deliberate failure check, made once, built, run with `cmake-build-checks\ai_hologram_tests.exe`, then undone exactly: DF3a-1 (in `computeFootprint`, rule (iii) `observedAfter.object == c1` dropped, keeping rules (i) and (ii); the now-unused parameter was left unnamed for that run only so the warnings-as-errors build could run) failed exactly FP7 (`FAIL: FP7: push cell walled, object seen at c1`; `199 checks, 1 failures`), as predicted.
+
+What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from the repository root, before the deliberate failure and again at the end after it was undone. Its exact final line was:
+
+`ALL CHECKS PASSED (163 preserved files, 199 checks, 92 code files checked, formatting checked)`
+
+The final run showed `199 checks, 0 failures`, CTest 2/2, `code checks: 92 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 55 lines, 50 non-blank` (unchanged).
+
+Unsure about: nothing in the behaviour. The DF3a-1 unnamed-parameter detail above is noted for the record, as in earlier stages.

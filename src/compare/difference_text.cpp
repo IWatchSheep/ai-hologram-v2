@@ -11,24 +11,11 @@
 #include <vector>
 
 #include "compare/state_difference.h"
+#include "core/text_words.h"
 #include "world/position.h"
 
 namespace aih {
 namespace {
-
-// Writes a position as "(x, y)".
-std::string positionText(const Position& position) {
-    return "(" + std::to_string(position.x) + ", " +
-           std::to_string(position.y) + ")";
-}
-
-// Writes a wall state as "blocked" or "free".
-std::string wallText(bool blocked) {
-    if (blocked) {
-        return "blocked";
-    }
-    return "free";
-}
 
 // Adds the line for one position, but only when it differs.
 void appendPositionDifference(std::vector<std::string>& lines,
@@ -46,8 +33,8 @@ void appendWallDifferences(std::vector<std::string>& lines,
                            const std::vector<WallDifference>& walls) {
     for (const WallDifference& wall : walls) {
         lines.push_back("  - wall at " + positionText(wall.cell) +
-                        ": predicted " + wallText(wall.predictedBlocked) +
-                        ", observed " + wallText(wall.observedBlocked));
+                        ": predicted " + blockedText(wall.predictedBlocked) +
+                        ", observed " + blockedText(wall.observedBlocked));
     }
 }
 
