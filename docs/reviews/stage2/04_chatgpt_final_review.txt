@@ -1,0 +1,70 @@
+Claude,
+
+Thank you for the complete Stage 2 final review package at commit dddf3da.
+
+**DECISION: STAGE 2 IMPLEMENTATION APPROVED FOR THE OWNER'S FINAL COMPLETION GATE.**
+
+ChatGPT independently extracted the complete repository and built the C++ project on Linux with compiler warnings treated as errors.
+
+### Independent verification
+
+- C++ build: PASSED.
+- Unit tests: 177 checks, 0 failures.
+- CTest: 2/2 passed.
+- Code checker: 79 files, 0 violations.
+- Python reference: 36 checks, no failures.
+- All six Python deliberate-failure predictions: reproduced.
+- Provenance: all 111 protected-file SHA-256 hashes matched.
+- Program output: exactly 55 lines, 50 nonblank.
+- Prediction demonstrations: produced the specified outcomes and difference text.
+
+### Source review
+
+I inspected the supplied Stage 2 implementation and found no blocking defect.
+
+**The v1.1 actionFromName correction is accepted.** One shared helper now handles action-name lookup for the golden readers.
+
+**The v1.2 demoLayout correction is accepted.** The program and tests share the existing implementation rather than defining the same function twice.
+
+The WorldModel implementation preserves the budget-controlled prediction interface. The comparison code preserves the distinction between outcome differences and full-state differences.
+
+The golden prediction reader follows the defensive structure established during Stage 1.
+
+The code checker reports zero violations across all 79 checked files.
+
+### Final completion
+
+The owner's reported Windows verification, fresh-clone check and deliberate failures are consistent with the independent results.
+
+Claude's additional 20,000 original-versus-rebuilt prediction comparisons provide further supporting evidence, although ChatGPT did not independently repeat those comparisons in this review.
+
+**No further Stage 2 coding changes are required by this review.**
+
+Please complete the following:
+
+1. Fill in Stage 2 plan Section 12 with the actual results, deviations and completion evidence.
+2. Record ChatGPT's independent review accurately.
+3. Have the owner approve the final completion checklist.
+4. Have the owner commit the completion documentation.
+5. Tag the approved final commit `stage-2-v2`.
+6. Merge into main according to the repository workflow.
+7. Preserve all source, reference files, prompts, reviews and handoff notes in GitHub.
+
+The tag must refer to the completed and approved commit, including its final documentation.
+
+### Guidance for Stage 3
+
+Stage 3 will rebuild the C1 reasoning agent. Preserve the boundaries already established:
+
+- Belief remains separate from the true world.
+- All predictions use the budget counter.
+- Comparison reports differences without deciding how to correct them.
+- Model injection remains replaceable for later experiments.
+- Golden outputs from the original C++ remain authoritative.
+- The eventual M1.4 step-by-step C1 equivalence gate must still be performed.
+
+Do not treat Stage 2 golden-case success as a substitute for the later full C1 equivalence test.
+
+**STAGE 2 IS APPROVED FOR FORMAL COMPLETION.**
+
+Thank you for providing the complete repository and for documenting the implementation corrections.

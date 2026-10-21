@@ -6,7 +6,7 @@
 | **Stage** | 2 of the rebuild (Brief Section 10, Stage 2: prediction and comparison) |
 | **Plan version** | 1.2 (a name clash found by Cursor in 2c, resolved by sharing one demo layout) |
 | **Date** | October 20, 2026 |
-| **Status** | v1.1 **APPROVED** (the owner on 2026-10-20: "yes i agree."). **v1.2 corrects a planning error found by Cursor in 2c (no change to behaviour, checks or counts) and awaits the owner's agreement; ChatGPT sees it in its final review of the whole tree.** |
+| **Status** | **COMPLETE** (2026-10-20). Plan v1.0 approved by ChatGPT (no changes) and the owner; v1.1 agreed by the owner ("yes i agree."); v1.2 agreed by the owner ("yes i agree."). ChatGPT independently built and tested the whole tree of the final source (`dddf3da`) and approved Stage 2 for formal completion. The completion gate (Section 10) passed. Tagged `stage-2-v2`. |
 | **Governing documents** | The brief v1.1; `docs/RULES.md` (R1–R24); Migration Addendum M1; `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 1, complete and tagged `stage-1-v2` (`5c2b3f9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 2 (plan `docs/history/ai-hologram/docs/stages/STAGE_02.md` v1.3, tag `stage-2`). Its code (`src/model`, `src/compare`, `src/demo/prediction_demo.*`) never changed from `stage-2` to `89ea9b6`, so it is also the prediction and comparison code inside the frozen C1 baseline (`stage-3`, `7587f38`). |
@@ -335,14 +335,14 @@ Each sub-stage is committed by the owner on `stage-2-work`, after Claude's revie
 - **Review notes.** Every exchange with ChatGPT goes in `docs/reviews/stage2/`.
 
 ## 10. Completion checklist (owner verification gate)
-- [ ] The plan was agreed and committed before any Stage 2 code.
-- [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
-- [ ] The program output is exactly 3.8, at 55 lines; the tests show `177 checks, 0 failures`; CTest 2/2; 0 checker violations (79 files).
-- [ ] G3 passes all 1,000 cases, and PN1–PN7 pass.
-- [ ] All deliberate failure checks gave exactly the predicted failures.
-- [ ] D-066 and D-067 recorded; handoff notes appended; prompts and review notes saved.
-- [ ] ChatGPT reviewed the whole buildable tree of the final commit.
-- [ ] The owner agrees (D-065).
+- [x] The plan was agreed and committed before any Stage 2 code (`fb19882`).
+- [x] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
+- [x] The program output is exactly 3.8, at 55 lines; the tests show `177 checks, 0 failures`; CTest 2/2; 0 checker violations (79 files).
+- [x] G3 passes all 1,000 cases, and PN1–PN7 pass.
+- [x] All deliberate failure checks gave exactly the predicted failures.
+- [x] D-066 and D-067 recorded; handoff notes appended; prompts saved; every exchange with ChatGPT saved in `docs/reviews/stage2/`.
+- [x] ChatGPT reviewed the whole buildable tree of the final commit (`dddf3da`) and approved Stage 2 for formal completion (review 04).
+- [x] The owner agrees (D-065).
 
 ## 11. Plain explanation (for any reader)
 1. **A belief is a different type from the true world,** so code cannot mix "what I think" with "what is".
@@ -353,10 +353,61 @@ Each sub-stage is committed by the owner on `stage-2-work`, after Claude's revie
 
 ## 12. What actually happened (filled in at the end)
 ```
-Date completed:
-Commit tagged stage-2-v2:
-Checks:
-Did everything go as planned?
+Date completed: 2026-10-20.
+Commit tagged stage-2-v2: the commit that adds this record, on branch stage-2-work,
+fast-forwarded into main.
+
+Checks (owner's computer, Windows, CLion 2026.2.3.1, GCC 15.2.0, clang-format 22.0.0git):
+  ALL CHECKS PASSED (111 preserved files, 177 checks, 79 code files checked, formatting checked)
+  program output: 55 lines, 50 non-blank (exactly Section 3.8)
+  The same on a fresh clone of stage-2-work (dddf3da), built from nothing.
+  Independent Linux builds with warnings as errors by Claude (from GitHub) and by ChatGPT
+  (from the whole-tree package): 177 checks, CTest 2/2, 0 checker violations (79 files),
+  reference checks.py "failing: none (36 checks)", all 111 provenance hashes matching.
+
+Equivalence with the original prediction and comparison code (12 files at 7587f38):
+  G3: all 1,000 golden prediction cases (golden file SHA-256 5e44df69...c9f2cf, unchanged).
+  Claude, beyond the golden file: the new comparison and prediction code on 20,000 fresh
+  random prediction cases, identical to the original C++ (ChatGPT notes it did not repeat
+  this). The prediction-demo part of the program output is byte-identical to the original
+  runPredictionDemos; the scripted-demo part is unchanged from Stage 1.
+  This is not the M1.4 C1 equivalence gate, which is still to come (Stage 3 onwards).
+
+Work, in order (branch stage-2-work):
+  fb19882  plan v1.0 (reference, golden file, provenance 111, D-066, D-067)
+  9b90ba1  Stage 2a (157 checks)
+  c05fbac  Stage 2b (176 checks), plan v1.1
+  dddf3da  Stage 2c (177 checks), plan v1.2
+
+Deliberate failure checks, all exactly as predicted by the reference:
+  DF2-P  (owner)  the golden file edited -> stopped at [provenance].
+  DF2a-1 (Cursor) budget test > instead of >= -> BC2, BC4a, BC4b, WM3.
+  DF2a-2 (Cursor) the supplied action model ignored -> WM6.
+  DF2b-1 (Cursor) walls missing from the prediction ignored -> CM5b, CM10, G3.
+  DF2b-2 (Cursor) walls compared column by column -> CM6, CM10, G3.
+  DF2c-1 (Cursor) demo budget 4 instead of 10 -> D2.
+  DF2c-2 (owner)  "seen" instead of "observed" -> stopped at [tests]: D2, CM10, G3.
+
+Did everything go as planned? Mostly; the differences, all recorded in the revision history:
+  1. ChatGPT approved plan v1.0 with no changes.
+  2. After 2b, Claude's review found the action-name lookup written twice (R4) -> v1.1:
+     one helper, actionFromName, in tests/golden_files, used by both readers.
+  3. In 2c, Cursor stopped at [build]: aih::demoLayout() was defined twice (once since
+     Stage 1 in tests/test_layouts, once as plan 3.7 asked in scripted_demo). This was
+     Claude's planning error. Cursor proposed the fix -> v1.2: the tests include
+     demo/scripted_demo.h and use the one shared layout.
+  4. Commands for the owner are now given in their own boxes, with explanations outside:
+     explanatory text inside a command box had broken a PowerShell command.
+No expected value was changed to make code pass. No golden value was changed.
+
+Lessons for the next stages:
+  - Before planning a new function, search the whole tree (tests included) for its name.
+  - Stopping and reporting under NEEDS THE OWNER worked as intended; keep it.
+  - Carry ChatGPT's Stage 3 boundaries forward (review 04): belief separate from the true
+    world; every prediction paid through the budget counter; comparison reports differences
+    and never decides corrections; the action model stays replaceable; golden outputs from
+    the original C++ stay authoritative; Stage 2 golden success is no substitute for the
+    full M1.4 step-by-step C1 equivalence gate.
 ```
 
 ## 13. Instructions to the coding assistant
