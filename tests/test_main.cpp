@@ -65,6 +65,9 @@ int main(int argc, char* argv[]) {
     aih::runFootprintTests(counter);
     aih::runFootprintRowsTests(counter);
     aih::runAgentLogTests(counter);
+    aih::runDeadSquaresTests(counter);
+    aih::runHeuristicTests(counter);
+    aih::runDeadSquareObserversTests(counter);
     std::cout << counter.checks << " checks, " << counter.failures
               << " failures\n";
     if (counter.failures == 0) {

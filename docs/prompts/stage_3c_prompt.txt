@@ -1,0 +1,114 @@
+STAGE 3c PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.1.
+This file is docs/prompts/stage_3c_prompt.txt. (The file with the same name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 3c of the rebuild, and ONLY Stage 3c.
+Stages 3a and 3b are finished and committed. Do not change their behaviour.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+2. Read docs/stages/STAGE_03.md v1.1: sections 3.4, 3.5, 3.6, 3.13, 4 (the 3c
+   rows and the R4 list), 5, 6.3, 7 (step 4) and 9.
+3. Read tools/reference/stage3/ref_parts.py (StepPredictor, AgentActionModel,
+   search, fallback) and checks.py
+   (check_predictor, check_agent_model, check_planner, push_north, Recorder,
+   main_search, active_walk). They are the authority where the plan uses words.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 4)
+Create exactly these files, and no others:
+  src/agent/step_predictor.h        src/agent/step_predictor.cpp
+  src/agent/agent_model.h           src/agent/agent_model.cpp
+  src/agent/planner.h               src/agent/planner_internal.h
+  src/agent/planner.cpp             src/agent/planner_expand.cpp
+  src/agent/planner_fallback.cpp
+  tests/test_step_predictor.cpp     (SP1, SP2a, SP2b, SP3, SP4a, SP4b, SP5, SP6, OB4)
+  tests/test_agent_model.cpp        (AM1-AM5)
+  tests/test_planner.cpp            (PL1, PL2a, PL2b, PL3, PL8, PL9, PL10)
+  tests/test_planner_budget.cpp     (PL4a, PL4b, PL5a, PL5b, PL6, PL7)
+Change exactly these existing files:
+  CMakeLists.txt                  add the five new src .cpp files to
+                                  ai_hologram_core and the four new test .cpp
+                                  files to ai_hologram_tests.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  tests/agent_test_support.h / .cpp   only if a shared test helper is needed
+                                  by more than one test file; say what you added.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create anything of 3d-3g (no records, investigation, verification,
+agents, run loop, demos or gate), and do not change currentStage() or the
+program output.
+
+DETAILS
+A. StepPredictor exactly as plan 3.4: a new BudgetCounter at startStep();
+   the cache with its walls-and-destination context (a prediction under other
+   walls or another destination clears it first); isCached; predict (a hit is
+   free; a refused miss changes nothing; usedTotal counted; the context set
+   when there is none; the entry appended; then the onEvaluation report with a
+   null model pointer); predictVariant (never reads or fills the cache, pays
+   through WorldModel(model).predict, reports with &model); setObserver;
+   clearCache; remaining; usedThisStep; usedTotal. It is the ONLY place that
+   calls WorldModel::predict for a reasoner.
+B. AgentActionModel exactly as plan 3.5, with setBase (H2). current() is a
+   snapshot: it copies the base model and the four marks when called. An empty
+   model always means applyAction.
+C. The planner exactly as plan 3.6:
+   - planner.h: PlanStep, SearchKind, DiscoveredState, SearchResult (with
+     improvedPaths and reopenedStates), search, fallback.
+   - planner_internal.h: used only by the three planner .cpp files: the queue
+     entry (f, h, entry number, state index, g), its order (smallest f, then
+     h, then entry number), the std::priority_queue type, the search state
+     (result, queue, closed flags, next entry number) and the declarations of
+     the helpers they share.
+   - planner.cpp: search's loop and adding an entry.
+   - planner_expand.cpp: finding a discovered state (same agent and object),
+     discovering, improving (counting improved and reopened), trying one
+     successor (the reserve test "not cached and remaining() <= reserve" gives
+     OutOfBudget; Blocked, InvalidState and a dead object through
+     readDeadStatus are skipped), and expanding in kActionOrder.
+   - planner_fallback.cpp: the ONE plan builder (used by search and fallback,
+     R4) and fallback (smallest (h, bestG, discovery number) among non-root
+     states with h < kInfiniteHeuristic).
+D. Tests exactly as plan 6.3 and checks.py (PL2a's 9-action plan, 60
+   evaluations, 1 improved path, 0 reopened; PL6's 156 evaluations and 39
+   states; OB4's three reports). Every fixture is a valid world. Each check's
+   description starts with its id. Expected after 3c: 242 checks, 0 failures.
+E. Three-part header in every new file (Introduced in: Stage 3c (rebuild)).
+   Beginner comments: std::priority_queue with a comparator and the open
+   list's order; why every successor state comes from the step predictor; why
+   the cache's context includes the walls; what a variant prediction is; why
+   current() is a snapshot.
+F. Format every new or changed C++ file with CLion's clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (163 preserved files, 242 checks, 116 code files checked, formatting checked)
+and the program output must be unchanged (55 lines, 50 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 4):
+  DF3c-1  in the planner's reserve test, use "remaining() < reserve" instead
+          of "remaining() <= reserve".
+          Expected failing: exactly PL4a, PL4b, PL5a and PL5b.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

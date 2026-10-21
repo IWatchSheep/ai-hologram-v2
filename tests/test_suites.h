@@ -85,6 +85,16 @@ void runFootprintRowsTests(TestCounter& counter);
 // Runs the agent log tests (LG1 to LG7).
 void runAgentLogTests(TestCounter& counter);
 
+// Runs the dead-square tests (DS1, DS2a, DS2b, DS3a, DS4,
+// DS5a, DS5b).
+void runDeadSquaresTests(TestCounter& counter);
+
+// Runs the cache and heuristic tests (DS6 to DS8d).
+void runHeuristicTests(TestCounter& counter);
+
+// Runs the dead-square observer tests (OB1 to OB3).
+void runDeadSquareObserversTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,
