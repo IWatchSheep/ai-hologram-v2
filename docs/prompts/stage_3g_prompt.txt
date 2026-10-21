@@ -1,0 +1,128 @@
+STAGE 3g PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.3.
+This file is docs/prompts/stage_3g_prompt.txt. There is NO Stage 3g prompt in
+docs/history/ (the original project had no 3g); if you were given any other
+text, stop and tell the owner.
+
+You are implementing Stage 3g of the rebuild, and ONLY Stage 3g: the first part
+of the equivalence gate (M1.4). Stages 3a-3f are finished and committed. Do
+not change their behaviour: the agents are DONE, and this sub-stage changes no
+file in src/.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/ (it creates __pycache__ folders);
+   read the reference files instead.
+2. Read docs/stages/STAGE_03.md v1.3: section 3.14 (all of it: the case file,
+   the seeds, the model catalogue, the C1 and C0 trace formats, the observer
+   file, the readers, G4 and G5), 4 (the 3g rows and the R4 list), 5, 6.7,
+   7 (step 8) and 9 (the README text).
+3. Read tools/reference/stage3/ref_trace.py (build_model, make_c1, make_c0,
+   hex_walls, state_text, observation_line, mismatch_lines, correction_line,
+   C1Printer, result_line, Tally, Observer, trace_c1, trace_c0),
+   ref_trace_reader.py (read_cases, split_traces, first_difference, gate) and
+   checks.py (check_reader, READER_CASES, SPLIT_CASES, CASE_D, check_models,
+   MC_FIXTURE, check_gate). Also look at the first blocks of
+   tools/reference/stage3/golden/c1_cases.txt, c1_traces.txt and
+   c1_observers.txt. ref_trace.py writes the golden text exactly; the C++
+   must write the same bytes. They are the authority where the plan uses words.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 8)
+Create exactly these files, and no others:
+  tests/trace_cases.h        tests/trace_cases.cpp
+  tests/trace_models.h       tests/trace_models.cpp
+  tests/trace_text.h         tests/trace_text.cpp
+  tests/trace_writer.h       tests/trace_writer.cpp
+  tests/test_trace_reader.cpp   (TN1-TN15)
+  tests/test_trace_gate.cpp     (MC1-MC5, TW1, G4, G5)
+Change exactly these existing files:
+  CMakeLists.txt                  add the six new test .cpp files to
+                                  ai_hologram_tests. Do NOT run clang-format on
+                                  CMakeLists.txt.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  README.md                       now that the gate exists: the status of plan
+                                  Section 9, exactly ("... checked step by step
+                                  against 789 runs recorded from the original
+                                  code (the first part of the M1.4 equivalence
+                                  gate). No faults are injected, ...").
+  notes/handoff_notes.md          append one note at the end.
+Do NOT change any file in src/, and do not change any existing test's
+expected value.
+
+DETAILS
+A. trace_cases: TraceCase (name, agent, settings, world, optional belief,
+   model spec words, notdead cells, seeds), readTraceCases(lines) ->
+   {ok, cases, problem}, splitTraceBlocks(lines) -> {ok, blocks, problem},
+   firstTraceDifference(name, expected, actual). Follow ref_trace_reader.py
+   EXACTLY: the same order of checks and the same problem texts; check that
+   every line exists before reading it; never throw; use the shared helpers
+   readLines, splitWords (single spaces), parseInteger and actionFromName
+   from golden_files (R4).
+B. trace_models: the six catalogue specs of plan 3.14 exactly (standard ->
+   no base model; stuck, nopush, slip, swap, pushturn).
+C. trace_text: hexWalls, stateText, the observation, mismatch, correction and
+   result lines, the element text, exactly as ref_trace.py (positions through
+   positionText, R4).
+D. trace_writer: builds the agent from a case (the constructor, then the
+   seeds in the order walls, v1, plan, committed, through the seeding helpers
+   of tests/agent_test_fixtures, R4); runs it with the real run loop and its
+   watchers (runSingleAgent, or continueRun after a seeded committed action;
+   the C0 overload for C0); writes the C1 or C0 trace of plan 3.14, or the
+   observer lines (an observer attached with predictor.setObserver and
+   deadCache.observer, counting since the last line). The reserve printed is
+   reserveFor(state.corrections). A correction line is printed when the
+   record is new or its text changed since it was last printed.
+E. G4 and G5 (plan 3.14): read c1_cases.txt and c1_traces.txt /
+   c1_observers.txt through AIH_SOURCE_DIR; split the golden file into
+   blocks; for every case in order, write its trace and compare with the
+   golden block of the same name; the FIRST difference fails the check and
+   prints firstTraceDifference's message (case, step, line). A missing file,
+   a reader problem, a different case count or name is a FAIL with a clear
+   message. G4 passes only with all 789 traces identical; G5 only with all
+   789 observer blocks identical.
+F. Tests exactly as plan 6.7 and checks.py. Each check's description starts
+   with its id. Expected after 3g: 340 checks, 0 failures.
+G. Three-part header in every new file (Introduced in: Stage 3g (rebuild)).
+   Beginner comments: what the gate proves and why it compares every decision
+   step, not only the outcome (M1.4); why the readers are bounds-safe.
+H. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (163 preserved files, 340 checks, 170 code files checked, formatting checked)
+and the program output must be unchanged (102 lines, 94 non-blank). If G4 or
+G5 fails, do NOT change any golden file, expected value or agent code: report
+the exact difference message (rule R22). The agents were already checked
+against all 789 runs by Claude, so a difference most likely means the trace
+writer does not yet write exactly ref_trace.py's text.
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 8):
+  DF3g-1  in C1's consequence surprise (single_agent_search.cpp), after a
+          trap correction is created, leave the trap V2 test waiting for the
+          next step (set state.waitingTrap to that correction and cell)
+          instead of attempting it at once.
+          Expected failing: exactly G4 and G5 (no other check: only the gate
+          catches it).
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again. DF3g-2 is the owner's.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
