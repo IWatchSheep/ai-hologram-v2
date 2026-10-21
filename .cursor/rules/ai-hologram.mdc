@@ -9,7 +9,14 @@ Before doing anything, read `AGENTS.md` at the root of the repository and follow
 
 The short version:
 1. Implement only the sub-stage the owner's prompt names, exactly as the approved stage plan in `docs/stages/` says.
-2. Never run any command that changes Git (no commit, push, tag, add, reset, checkout, restore, rm, mv, stash). Only `git status`, `git diff` and `git log` are allowed. The owner does all Git operations.
+2. Never run any command that changes Git (no commit, push, tag, add, reset, checkout, restore, switch, branch, merge, rm, mv, stash, clean). Only `git status`, `git diff` and `git log` are allowed. The owner does all Git operations.
 3. Never edit `docs/`, `tools/reference/`, `LICENSE`, `.gitignore`, `.gitattributes`, `.clang-format`, `.cursor/` or `AGENTS.md`. The only file outside the prompt's list you may write is `notes/handoff_notes.md` (append only).
 4. Never change an expected value to make a test pass. Stop and report the actual value.
 5. Run `run_checks.ps1` before reporting, and report its result exactly.
+
+## Do not ask the owner for forbidden actions
+
+The owner should never have to say "no". So:
+- **Do not propose, attempt or ask permission for** any action forbidden in points 2 and 3, or in `AGENTS.md` section 4. Not even "just this once", not even to undo a mistake, and not through another route (a script, `powershell -Command`, `cmd /c`, a Python one-liner or a CMake command that runs Git or writes those files).
+- If you believe a forbidden action is needed (for example, a file in `docs/` looks wrong, or something should be committed or restored), **stop**, and write it in your report under the heading `NEEDS THE OWNER:`, with the exact reason. The owner and Claude decide.
+- Asking permission is fine only for allowed actions: building with `cmake`, running `ctest`, `run_checks.ps1`, the programs built in `cmake-build-checks`, and `git status` / `git diff` / `git log`.

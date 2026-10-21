@@ -1,0 +1,24 @@
+// Cursor IDE permissions for AI Hologram v2 (per-repository).
+// Commands in terminalAllowlist run without asking the owner. Everything else
+// still asks. This file steers Cursor; it is not a security boundary. The
+// binding rules are AGENTS.md and .cursor/rules/ai-hologram.mdc.
+{
+  "terminalAllowlist": [
+    "cmake",
+    "ctest",
+    "git:status*",
+    "git:diff*",
+    "git:log*"
+  ],
+  "autoRun": {
+    "allow_instructions": [
+      "Building with cmake, running ctest, and running the test and program executables inside cmake-build-checks are allowed.",
+      "Running run_checks.ps1 from the repository root is allowed."
+    ],
+    "block_instructions": [
+      "Any git command other than git status, git diff or git log must never run.",
+      "Any command that deletes, moves or renames files must never run.",
+      "Any command or script that writes to docs/, tools/reference/, .cursor/, LICENSE, .gitignore, .gitattributes, .clang-format or AGENTS.md must never run."
+    ]
+  }
+}
