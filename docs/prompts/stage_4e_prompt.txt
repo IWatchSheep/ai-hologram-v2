@@ -1,0 +1,147 @@
+STAGE 4e PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_04.md version 1.2.
+This file is docs/prompts/stage_4e_prompt.txt. (The file with a similar name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 4e of the rebuild, and ONLY Stage 4e: shadow
+evaluation of the observed computations, through the watch-only computation
+observer (IE-1 H3, H4). Stages 4a-4d are committed. Do not change their
+behaviour or Stage 3's. Primary scoring must never depend on the observer.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/; read the reference files instead.
+2. Read docs/stages/STAGE_04.md: sections 1, 2, 3.6 (item 4), 3.9, 3.13,
+   4 (the 4e rows and the R4 list), 5, 6.4, 7 (step 6), 9 and 13.
+3. Read tools/reference/stage4_rebuild/ref_scorer.py: predictions_differ,
+   shadow_input, evaluation_effective, shadow_map, and the Scorer's observer
+   callbacks (attach_view, awaiting, on_evaluation, on_dead_read,
+   on_heuristic, observed_evaluations); ref_faults.py: ScorerObserver and
+   run_with_faults (the observe flag, attaching and detaching the observer;
+   report_variant_models is only a Python detail: the C++ H3 already passes
+   the model itself); and checks.py section "4e" (FixedView, prediction,
+   check_shadow, Recorder, check_observed_runs, primary, values_match,
+   check_read_sites). They are the authority where the plan uses words. The
+   original's declarations are in tools/reference/stage4_rebuild/orig_trace/
+   original_src/experiment/shadow.h, shadow.cpp and scorer_observe.cpp: read
+   them for names; our file layout is the plan's.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 6)
+Create exactly these files, and no others:
+  src/experiment/shadow.h             src/experiment/shadow.cpp
+                                      shadowInput, evaluationEffective,
+                                      shadowMap (plan 3.9)
+  src/experiment/scorer_observe.cpp   attachView, onEvaluation, onDeadRead,
+                                      onHeuristic, observedEvaluations
+  tests/recording_observer.h          tests/recording_observer.cpp
+                                      the one recording observer of the tests
+                                      (R4): moved out of
+                                      tests/test_dead_square_observers.cpp; it
+                                      also records evaluations
+  tests/test_shadow.cpp               tests/test_shadow_more.cpp      (SH1)
+  tests/test_observed_runs.cpp        (SH2, SH3, SH4, SH5)
+  tests/test_read_sites.cpp           tests/test_read_sites_more.cpp  (SH6)
+Change exactly these existing files:
+  src/experiment/scorer.h         declare the observer callbacks and
+                                  observedEvaluations (implemented in
+                                  scorer_observe.cpp).
+  src/experiment/fault_run.h, fault_run.cpp, fault_run_naive.cpp
+                                  the observe flag (bool observe = true, after
+                                  the events and before the watchers, as
+                                  ref_faults.run_with_faults) and the observer
+                                  (plan 3.6 item 4); FaultRunResult gains
+                                  observedEvaluations. After runSingleAgent
+                                  returns, the observer is detached from the
+                                  predictor, the dead-square cache and the
+                                  cached map.
+  tests/test_dead_square_observers.cpp   uses tests/recording_observer instead
+                                  of its own copy. No other change: OB1-OB3
+                                  and their expected values stay exactly as
+                                  they are.
+  tests/test_fault_run_more.cpp (and any other existing test) ONLY if a call
+                                  of runWithFaults with watchers must change
+                                  to pass the new observe argument; change
+                                  nothing else in it.
+  tests/stage4_suites.h, tests/test_main.cpp   add the new groups.
+  CMakeLists.txt                  add the two new src .cpp files
+                                  (shadow.cpp, scorer_observe.cpp) to
+                                  ai_hologram_core and the six new test .cpp
+                                  files (recording_observer.cpp and the five
+                                  test files) to ai_hologram_tests. Do NOT run
+                                  clang-format on it.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create anything of 4f-4g (no CSV, no demonstration, no fault-case
+reader, no gate). Do not change currentStage() or the program output.
+src/agent/ must never include src/experiment/ (R7). Do not change any
+src/agent/ file: the H3/H4 reports already exist.
+
+DETAILS
+A. shadow: shadowInput, evaluationEffective and shadowMap exactly as plan 3.9
+   and ref_scorer (F3 against the result passed in; F1/F2/F5 shadows repeat
+   the evaluation with the SAME model, D-043; an invalid shadow is effective;
+   shadow maps with fresh local counts). Use computeDeadSquares and
+   readDeadStatus (Stage 3) for every shadow map and read, and
+   computeFootprintForTwoPredictions / compareFootprint for every prediction
+   comparison (R4). Shadow work never uses a budget and is never seen by an
+   agent. If the 4d committedEffective and the new code would build the same
+   F1/F2/F5 shadow state, they must share one helper (R4): move it into
+   shadow.cpp and have scorer_commit.cpp use it, without changing behaviour.
+B. scorer_observe.cpp: the callbacks exactly as ref_scorer: onEvaluation
+   counts every call (observedEvaluations) and, for activated, still-active
+   events with no opportunity step yet (awaiting), sets revealing and the
+   opportunity step when the evaluation is effective; onDeadRead (F1 and F4
+   with the shadow map); onHeuristic (F1/F4 with the shadow map; F2/F5 with
+   the shadow state and a fresh map of the current belief; invalid shadow ->
+   effective).
+C. The observer of the run with faults is a ComputationObserver whose three
+   functions only call the scorer (ScorerObserver). With observe false
+   nothing is attached and observedEvaluations stays 0.
+D. Tests exactly as plan 6.4 and checks.py section 4e: SH1 (14), SH2 (5),
+   SH3 (12), SH4 (8), SH5 (2), SH6 (7) = 48 new checks. Every expected value
+   is copied from checks.py. Use the shared helpers (tests/fault_test_material,
+   tests/recording_observer, agent test support), R4. Each check's
+   description starts with its id. Expected after 4e: 513 checks, 0 failures.
+E. Three-part header in every new file (Introduced in: Stage 4e (rebuild)).
+   Beginner comments: what a shadow is (the same computation repeated with
+   the fault undone, to see whether the fault could have made a difference);
+   why shadow work never uses a budget and is never seen by an agent; why
+   primary scoring must not depend on the observer.
+F. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (191 preserved files, 513 checks, 230 code files checked, formatting checked)
+and the program output must be unchanged (102 lines, 94 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 6):
+  DF4e-1  in localCheckSaysNotDead (src/agent/dead_squares.cpp), read the
+          cell ahead directly from map.dead instead of through
+          readDeadStatus.
+          Expected failing, exactly these 4 checks: Stage 3's OB2 and G5 (the
+          local check's reads are no longer reported), SH6.4 and SH6.5.
+          Nothing else (G4, G6, G7 and every 4a-4e check still pass).
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly (src/agent/ must end
+unchanged), and confirm with run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
