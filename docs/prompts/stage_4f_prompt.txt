@@ -1,0 +1,145 @@
+STAGE 4f PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_04.md version 1.2.
+This file is docs/prompts/stage_4f_prompt.txt. (The file with a similar name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 4f of the rebuild, and ONLY Stage 4f: CSV output,
+the fault demonstration, the program's new header, currentStage() = 4 and the
+README status. Stages 4a-4e are committed. Do not change their behaviour or
+Stage 3's. This is the sub-stage where the program output changes: from the
+102 Stage 3 lines to exactly the 170 lines of
+tools/reference/stage4_rebuild/expected_program_output.txt.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/; read the reference files instead.
+2. Read docs/stages/STAGE_04.md: sections 1, 2, 3.10, 3.11, 3.14, 3.16 (Q7),
+   4 (the 4f rows and the R4 list), 5, 6.5, 7 (step 7), 8 (D-078), 9 and 13.
+3. Read tools/reference/stage4_rebuild/ref_fault_csv.py (all of it),
+   ref_fault_demo.py (all of it), expected_program_output.txt, and checks.py
+   section "4f" (CSV3_ROW, check_csv, S3_RUN_HEADER, S3_EVENT_HEADER). They are
+   the authority where the plan uses words. The original's code is in
+   tools/reference/stage4_rebuild/orig_trace/original_src/experiment/
+   csv_output.h, csv_output.cpp, csv_output_event.cpp and
+   original_src/demo/fault_demo.h, fault_demo.cpp: read them for names and
+   exact texts; our file layout is the plan's.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 7)
+Create exactly these files, and no others:
+  src/experiment/csv_fields.h         src/experiment/csv_fields.cpp
+                                      joinFields, bitText, optionalStepText (R4)
+  src/experiment/csv_output.h         the two headers, runCsvRow, eventCsvRow,
+                                      writeTextFile
+  src/experiment/csv_output.cpp       the run row, the headers, writeTextFile
+  src/experiment/csv_event_row.cpp    the event row
+  src/demo/fault_demo.h               runFaultDemo(std::ostream&)
+  src/demo/fault_demo_runs.h          src/demo/fault_demo_runs.cpp
+                                      the demonstration material and its four
+                                      runs
+  src/demo/fault_demo.cpp             the demonstration text
+  tests/expected_fault_demo.h         tests/expected_fault_demo.cpp
+                                      the 68 expected demonstration lines
+                                      (lines 103-170 of
+                                      tools/reference/stage4_rebuild/
+                                      expected_program_output.txt, copied
+                                      exactly)
+  tests/test_csv_output.cpp           (CSV1, CSV3, CSV4)
+  tests/test_fault_demo.cpp           (FD1)
+Change exactly these existing files:
+  src/main.cpp                    the three new header lines of plan Section 5,
+                                  then runScriptedDemo, runPredictionDemos,
+                                  runAgentDemos and runFaultDemo (plan 3.14).
+  src/core/project_info.cpp       currentStage() returns 4.
+  tests/test_project_info.cpp     P2 checks 4 (no other change; the number of
+                                  checks stays the same).
+  README.md                       only the status sentence, replaced by the
+                                  exact text of plan Section 9 (README).
+  tests/stage4_suites.h, tests/test_main.cpp   add the new groups.
+  CMakeLists.txt                  add the five new src .cpp files
+                                  (csv_fields.cpp, csv_output.cpp,
+                                  csv_event_row.cpp, fault_demo_runs.cpp,
+                                  fault_demo.cpp) to ai_hologram_core, and the three
+                                  new test .cpp files (expected_fault_demo.cpp,
+                                  test_csv_output.cpp, test_fault_demo.cpp) to
+                                  ai_hologram_tests. Do NOT run clang-format
+                                  on it.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create anything of 4g (no fault-case reader, no fault trace text or
+writer, no gate). src/agent/ must never include src/experiment/ (R7). Do not
+change any src/agent/ file.
+
+DETAILS
+A. CSV exactly as plan 3.11 and ref_fault_csv: the two header lines (equal to
+   checks.py S3_RUN_HEADER and S3_EVENT_HEADER), runCsvRow(condition,
+   layoutSeed, runSeed, result) and eventCsvRow(condition, event, activation,
+   score): fields joined by commas with NO quoting, 1/0 for yes/no, empty
+   fields for values that do not exist, cells x:y, the direction order with
+   single spaces, every measurement field empty for an event not activated
+   (D-044). Use the shared names (fault_event: faultTypeName, ...;
+   reportedAs, activationDelay from fault_injector) and the csv_fields
+   helpers; write no new copies (R4).
+B. Quirk Q7 (D-078): the reported_as text "Not activated: deferred, never
+   applicable" contains a comma and is written as it is, unquoted, so that row
+   has 31 comma-separated pieces instead of 30. This is the original's output:
+   keep it, never repair it, and say so in a comment where the row is built.
+C. writeTextFile(path, text) writes the text exactly (binary, so "\n" stays
+   "\n" on Windows) and returns false when it cannot. CSV4 writes a file in
+   the system temporary folder (not in the repository), reads it back, removes
+   it, and checks that a missing folder returns false. No test may leave a
+   file behind.
+D. runFaultDemo writes exactly the original's 68 lines, as ref_fault_demo.
+   fault_demo_lines: layout 500000's drawing, the six events of runs
+   500000-1 and 500003-1, the four runs (500000-2 and 500003-1, C1 and C0)
+   with their activation lines, runs.csv and events.csv, and the closing
+   line. Use the shared demonstration material where the plan's R4 list says
+   so, and the Stage 3 drawing and text helpers (R4).
+E. Tests exactly as plan 6.5 and checks.py section 4f: CSV1 (2), CSV3 (2),
+   CSV4 (4), FD1 (1) = 9 new checks. CSV3's row is copied from checks.py
+   CSV3_ROW; FD1 compares runFaultDemo's lines with tests/expected_fault_demo.
+   Each check's description starts with its id.
+   Expected after 4f: 522 checks, 0 failures.
+F. Three-part header in every new file (Introduced in: Stage 4f (rebuild)).
+   Beginner comments: what the two CSV files hold (one row per run, one row
+   per event); why fields are empty for an event that was never activated;
+   Q7 in plain words; why the demonstration lines are "not results".
+G. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (191 preserved files, 522 checks, 243 code files checked, formatting checked)
+and the program output must now be exactly
+tools/reference/stage4_rebuild/expected_program_output.txt: run_checks.ps1
+must report "program output: 170 lines, 152 non-blank", and the first line
+must be "AI Hologram v2 -- Stage 4". Compare the whole output with the file
+line by line and report that you did. If any expected value or line does not
+match, do NOT change it: stop and report the id or line number, the expected
+and the actual text (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 7):
+  DF4f-1  in the event row, compute the detection delay from the event's
+          SCHEDULED step instead of its activation (application) step.
+          Expected failing: exactly FD1. Nothing else.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, the program output
+   comparison, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
