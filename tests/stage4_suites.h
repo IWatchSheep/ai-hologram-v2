@@ -77,6 +77,13 @@ void runCsvOutputTests(TestCounter& counter);
 // Runs the fault demo tests (FD1).
 void runFaultDemoTests(TestCounter& counter);
 
+// Runs the fault reader and trace text tests (FN1 to
+// FN10, FT1, FT2).
+void runFaultReaderTests(TestCounter& counter);
+
+// Runs the fault gate tests (G8, G9, G10).
+void runFaultGateTests(TestCounter& counter);
+
 }  // namespace aih
 
 #endif  // AI_HOLOGRAM_TESTS_STAGE4_SUITES_H

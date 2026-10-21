@@ -16,6 +16,7 @@
 #include "agent/run_loop.h"
 #include "agent/single_agent.h"
 #include "agent_test_fixtures.h"
+#include "trace_agents.h"
 #include "trace_cases.h"
 #include "trace_models.h"
 #include "trace_printer.h"
@@ -25,29 +26,6 @@
 namespace aih {
 namespace {
 using Lines = std::vector<std::string>;
-
-// Seeds a built C1 agent from its case, in the order of
-// plan 3.14, through the shared seeding helpers (R4).
-void applySeeds(SingleAgent& agent, const TraceCase& traceCase) {
-    if (!traceCase.walls.empty()) {
-        std::vector<WallSeed> seeds;
-        for (const TraceSeedWall& wall : traceCase.walls) {
-            seeds.push_back(
-                WallSeed{wall.cell, wall.newBlocked, wall.oldBlocked});
-        }
-        seedWallCorrections(agent, seeds);
-    }
-    if (traceCase.v1.has_value()) {
-        seedModelV1(agent, traceCase.world, traceCase.v1.value().action,
-                    traceCase.v1.value().count);
-    }
-    if (traceCase.plan.has_value()) {
-        seedPlan(agent, traceCase.plan.value());
-    }
-    if (traceCase.committed.has_value()) {
-        seedCommitted(agent, traceCase.committed.value());
-    }
-}
 
 // Runs a built C1 agent: from the start, or after its
 // seeded committed action through continueRun (plan 3.14).
@@ -70,7 +48,7 @@ RunResult runC1Case(SingleAgent& agent, const TraceCase& tc,
 Lines traceC1(const TraceCase& tc, bool observers) {
     SingleAgent agent(makeObservation(1, tc.world), tc.settings, tc.belief,
                       traceBaseModel(tc.modelSpec), tc.notDead);
-    applySeeds(agent, tc);
+    applyTraceSeeds(agent, tc);
     Printer printer;
     printer.observers = observers;
     printer.out.push_back("case " + tc.name);

@@ -197,6 +197,13 @@ add_executable(ai_hologram_tests
                tests/test_seeded_random.cpp
                tests/test_csv_output.cpp
                tests/test_fault_demo.cpp
+               tests/trace_agents.cpp
+               tests/fault_case_reader.cpp
+               tests/fault_trace_text.cpp
+               tests/fault_trace_writer.cpp
+               tests/fault_gate.cpp
+               tests/test_fault_reader.cpp
+               tests/test_fault_gate.cpp
                tests/test_budget_counter.cpp
                tests/test_compare_predictions.cpp
                tests/test_compare_states.cpp
