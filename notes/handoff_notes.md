@@ -318,3 +318,23 @@ What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from t
 The final run showed `340 checks, 0 failures`, CTest 2/2, `code checks: 176 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 102 lines, 94 non-blank`.
 
 Unsure about: nothing in the behaviour. G4 and G5 pass all 789 cases byte for byte against the golden files, and Claude independently confirmed the same on Linux before the printer split, which moved whole functions only and is verified by the final full run above.
+
+## Stage 3g correction (plan v1.6) - 2026-10-21
+
+What was changed: the one narrow correction asked for by ChatGPT's review 04, and nothing else. The gate logic that lived in `checkGate` in `tests/test_trace_gate.cpp` moved as it was into the new `tests/trace_gate.h` / `tests/trace_gate.cpp` (`kGoldenCaseCount` = 789 and `runTraceGate(caseLines, goldenLines, observers, requiredCases)`, returning "" or the first failure in the plan's order: a golden file missing or empty; `readTraceCases`' problem; `splitTraceBlocks`' problem; the new `case file has <n> cases, required <r>`; `trace file has <n> cases, the case file <m>`; a name mismatch; `firstTraceDifference`'s message; it never throws). The beginner comment in both new files explains why the exact count protects coverage: matching but truncated files must not pass. `checkGate` now reads the two golden files and calls `runTraceGate(..., kGoldenCaseCount)`, keeping the G4/G5 descriptions and the failure in brackets. New G6 takes the lines of `c1_cases.txt` and `c1_traces.txt` up to and including the third `end` line (the local helper `firstThreeBlocks`) and requires exactly `case file has 3 cases, required 789`; G7 is its control, the same inputs with 3 required giving "". No file in `src/`, no other test, and no expected or golden value was changed. No Stage 3-baseline file was touched (none exists yet), Python was not run, and no Git operation other than the `git status` inside `run_checks.ps1` was run (direct `git status`/`git diff` calls from the assistant's shell were blocked by its permission configuration, so none was used); nothing was committed.
+
+Before starting, the files to change were read: `tests/test_trace_gate.cpp` held MC1-MC5, TW1 and the inline `checkGate` gate logic (155 lines); `CMakeLists.txt` listed the test sources without `trace_gate.cpp`; `notes/handoff_notes.md` ended with the Stage 3g note above.
+
+Files created, with line counts (all lines, after clang-format): `tests/trace_gate.h` (32), `tests/trace_gate.cpp` (61).
+
+Files changed, with line counts: `tests/test_trace_gate.cpp` (162, after clang-format), `CMakeLists.txt` (181, adds `tests/trace_gate.cpp` to `ai_hologram_tests`; clang-format was not run on it), and this file (this note appended only). CLion's clang-format was run with `-i` on the new and changed C++ files only.
+
+Deliberate failure check DF3g-3, made once, built, run with `cmake-build-checks\ai_hologram_tests.exe`, then undone exactly: removing the required-count check from `runTraceGate` (with the parameter left unnamed in that temporary build so the unused-parameter warning did not stop the build) failed exactly G6, as predicted: `FAIL: G6: three matching cases fail with the required count` (`342 checks, 1 failures`; G4, G5 and G7 still passed). The check and the parameter name were then restored exactly.
+
+What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from the repository root before the deliberate failure, and again at the end after it was undone. Its exact final line was:
+
+`ALL CHECKS PASSED (163 preserved files, 342 checks, 178 code files checked, formatting checked)`
+
+The final run showed `342 checks, 0 failures`, CTest 2/2, `code checks: 178 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 102 lines, 94 non-blank` (unchanged).
+
+Unsure about: nothing in the behaviour. One temporary-build detail of DF3g-3 is recorded above: a plain removal of the count check does not compile because `requiredCases` becomes an unused parameter under warnings-as-errors, so the parameter was left unnamed only for that one deliberate-failure build and restored with the check.

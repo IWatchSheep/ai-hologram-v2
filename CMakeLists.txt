@@ -136,6 +136,7 @@ add_executable(ai_hologram_tests
                tests/test_trace_reader.cpp
                tests/test_trap_checks.cpp
                tests/trace_blocks.cpp
+               tests/trace_gate.cpp
                tests/trace_case_parts.cpp
                tests/trace_cases.cpp
                tests/trace_models.cpp

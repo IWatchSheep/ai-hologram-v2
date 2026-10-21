@@ -1,6 +1,6 @@
 // Purpose: Tests for the model catalogue (MC1 to MC5), the
 // trace text of the demo world (TW1), and the first part of
-// the M1.4 equivalence gate itself (G4, G5, plan 6.7).
+// the M1.4 equivalence gate itself (G4 to G7, plan 6.7).
 // Introduced in: Stage 3g (rebuild)
 // Architecture: The gate replays all 789 golden cases through
 // the rebuilt agents and compares every traced line. It runs
@@ -14,11 +14,9 @@
 #include "golden_files.h"
 #include "test_suites.h"
 #include "test_support.h"
-#include "trace_blocks.h"
-#include "trace_cases.h"
+#include "trace_gate.h"
 #include "trace_models.h"
 #include "trace_text.h"
-#include "trace_writer.h"
 #include "world/rules.h"
 
 namespace aih {
@@ -40,40 +38,48 @@ void checkGate(TestCounter& counter, const std::string& id, bool observers,
         std::string(AIH_SOURCE_DIR) + "/tools/reference/stage3/golden/";
     const Lines caseLines = readLines(folder + "c1_cases.txt");
     const Lines goldenLines = readLines(folder + goldenName);
-    std::string failure;
-    if (caseLines.empty() || goldenLines.empty()) {
-        failure = "a golden file is missing or empty";
-    }
-    const TraceCaseRead cases = readTraceCases(caseLines);
-    if (failure.empty() && !cases.ok) {
-        failure = cases.problem;
-    }
-    const TraceBlockSplit blocks = splitTraceBlocks(goldenLines);
-    if (failure.empty() && !blocks.ok) {
-        failure = blocks.problem;
-    }
-    if (failure.empty() && blocks.blocks.size() != cases.cases.size()) {
-        failure = "trace file has " + std::to_string(blocks.blocks.size()) +
-                  " cases, the case file " + std::to_string(cases.cases.size());
-    }
-    for (std::size_t i = 0; failure.empty() && i < cases.cases.size();
-         i = i + 1) {
-        const TraceCase& traceCase = cases.cases[i];
-        const TraceBlock& block = blocks.blocks[i];
-        if (block.name != traceCase.name) {
-            failure =
-                "trace " + block.name + ": expected case " + traceCase.name;
-            break;
-        }
-        const Lines actual =
-            observers ? writeObserverTrace(traceCase) : writeTrace(traceCase);
-        failure = firstTraceDifference(traceCase.name, block.lines, actual);
-    }
+    const std::string failure =
+        runTraceGate(caseLines, goldenLines, observers, kGoldenCaseCount);
     std::string description = id + ": all 789 golden blocks are identical";
     if (!failure.empty()) {
         description += " (" + failure + ")";
     }
     check(counter, failure.empty(), description);
+}
+
+// The lines up to and including the third "end" line: the
+// first three cases, or blocks, of a golden file.
+Lines firstThreeBlocks(const Lines& lines) {
+    Lines result;
+    int ends = 0;
+    for (const std::string& line : lines) {
+        result.push_back(line);
+        if (line == "end") {
+            ends = ends + 1;
+        }
+        if (ends == 3) {
+            break;
+        }
+    }
+    return result;
+}
+
+// G6 and G7: three matching cases must fail only because
+// 789 are required, and must pass when 3 are required.
+void checkTruncatedGate(TestCounter& counter) {
+    const std::string folder =
+        std::string(AIH_SOURCE_DIR) + "/tools/reference/stage3/golden/";
+    const Lines caseLines =
+        firstThreeBlocks(readLines(folder + "c1_cases.txt"));
+    const Lines goldenLines =
+        firstThreeBlocks(readLines(folder + "c1_traces.txt"));
+    const std::string failure =
+        runTraceGate(caseLines, goldenLines, false, kGoldenCaseCount);
+    check(counter, failure == "case file has 3 cases, required 789",
+          "G6: three matching cases fail with the required count");
+    const std::string control = runTraceGate(caseLines, goldenLines, false, 3);
+    check(counter, control.empty(),
+          "G7: the same three cases pass when 3 are required");
 }
 
 // The catalogue checks MC1 to MC3 (the blocking models).
@@ -150,6 +156,7 @@ void runTraceGateTests(TestCounter& counter) {
           "TW1: demo walls hex and state text are exact");
     checkGate(counter, "G4", false, "c1_traces.txt");
     checkGate(counter, "G5", true, "c1_observers.txt");
+    checkTruncatedGate(counter);
 }
 
 }  // namespace aih
