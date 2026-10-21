@@ -95,6 +95,18 @@ void runHeuristicTests(TestCounter& counter);
 // Runs the dead-square observer tests (OB1 to OB3).
 void runDeadSquareObserversTests(TestCounter& counter);
 
+// Runs the step predictor tests (SP1 to SP6, OB4).
+void runStepPredictorTests(TestCounter& counter);
+
+// Runs the agent model tests (AM1 to AM5).
+void runAgentModelTests(TestCounter& counter);
+
+// Runs the planner tests (PL1, PL2a, PL2b, PL3, PL8, PL9, PL10).
+void runPlannerTests(TestCounter& counter);
+
+// Runs the planner budget tests (PL4a, PL4b, PL5a, PL5b, PL6, PL7).
+void runPlannerBudgetTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

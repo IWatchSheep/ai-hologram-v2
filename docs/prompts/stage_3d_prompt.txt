@@ -1,0 +1,110 @@
+STAGE 3d PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.2.
+This file is docs/prompts/stage_3d_prompt.txt. (The file with the same name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 3d of the rebuild, and ONLY Stage 3d.
+Stages 3a-3c are finished and committed. Do not change their behaviour.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+2. Read docs/stages/STAGE_03.md v1.2: sections 3.7, 3.8, 4 (the 3d rows and
+   the R4 list), 5, 6.4, 7 (step 5), 9 and the revision history row 1.2.
+3. Read tools/reference/stage3/ref_verify.py (all of it) and checks.py
+   (check_investigation and the helpers it uses: investigate, two_obs,
+   east_history, wall_record, model_record, object_record, push_north,
+   always_moved_east, counting). They are the authority where the plan uses
+   words.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 5)
+Create exactly these files, and no others:
+  src/agent/records.h
+  src/agent/history_checks.h        src/agent/history_checks.cpp
+  src/agent/investigation.h         src/agent/investigation.cpp
+  src/agent/consequence.cpp
+  src/agent/model_v1.h              src/agent/model_v1.cpp
+  src/agent/verification.h          src/agent/verification.cpp
+  src/agent/alternative_prediction.cpp
+  tests/test_investigation.cpp      (IV1-IV7)
+  tests/test_investigation_more.cpp (IV9, IV10, IV11, VF1, VF2, VF3a, VF3b, HC1, AT1, RC1)
+  tests/test_model_v1.cpp           (VF4a, VF4b, VF4c, VF5)
+  tests/test_verification.cpp       (VF7a, VF7b, VF7c, VF8a, VF8b, VF8c)
+  tests/test_trap_checks.cpp        (VF9a-VF9d, VF10, VF11, VF12, VF13)
+Change exactly these existing files:
+  CMakeLists.txt                  add the six new src .cpp files to
+                                  ai_hologram_core and the five new test .cpp
+                                  files to ai_hologram_tests.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  notes/handoff_notes.md          append one note at the end.
+tests/agent_test_support.h/.cpp is full (196 lines): do not add to it. If a
+helper is needed by more than one 3d test file and has no home, stop and ask.
+Do NOT create anything of 3e-3g (no agent state, decision step, run loop, C0,
+demos or gate), and do not change currentStage() or the program output.
+
+DETAILS
+A. records.h exactly as plan 3.7: SourceLabel, CorrectionStatus, ElementKind,
+   Element, CorrectionRecord, MismatchRecord (one member per line, with the
+   defaults of the reference), and reserveFor(corrections) as a short inline
+   function, the one reserve rule (R4).
+B. history_checks: wallHistoryCheck, objectHistoryCheck, trapHistoryPasses,
+   each the one copy (R4).
+C. investigation exactly as plan 3.7: BeliefCandidate, InvestigationOutcome,
+   InvestigationResult (defaults ModelSuspected, S5, no anomaly),
+   investigateMismatch in exactly the reference's order (the anomaly, the
+   candidates from footprintAfter, the history checks and the corrected
+   belief's validity, then the reserve test "remaining() <= reserve" gives
+   Deferred, then one predictVariant with the CURRENT model, compared with
+   isFootprintMatch). ConsequenceOutcome and checkConsequence (in
+   consequence.cpp; it reads p's status only through readDeadStatus).
+D. model_v1 exactly as plan 3.8: ModelV1Work, startModelV1, V1Progress,
+   continueModelV1 (replays with predictVariant and applyAction).
+E. verification exactly as plan 3.8: trapV1Check, TrapV2Result, trapV2Test
+   (skip a standing cell that is a believed wall; an invalid hypothetical adds
+   1 to anomalies and is skipped; Waiting when remaining() - k < reserve; the
+   CURRENT model; an escape onto a cell that is not p, inside, and not dead
+   through readDeadStatus), predictionsDiffer, activeTestTargets; and
+   alternativePrediction in alternative_prediction.cpp (model: the OLD model;
+   wall and object: the CURRENT model on the belief with the old value).
+F. Tests exactly as plan 6.4 and checks.py. Every fixture is a valid world
+   (IV11's and VF4c's hand-altered histories hold valid states). Each check's
+   description starts with its id. Expected after 3d: 277 checks, 0 failures.
+G. Three-part header in every new file (Introduced in: Stage 3d (rebuild)).
+   Beginner comments: why the object's history check is time-aware (only
+   o_t-1); what a variant prediction is used for in each check; why the trap
+   V2 test predicts hypothetical states.
+H. Format every new or changed C++ file with CLion's clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (163 preserved files, 277 checks, 132 code files checked, formatting checked)
+and the program output must be unchanged (55 lines, 50 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 5):
+  DF3d-1  in investigateMismatch's history checks, check an object candidate
+          against history.front() instead of the observation before the
+          action (o_t-1).
+          Expected failing: exactly VF2.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

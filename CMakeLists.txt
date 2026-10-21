@@ -37,10 +37,15 @@ endfunction()
 add_library(ai_hologram_core STATIC
             src/agent/agent_log.cpp
             src/agent/agent_log_findings.cpp
+            src/agent/agent_model.cpp
             src/agent/dead_square_cache.cpp
             src/agent/dead_squares.cpp
             src/agent/footprint.cpp
             src/agent/heuristic.cpp
+            src/agent/planner.cpp
+            src/agent/planner_expand.cpp
+            src/agent/planner_fallback.cpp
+            src/agent/step_predictor.cpp
             src/core/project_info.cpp
             src/core/text_words.cpp
             src/demo/prediction_demo.cpp
@@ -90,10 +95,14 @@ add_executable(ai_hologram_tests
                tests/golden_prediction_reader.cpp
                tests/golden_rules_reader.cpp
                tests/test_agent_log.cpp
+               tests/test_agent_model.cpp
                tests/test_code_checker_architecture.cpp
                tests/test_dead_square_observers.cpp
                tests/test_dead_squares.cpp
                tests/test_heuristic.cpp
+               tests/test_planner.cpp
+               tests/test_planner_budget.cpp
+               tests/test_step_predictor.cpp
                tests/test_code_checker_declarations.cpp
                tests/test_code_checker_size.cpp
                tests/test_code_checker_style.cpp

@@ -8,13 +8,21 @@
 
 #include "agent_test_support.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
 
+#include "agent/dead_squares.h"
+#include "agent/heuristic.h"
+#include "agent/planner.h"
+#include "agent/step_predictor.h"
 #include "demo/scripted_demo.h"
+#include "model/world_model.h"
+#include "world/action.h"
 #include "world/position.h"
+#include "world/rules.h"
 #include "world/world_state.h"
 #include "world/world_text.h"
 
@@ -119,4 +127,70 @@ bool linesEqual(const std::vector<std::string>& expected,
     return true;
 }
 
+SearchRun runMainSearchCounting(const WorldState& root, int budget, int reserve,
+                                int& modelCalls) {
+    FreeComputationCounts counts;
+    SearchRun run;
+    run.map = computeDeadSquares(root, {}, {}, counts);
+    const DeadSquareMap& map = run.map;
+    const ActionModel counting = [&modelCalls](const WorldState& state,
+                                               Action action) {
+        modelCalls = modelCalls + 1;
+        return applyAction(state, action);
+    };
+    StepPredictor predictor(WorldModel(counting), budget);
+    predictor.startStep();
+    auto goal = [](const WorldState& state) {
+        return state.object == state.destination;
+    };
+    auto estimate = [&map, &counts](const WorldState& state) {
+        return heuristic(state, map, counts);
+    };
+    run.result = search(root, map, goal, estimate, predictor, reserve);
+    run.usedThisStep = predictor.usedThisStep();
+    run.remaining = predictor.remaining();
+    return run;
+}
+
+SearchRun runMainSearch(const WorldState& root, int budget, int reserve) {
+    int modelCalls = 0;
+    return runMainSearchCounting(root, budget, reserve, modelCalls);
+}
+
+SearchRun runActiveWalk(const WorldState& root,
+                        const std::vector<Position>& targets) {
+    FreeComputationCounts counts;
+    SearchRun run;
+    run.map = computeDeadSquares(root, {}, {}, counts);
+    const DeadSquareMap& map = run.map;
+    StepPredictor predictor(WorldModel(), 1000000);
+    predictor.startStep();
+    auto goal = [&targets](const WorldState& state) {
+        // True when the agent stands on any target cell.
+        return std::find(targets.begin(), targets.end(), state.agent) !=
+               targets.end();
+    };
+    auto estimate = [&map, &targets](const WorldState& state) {
+        if (readDeadStatus(map, state.object)) {
+            return kInfiniteHeuristic;
+        }
+        int best = kInfiniteHeuristic;
+        for (const Position target : targets) {
+            best = std::min(best, manhattan(state.agent, target));
+        }
+        return best;
+    };
+    run.result = search(root, map, goal, estimate, predictor, 1);
+    run.usedThisStep = predictor.usedThisStep();
+    run.remaining = predictor.remaining();
+    return run;
+}
+
+std::vector<Action> planActions(const std::vector<PlanStep>& plan) {
+    std::vector<Action> actions;
+    for (const PlanStep& step : plan) {
+        actions.push_back(step.action);
+    }
+    return actions;
+}
 }  // namespace aih

@@ -35,6 +35,21 @@ void checkKind(TestCounter& counter, const std::string& description,
     check(counter, checkedKind(path) == expected, description);
 }
 
+// Runs the agent test groups (Stages 3a to 3c), so main stays
+// a short list of groups.
+void runAgentTestGroups(TestCounter& counter) {
+    runFootprintTests(counter);
+    runFootprintRowsTests(counter);
+    runAgentLogTests(counter);
+    runDeadSquaresTests(counter);
+    runHeuristicTests(counter);
+    runDeadSquareObserversTests(counter);
+    runStepPredictorTests(counter);
+    runAgentModelTests(counter);
+    runPlannerTests(counter);
+    runPlannerBudgetTests(counter);
+}
+
 }  // namespace aih
 
 int main(int argc, char* argv[]) {
@@ -62,12 +77,7 @@ int main(int argc, char* argv[]) {
     aih::runCompareStatesTests(counter);
     aih::runComparePredictionsTests(counter);
     aih::runPredictionGoldenTests(counter);
-    aih::runFootprintTests(counter);
-    aih::runFootprintRowsTests(counter);
-    aih::runAgentLogTests(counter);
-    aih::runDeadSquaresTests(counter);
-    aih::runHeuristicTests(counter);
-    aih::runDeadSquareObserversTests(counter);
+    aih::runAgentTestGroups(counter);
     std::cout << counter.checks << " checks, " << counter.failures
               << " failures\n";
     if (counter.failures == 0) {

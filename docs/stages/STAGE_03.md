@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 3 of the rebuild (Brief Section 10, Stage 3: the competent single agent) |
-| **Plan version** | 1.1 (the R21 clarification asked for by ChatGPT, recorded with the owner's agreement) |
+| **Plan version** | 1.2 (after 3c: the shared test-helper file is full, so 3e's seeding helpers get a file of their own) |
 | **Date** | October 21, 2026 |
-| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). |
+| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). **v1.2 (a planning detail after 3c: one more test file, no change to behaviour) awaits the owner's agreement.** |
 | **Governing documents** | The brief v1.1; the frozen protocol v1.0 (Phase B Sections 10–12 define C1 and C0); **Migration Addendum M1** (M1.3, M1.4); `docs/RULES.md` (R1–R24); `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 2, complete and tagged `stage-2-v2` (`a1a32d9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 3 (plan `docs/history/ai-hologram/docs/stages/STAGE_03.md` v1.2, tag `stage-3`, commit `7587f38`) **plus the IE-1 instrumentation hooks H1–H4 as built at `89ea9b6`** (M1.3 item 1; R5: instrumentation is designed in from the start). The original's `src/agent/` is the frozen C1 baseline. |
@@ -636,7 +636,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 | `src/agent/run_loop_naive.cpp` | 80 | `runSingleAgent` for C0 (declared in `run_loop.h` from 3f) | 3f |
 | `src/demo/agent_demo.h` / `.cpp` | 25 / 110 | `runAgentDemos` | 3f |
 | `src/main.cpp`, `src/core/project_info.cpp` | — | the header (3.12), then the three demos; `currentStage()` returns 3 | 3f (changed) |
-| `tests/agent_test_support.h` / `.cpp` | 70 / 165 | shared test helpers (R4): the demo world and its edited copies, the named layouts of Section 6, and a line-list comparison that prints the first difference (3a); seeding corrections and V1 work (added in 3e) | 3a (3e changed) |
+| `tests/agent_test_support.h` / `.cpp` | 86 / 196 | shared test helpers (R4): the demo world and its edited copies, the named layouts of Section 6, a line-list comparison that prints the first difference (3a); the search helpers shared by the two planner test files (3c). **Full since 3c: nothing more is added to it** | 3a (3c changed) |
 | `tests/test_footprint.cpp` | 170 | FP1, FP10–FP13 | 3a |
 | `tests/test_footprint_rows.cpp` | 190 | FP2–FP9 | 3a |
 | `tests/test_agent_log.cpp` | 150 | LG1–LG7 | 3a |
@@ -652,6 +652,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 | `tests/test_model_v1.cpp` | 130 | VF4a–VF5 | 3d |
 | `tests/test_verification.cpp` | 180 | VF7a–VF8c | 3d |
 | `tests/test_trap_checks.cpp` | 180 | VF9a–VF13 | 3d |
+| `tests/agent_test_seeds.h` / `.cpp` | 40 / 90 | v1.2: seeding a C1 state for tests: wall corrections (`seed wall`), model V1 work with its history (`seed v1`), a plan in place, a committed action at step 1 (used by C1-6b/6c, C1-11, VF6, SP7, OB5, and by the trace writer in 3g) | 3e |
 | `tests/expected_demo_lines.h` / `.cpp` | 30 / 90 | the expected run lines of the two C1 demos (`C1_1`, `C1_2`), shared by C1-1, C1-2, OB6 and AD1 (R4) | 3e |
 | `tests/test_single_agent.cpp` | 190 | C1-1, C1-10, C1-2, C1-5, C1-9, C1-12a, C1-12b | 3e |
 | `tests/test_single_agent_cases.cpp` | 190 | C1-3, C1-4, C1-6a, C1-6b, VF5b, C1-6c-1, C1-6c-2, C1-7 | 3e |
@@ -668,7 +669,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 | `tests/test_suites.h`, `test_main.cpp`, `test_project_info.cpp`, `test_layouts.h`/`.cpp` (if a layout helper is needed), `CMakeLists.txt` | — | new groups and files; P2 checks 3 from 3f | 3a–3g (changed) |
 | `tools/reference/stage3/` | — | the reference, the golden files, the original-code tools (committed with this plan) | plan |
 
-**89 new code files.** The code checker sees 79 → 92 (3a) → 103 (3b) → 116 (3c) → 132 (3d) → 151 (3e) → 158 (3f) → **168** (3g).
+**91 new code files.** The code checker sees 79 → 92 (3a) → 103 (3b) → 116 (3c) → 132 (3d) → 153 (3e) → 160 (3f) → **170** (3g).
 
 **One shared helper per job (R4):**
 - `positionText` and `blockedText` live only in `text_words`;
@@ -680,7 +681,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 - `objectDead` is one private helper of C1;
 - every prediction goes through `StepPredictor`;
 - the demo layout comes only from `demoLayout()`;
-- the test text helpers come only from `golden_files`, the test worlds only from `agent_test_support` and `test_layouts`, and the demos' expected run lines only from `expected_demo_lines`.
+- the test text helpers come only from `golden_files`, the test worlds only from `agent_test_support` and `test_layouts`, the seeding of a C1 state only from `agent_test_seeds`, and the demos' expected run lines only from `expected_demo_lines`.
 
 **Splits planned in advance** (each file has one job):
 - the original's 230-line `planner.cpp` becomes three files;
@@ -705,7 +706,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 
   The 340 are the 177 Stage 2 checks (P2 now checks 3) and the 163 of Section 6. `checks.py` mirrors all 163: `failing: none (163 checks)`.
 - **CTest:** 2/2. **Code checker:** 0 violations (the file counts above).
-- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (163 preserved files, 340 checks, 168 code files checked, formatting checked)`.
+- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (163 preserved files, 340 checks, 170 code files checked, formatting checked)`.
 
 ## 6. Tests
 Each description starts with its id. Every fixture is a valid world unless the check is about invalid states. D is the demo layout; D2 is D with a wall at (4, 3). LP, L2, LT, LG, LTa, BOXED and SMALL are the layouts in `checks.py`, the same as the original's tests. `checks.py` holds the exact data of every check. Where this table and `checks.py` differ, `checks.py` wins, and Claude must be told.
@@ -906,7 +907,7 @@ Each sub-stage is committed by the owner on `stage-3-work`, after Claude's revie
 ## 10. Completion checklist (owner verification gate)
 - [ ] The plan was agreed and committed before any Stage 3 code.
 - [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
-- [ ] The program output is exactly 3.12, at 102 lines; the tests show `340 checks, 0 failures`; CTest 2/2; 0 checker violations (168 files).
+- [ ] The program output is exactly 3.12, at 102 lines; the tests show `340 checks, 0 failures`; CTest 2/2; 0 checker violations (170 files).
 - [ ] G4 and G5 pass all 789 cases, and TN1–TN15 pass.
 - [ ] All deliberate failure checks gave exactly the predicted failures.
 - [ ] D-068 to D-072 recorded (D-070 with the owner's approval of the R21 clarification); handoff notes appended; prompts and review notes saved.
@@ -943,3 +944,4 @@ Every prompt says:
 |---|---|---|
 | 1.0 | 2026-10-21 | First draft. Everything was built first (R9, R11):<br>- the golden traces, from the original C++ at both commits;<br>- the reference, which reproduces all three golden files byte for byte;<br>- the 163-check mirror; the values of the new checks were confirmed against the original C++ (`orig_trace/unit_values_output_2026-10-21.txt`);<br>- the deliberate failure predictions.<br>The agent-demo text was checked against the original. |
 | 1.1 | 2026-10-21 | ChatGPT approved the v1.0 technical design (review 02): D-068, D-069, D-071 and D-072 accepted; the seven sub-stages, the file organisation and the 3a prompt accepted; independently verified (177 C++ checks, the 163 reference checks, all eight deliberate failure predictions, the golden hashes). D-070 accepted in principle: the synthetic cases are now called deterministically generated synthetic verification fixtures, and ChatGPT's narrow R21 clarification is recorded with the owner's approval. No other change. |
+| 1.2 | 2026-10-21 | After 3c (242 checks; Claude also compared the new planner with the reference on 3,156 searches over the 789 case worlds: identical). Cursor put the search helpers shared by the two planner test files into `tests/agent_test_support` (R4), which is now at 196 lines, so the seeding helpers planned for it in 3e get their own file, `tests/agent_test_seeds.h/.cpp`. 91 new code files; the final line says 170 code files. No change to behaviour, checks or golden values. |
