@@ -36,6 +36,7 @@ endfunction()
 # The library holds the code shared by the program and the tests.
 add_library(ai_hologram_core STATIC
             src/core/project_info.cpp
+            src/demo/scripted_demo.cpp
             src/world/action.cpp
             src/world/environment.cpp
             src/world/rules.cpp
@@ -78,6 +79,7 @@ add_executable(ai_hologram_tests
                tests/test_code_checker_declarations.cpp
                tests/test_code_checker_size.cpp
                tests/test_code_checker_style.cpp
+               tests/test_demo.cpp
                tests/test_environment.cpp
                tests/test_layouts.cpp
                tests/test_main.cpp

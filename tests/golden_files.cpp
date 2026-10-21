@@ -1,11 +1,15 @@
 // Purpose: Implements readLines, reading a text file into
-// lines and removing carriage returns, and parseInteger,
-// the one integer test shared by the golden readers.
-// Introduced in: Stage 1a (rebuild); parseInteger in 1b
+// lines and removing carriage returns, parseInteger, the
+// one integer test shared by the golden readers, and
+// splitWords and startsWith, shared by both readers too.
+// Introduced in: Stage 1a (rebuild); parseInteger in 1b;
+// splitWords and startsWith in Stage 1c
 // Architecture: std::ifstream reads the file one line at a
 // time with std::getline, which removes the newline but keeps
 // a carriage return left over from Windows line endings, so
 // each line has any trailing carriage return removed here.
+// The text helpers moved here in Stage 1c so the two golden
+// readers share one copy of each (rule R4).
 
 #include "golden_files.h"
 
@@ -48,6 +52,11 @@ bool parseInteger(const std::string& text, int& value) {
             return false;
         }
     }
+    // At most 9 digits may follow the optional '-', so the
+    // result below can never overflow an int (plan 6.7, v1.3).
+    if (text.size() - index > 9) {
+        return false;
+    }
     int result = 0;
     while (index < text.size()) {
         const char character = text[index];
@@ -63,6 +72,28 @@ bool parseInteger(const std::string& text, int& value) {
         value = result;
     }
     return true;
+}
+
+std::vector<std::string> splitWords(const std::string& text) {
+    std::vector<std::string> words;
+    std::string word;
+    for (const char character : text) {
+        if (character == ' ') {
+            words.push_back(word);
+            word.clear();
+        } else {
+            word.push_back(character);
+        }
+    }
+    words.push_back(word);
+    return words;
+}
+
+bool startsWith(const std::string& line, const std::string& prefix) {
+    if (line.size() < prefix.size()) {
+        return false;
+    }
+    return line.compare(0, prefix.size(), prefix) == 0;
 }
 
 }  // namespace aih

@@ -19,31 +19,6 @@
 namespace aih {
 namespace {
 
-// Splits text at every single space, keeping empty words,
-// exactly like the reference's split(' ').
-std::vector<std::string> splitWords(const std::string& text) {
-    std::vector<std::string> words;
-    std::string word;
-    for (const char character : text) {
-        if (character == ' ') {
-            words.push_back(word);
-            word.clear();
-        } else {
-            word.push_back(character);
-        }
-    }
-    words.push_back(word);
-    return words;
-}
-
-// Returns whether line starts with the whole prefix.
-bool startsWith(const std::string& line, const std::string& prefix) {
-    if (line.size() < prefix.size()) {
-        return false;
-    }
-    return line.compare(0, prefix.size(), prefix) == 0;
-}
-
 // Reads "case <n> lines <k>" with integers and k >= 0.
 bool readCaseHeader(const std::string& line, int& number, int& count) {
     const std::vector<std::string> parts = splitWords(line);

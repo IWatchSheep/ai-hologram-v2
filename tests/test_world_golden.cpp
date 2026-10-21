@@ -1,12 +1,13 @@
 // Purpose: Golden tests for the parser (G2, plan Section
-// 6.7) and the malformed-file tests GN1 to GN6. G2: the
+// 6.7) and the malformed-file tests GN1 to GN7. G2: the
 // rebuilt parser must reproduce all 1,009 cases of the
 // golden file produced from the original C++.
-// Introduced in: Stage 1a (rebuild); GN1 to GN6 in Stage 1b
+// Introduced in: Stage 1a (rebuild); GN1 to GN6 in Stage 1b;
+// GN7 in Stage 1c
 // Architecture: The golden file is read with readLines from
 // golden_files through AIH_SOURCE_DIR (decision D-063) and
 // checked by the shared bounds-safe reader in
-// golden_parse_reader.cpp, which GN1 to GN6 also use.
+// golden_parse_reader.cpp, which GN1 to GN7 also use.
 
 #include <cstddef>
 #include <string>
@@ -67,6 +68,9 @@ void checkMalformedParse(TestCounter& counter) {
                      "line 1: invalid case header");
     expectParseCheck(counter, "GN6: a correct empty case passes",
                      {"case 1 lines 0", emptyError}, true, 1, "");
+    expectParseCheck(counter, "GN7: ten-digit line count is an invalid header",
+                     {"case 1 lines 9999999999", emptyError}, false, 0,
+                     "line 1: invalid case header");
 }
 
 void checkGoldenParseFile(TestCounter& counter) {

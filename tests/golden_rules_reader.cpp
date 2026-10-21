@@ -23,31 +23,6 @@
 namespace aih {
 namespace {
 
-// Splits text at every single space, keeping empty words,
-// exactly like the reference's split(' ').
-std::vector<std::string> splitWords(const std::string& text) {
-    std::vector<std::string> words;
-    std::string word;
-    for (const char character : text) {
-        if (character == ' ') {
-            words.push_back(word);
-            word.clear();
-        } else {
-            word.push_back(character);
-        }
-    }
-    words.push_back(word);
-    return words;
-}
-
-// Returns whether line starts with the whole prefix.
-bool startsWith(const std::string& line, const std::string& prefix) {
-    if (line.size() < prefix.size()) {
-        return false;
-    }
-    return line.compare(0, prefix.size(), prefix) == 0;
-}
-
 // Turns one of the four action names into its Action, by
 // comparing with actionName, the one place names are given.
 bool actionForName(const std::string& name, Action& action) {

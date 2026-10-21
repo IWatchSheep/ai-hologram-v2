@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
     aih::runRulesTests(counter);
     aih::runEnvironmentTests(counter);
     aih::runWorldGoldenRulesTests(counter);
+    aih::runDemoTests(counter);
     std::cout << counter.checks << " checks, " << counter.failures
               << " failures\n";
     if (counter.failures == 0) {

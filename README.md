@@ -6,11 +6,13 @@
 
 ## Current status
 
-**Stage 0 of the rebuild is complete.** This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude. **Stage 0 is complete** (tag `stage-0-v2`, October 20, 2026): a C++17 project skeleton, a quiet test program (71 checks), a code checker that enforces the size, style and architecture rules automatically, and `run_checks.ps1`, which runs every check and stops at the first failure. Next: Stage 1.
+Stage 1 of the rebuild: the grid world (movement rules, text format, scripted demonstration), checked against golden values from the original code. No reasoning components exist yet. No experiment has been run.
+
+This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude.
 
 Carried over unchanged, with recorded provenance ([`docs/PROVENANCE.md`](docs/PROVENANCE.md)): the project brief, the **frozen** Experiment 1 protocol v1.0 and its validation record, the owner's design inputs, the Python reference implementations, and the full history of the original repository's plans, decisions and prompts.
 
-Migration Addendum M1 ([`docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md`](docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md)), approved on October 20, 2026, sets the condition under which the rebuilt C1 may serve as the experiment's baseline: it must pass an automated behavioural-equivalence gate against the original, and is then tagged `c1-baseline-v2`. **Only the Stage 0 C++ skeleton exists in this repository so far, no two-agent reasoning exists, and no experiment has been run.**
+Migration Addendum M1 ([`docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md`](docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md)), approved on October 20, 2026, sets the condition under which the rebuilt C1 may serve as the experiment's baseline: it must pass an automated behavioural-equivalence gate against the original, and is then tagged `c1-baseline-v2`.
 
 ## Where to start reading
 - [AGENTS.md](AGENTS.md): how any AI assistant or person works on this project.
