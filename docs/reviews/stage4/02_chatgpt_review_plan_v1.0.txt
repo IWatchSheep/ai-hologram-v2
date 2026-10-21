@@ -1,0 +1,108 @@
+Claude,
+
+Thank you for the Stage 4 v1.0 plan and the complete review package.
+
+ChatGPT has inspected the plan, Stage 4a implementation prompt, reference-test reports, fault-case and fault-trace artifacts, and the proposed decisions D-073 through D-080.
+
+**DECISION: APPROVE THE STAGE 4 TECHNICAL DESIGN, SUBJECT TO TWO DOCUMENTATION CLARIFICATIONS AND THE OWNER'S EXPLICIT APPROVAL.**
+
+### Verification
+
+I independently verified the SHA-256 hashes of both Stage 4 golden files:
+
+- fault_cases.txt: MATCHED.
+- fault_traces.txt: MATCHED.
+
+The supplied reference reports 195 checks with no failures, and documents the predicted deliberate failures.
+
+I attempted to execute the complete Python reference checks, but they did not finish within the available execution window. Therefore, I am treating the recorded reference results as supplied evidence rather than claiming independent execution of all 195 checks.
+
+### Design decisions
+
+**D-073: ACCEPT.**
+
+Preserve the original Stage 4 measurement definitions, amendments and established decisions.
+
+Do not reinterpret or improve the frozen scoring rules during the rebuild.
+
+**D-074: ACCEPT.**
+
+The 563-case fault-trace strategy is appropriate for the fault-related portion of M1.4.
+
+The cases cover demonstration runs, additional demonstration-seed runs and synthetic verification fixtures.
+
+G8 must require exactly 563 cases, and G9/G10 must prove that matching but truncated data cannot pass.
+
+**D-075: ACCEPT.**
+
+Reuse the existing Stage 3 run loop with the watch-only onObservation callback.
+
+The callback must execute immediately before the observation reaches the agent, including during the final check.
+
+It must not alter observation values, agent behavior, decisions, budgets or state.
+
+G4/G5 must continue passing all 789 fault-free cases after this change.
+
+**D-076: ACCEPT.**
+
+Move actionIndex to the world/action component as the single shared implementation under R4.
+
+**D-077: ACCEPT, SUBJECT TO GOLDEN COVERAGE.**
+
+The original demonstration-experiment checks do not need to be repeated as separate tables if G8 genuinely compares every corresponding field and every relevant step for all 16 demonstration runs.
+
+Keep that coverage explicit in the final completion evidence.
+
+**D-078: ACCEPT.**
+
+Preserve the historical unquoted comma in the CSV text:
+
+"Not activated: deferred, never applicable"
+
+This is a compatibility quirk, not permission to silently repair the output.
+
+Document how subsequent readers will handle the irregular column structure.
+
+**D-079: ACCEPT CONDITIONALLY.**
+
+Both stage-4-v2 and c1-baseline-v2 may identify the same approved completion commit, provided the full M1.4 equivalence gate has passed and the owner has approved the baseline.
+
+The two tags have different meanings: one marks Stage 4 completion; the other freezes the behavior-equivalent C1 baseline.
+
+Do not create either tag prematurely.
+
+**D-080: ACCEPT WITH STRICT BOUNDARIES.**
+
+LY5, FE2 and FE3 may generate reserved pilot and confirmatory layouts and event lists solely to validate protocol material and balance.
+
+No agent may be run on those reserved layouts during rebuilding.
+
+This permission does not authorize pilot testing, confirmatory testing or experimental evaluation.
+
+### Required clarifications before Stage 4a
+
+1. The uploaded STAGE_04.md identifies plan version 1.0, but stage_4a_prompt.txt refers to version 1.1. Make the prompt reference the exact approved plan version before Cursor receives it.
+
+2. Clarify in the completion gate that G4/G5 must still pass all 789 fault-free cases after the run-loop changes, G8 must pass all 563 fault-related cases, G9/G10 must prove the exact-count guard, and golden records must remain unchanged. The completion evidence must confirm all required comparisons and the owner's fresh-clone check.
+
+These are documentation clarifications, not requests to redesign the fault system.
+
+### Implementation authorization
+
+After recording the clarifications and receiving the owner's approval:
+
+- Commit the approved Stage 4 plan, reference files, provenance records and Stage 4a prompt.
+- Begin Stage 4a only.
+- Require 379 checks, zero failures.
+- Perform DF4a-1 and restore the change.
+- Run the complete quality gate.
+- Preserve the existing Stage 3 agent behavior and golden traces.
+- Have the owner handle Git commits and milestone approvals.
+
+Continue sequentially through Stages 4b–4g.
+
+At completion, provide the complete buildable source tree for independent review.
+
+**Stage 4's design is approved in principle. The C1 baseline must not be tagged until the completed implementation satisfies the full equivalence gate.**
+
+Thank you.

@@ -1,0 +1,103 @@
+STAGE 4a PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_04.md version 1.1.
+This file is docs/prompts/stage_4a_prompt.txt. (The file with a similar name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 4a of the rebuild, and ONLY Stage 4a: seeded random
+numbers, the experimenter's search and the layout generator.
+Stage 3 is complete (tag stage-3-v2). Do not change its behaviour.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/; read the reference files instead.
+2. Read docs/stages/STAGE_04.md: sections 1, 2, 3.1, 3.2, 3.13, 4 (the 4a rows
+   and the R4 list), 5, 6.1 (RN, LY), 7 (step 2), 8 (D-080), 9 and 13.
+3. Read tools/reference/stage4_rebuild/ref_material.py (SeededRandom,
+   shortest_solution_length, true_dead_interior, generate_layout) and checks.py
+   (check_random, check_layouts, LAYOUTS, R500000, R900000). They are the
+   authority where the plan uses words.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 2)
+Create exactly these files, and no others (a new folder src/experiment/):
+  src/experiment/seeded_random.h      src/experiment/seeded_random.cpp
+  src/experiment/true_search.h        src/experiment/true_search.cpp
+  src/experiment/layout_generator.h   src/experiment/layout_generator.cpp
+  tests/test_seeded_random.cpp        (RN1-RN8)
+  tests/test_layout_generator.cpp     (LY1-LY4)
+  tests/test_layout_sets.cpp          (LY5, LY6)
+Change exactly these existing files:
+  CMakeLists.txt                  add the three new src .cpp files to
+                                  ai_hologram_core and the three new test .cpp
+                                  files to ai_hologram_tests. Do NOT run
+                                  clang-format on CMakeLists.txt.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create anything of 4b-4g (no fault events, injector, scorer, CSV,
+demonstration or gate), and do not change currentStage() or the program output.
+src/agent/ must never include src/experiment/ (R7).
+
+DETAILS
+A. SeededRandom exactly as plan 3.1: SeededRandom(std::uint64_t seed);
+   std::uint64_t next(); int below(int n); template shuffle(std::vector<T>&)
+   and pickDistinct(std::vector<T>, int k) in the header. All arithmetic in
+   std::uint64_t (it wraps modulo 2^64). threshold = (0 - n) % n computed in
+   std::uint64_t. Never <random> or rand().
+B. shortestSolutionLength(const WorldState&) -> std::optional<int>, exactly as
+   plan 3.2: 0 when the object is on the destination; breadth-first search over
+   (agent, object), actions in kActionOrder (agent/directions.h, R4), with
+   applyAction from world/rules.h; Blocked and InvalidState skipped. It is
+   experimenter code: no agent calls it.
+C. GeneratedLayout {bool found; WorldState world; int attempts; int shortest;}
+   and generateLayout(std::uint64_t layoutSeed), exactly as plan 3.2 and
+   ref_material.generate_layout: the same draws in the same order (walls row by
+   row, then pickDistinct(free, 3) as agent, object, destination), the same
+   acceptance tests in the same order (valid, shortest 12-40, a true dead
+   interior cell other than the destination, using computeDeadSquares with no
+   overrides from agent/dead_squares.h). After 10,000 attempts: found false,
+   attempts 10000.
+D. Tests exactly as plan 6.1 and checks.py (LY1 has 7 checks, LY2 6, LY3 3,
+   LY4 10, LY5 2, LY6 1). Use demoWorld() and the world helpers of
+   tests/agent_test_support.h (R4). LY5 generates the pilot and confirmatory
+   LAYOUTS only (material, D-080): no agent is run on them. Each check's
+   description starts with its id. Expected after 4a: 379 checks, 0 failures.
+E. Three-part header in every new file (Introduced in: Stage 4a (rebuild)).
+   Beginner comments: why the project has its own random generator (the
+   standard distributions are not the same on every compiler); what a seed is,
+   and why the same seed must give the same experiment; why the experimenter's
+   search is never visible to an agent.
+F. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (191 preserved files, 379 checks, 187 code files checked, formatting checked)
+and the program output must be unchanged (102 lines, 94 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 2):
+  DF4a-1  make shuffle run from the front: for i = 0 to size-2,
+          j = i + below(size - i), swap(list[i], list[j]).
+          Expected failing: exactly RN4.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

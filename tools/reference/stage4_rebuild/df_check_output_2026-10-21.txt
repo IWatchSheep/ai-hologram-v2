@@ -1,0 +1,16 @@
+DF4a-1 (Cursor): shuffle runs from the front (i = 0 .. size-2, j = i + below(size - i)) instead of from the end
+  failing: RN4
+DF4b-1 (Cursor): the common-mode share rounds down instead of half up
+  failing: FE1a, FE1b, FE6a, FE2a
+DF4c-1 (Cursor): F5 forgets A3's check of the believed agent square
+  failing: FI5c, FI7a
+DF4d-1 (Cursor): a claim is judged against the end of its phase instead of the start
+  failing: SC1b, SC1c, SC4d, SC4g
+DF4e-1 (Cursor): the local check reads the map directly instead of through readDeadStatus
+  failing: OB2, G5, SH6.4, SH6.5
+DF4f-1 (Cursor): the detection delay counts from the scheduled step instead of the activation step
+  failing: FD1
+DF4g-1 (Cursor): dead-status reads are compared for F4 events only, not F1
+  failing: G8
+DF4g-2 (owner): the F5 reason text "the object has not moved yet" becomes "the object did not move yet"
+  failing: FI5e, FI7b, CSV3a, G8
