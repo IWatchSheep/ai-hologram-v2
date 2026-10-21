@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "checker.h"
+#include "stage4_suites.h"
 #include "test_suites.h"
 #include "test_support.h"
 
@@ -77,6 +78,8 @@ void runStage4TestGroups(TestCounter& counter) {
     runFaultActivationTests(counter);
     runFaultRunTests(counter);
     runFaultRunMoreTests(counter);
+    runScorerTests(counter);
+    runScorerLifeTests(counter);
 }
 
 }  // namespace aih

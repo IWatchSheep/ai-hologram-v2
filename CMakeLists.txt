@@ -77,6 +77,10 @@ add_library(ai_hologram_core STATIC
             src/experiment/fault_run.cpp
             src/experiment/fault_run_naive.cpp
             src/experiment/layout_generator.cpp
+            src/experiment/scorer.cpp
+            src/experiment/scorer_claims.cpp
+            src/experiment/scorer_commit.cpp
+            src/experiment/scorer_life.cpp
             src/experiment/seeded_random.cpp
             src/experiment/true_search.cpp
             src/compare/difference_text.cpp
@@ -174,6 +178,8 @@ add_executable(ai_hologram_tests
                tests/test_fault_run_more.cpp
                tests/test_layout_generator.cpp
                tests/test_layout_sets.cpp
+               tests/test_scorer.cpp
+               tests/test_scorer_life.cpp
                tests/test_seeded_random.cpp
                tests/test_budget_counter.cpp
                tests/test_compare_predictions.cpp

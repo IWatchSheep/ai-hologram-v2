@@ -92,14 +92,14 @@ void checkFr7(TestCounter& counter) {
     const WorldState d2 = withWallAt(demo, Position{4, 3}, true);
     std::vector<std::pair<char, int>> calls;
     FaultRunWatchers watchers;
-    watchers.afterDecision = [&calls](const SingleAgent&,
-                                      const Observation& observation,
-                                      const Decision&, const FaultInjector&) {
-        calls.push_back(std::make_pair('d', observation.decisionStep));
-    };
+    watchers.afterDecision =
+        [&calls](const SingleAgent&, const Observation& observation,
+                 const Decision&, const FaultInjector&, const Scorer&) {
+            calls.push_back(std::make_pair('d', observation.decisionStep));
+        };
     watchers.afterFinalCheck = [&calls](const SingleAgent&,
                                         const Observation& observation,
-                                        const FaultInjector&) {
+                                        const FaultInjector&, const Scorer&) {
         calls.push_back(std::make_pair('f', observation.decisionStep));
     };
     SingleAgent agent(makeObservation(1, d2), AgentSettings{});
