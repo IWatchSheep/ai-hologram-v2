@@ -1,0 +1,5 @@
+baseline failing: []
+DF0b-1 (limit 41) failing: ['CK3', 'CK22', 'CK25', 'CK29', 'CK31', 'CK32', 'CK33', 'CK35', 'CK36', 'CK37', 'CK51', 'CK52', 'CK50']
+DF0b-2 (else ignored) failing: ['CK7']
+DF0b-3 (lambda bodies not recognised) failing: ['CK29', 'CK31', 'CK32', 'CK33', 'CK51', 'CK52', 'CK50']
+DF0b-6 (noexcept(...) not allowed in lambda heads) failing: ['CK51', 'CK52']

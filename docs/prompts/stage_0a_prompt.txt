@@ -1,0 +1,110 @@
+STAGE 0a PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use, as rule R24 requires. Plan: docs/stages/STAGE_00.md version 1.2.
+
+You are implementing Stage 0a of the rebuild, and ONLY Stage 0a.
+
+BEFORE YOU START
+1. Read AGENTS.md completely and follow it. In particular: never run a Git command
+   that changes anything, never commit, never edit docs/, tools/reference/,
+   .cursor/, LICENSE, .gitignore, .gitattributes, .clang-format or AGENTS.md,
+   never create scratch or temporary files, never rename, move or delete files.
+2. Read these sections of docs/stages/STAGE_00.md: 1, 2, 3.1, 3.2, 3.3, 3.5,
+   4, 5, 6.1, 7 (step 2), 9, 13.
+3. Read the existing files you will change: run_checks.ps1, README.md,
+   notes/handoff_notes.md. Tell the owner briefly what is in them now.
+4. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+   Do not guess and do not redesign.
+
+WHAT TO BUILD (Stage 0a = plan Section 7, step 2)
+Create exactly these files (plan Section 4), and no others:
+  CMakeLists.txt
+  src/core/project_info.h
+  src/core/project_info.cpp
+  src/main.cpp
+  tests/test_support.h
+  tests/test_support.cpp
+  tests/test_suites.h
+  tests/test_main.cpp
+  tests/test_project_info.cpp
+Change exactly these existing files:
+  run_checks.ps1      (steps 1-6 and 9-11 of plan 3.5)
+  README.md           (status line, plan Section 9)
+  notes/handoff_notes.md   (append one note at the end; change nothing above it)
+
+DETAILS
+A. CMakeLists.txt (plan 3.1), for Stage 0a only:
+   - cmake_minimum_required(VERSION 3.20); project(ai_hologram_v2 VERSION 0.0.0
+     LANGUAGES CXX); C++17 required; CMAKE_CXX_EXTENSIONS OFF.
+   - option(AI_HOLOGRAM_WARNINGS_AS_ERRORS "..." ON). For GCC/Clang:
+     -Wall -Wextra -Wpedantic, plus -Werror when the option is ON. For MSVC:
+     /W4, plus /WX when the option is ON. Apply to every target.
+   - Targets: static library ai_hologram_core (src/core/project_info.cpp, include
+     directory src/); program ai_hologram (src/main.cpp); test program
+     ai_hologram_tests (the tests/*.cpp files listed above, listed by name, not
+     by glob), linked to ai_hologram_core.
+   - enable_testing(); one CTest test: correctness_tests, running
+     ai_hologram_tests.
+   - Do NOT add the code checker targets or the code_checks test: they are 0b.
+   - Executables are written to the build folder itself (do not change the
+     output directories).
+B. project_info: std::string projectName() returns "AI Hologram";
+   int currentStage() returns 0. Put them in namespace aih.
+C. main.cpp prints exactly these two lines and returns 0 (plan 3.2):
+     AI Hologram v2 -- Stage 0
+     Project skeleton: build, tests and code checks only. No world, agents or experiments yet.
+   The first line is built from projectName() and currentStage().
+D. The test program (plan 3.3 and 6.1): TestCounter, check(), quiet by default,
+   --verbose shows PASS lines and group headings, last line always
+   "<checks> checks, <failures> failures", exit code 0 only with no failures.
+   Tests P1, P2, TS1, TS2, TS3 exactly as plan 6.1 says. Expected result:
+     5 checks, 0 failures
+   test_suites.h declares one function per group; Stage 0a has one group,
+   runProjectInfoTests(TestCounter&). (0b will add groups.)
+E. run_checks.ps1 (plan 3.5): keep the existing provenance check exactly as it
+   works now. Add, in this order: [path] (now FAILS if CLion's MinGW bin folder
+   or CLion's CMake bin folder C:\Program Files\JetBrains\CLion 2026.2.3.1\bin\cmake\win\x64\bin
+   is missing), [provenance], [configure] (with the generator choice of step 3,
+   and -DAI_HOLOGRAM_WARNINGS_AS_ERRORS=ON), [build] (exit code AND the
+   "warning:" search), [tests], [ctest], [program], [git], then the final line.
+   - Run EVERY external program through ONE helper, Invoke-Tool, exactly as the
+     paragraph "Running programs from the script" in plan 3.5 describes. This
+     matters: without it, Windows PowerShell 5.1 stops the script with a
+     confusing error the first time CMake writes a warning to its error stream.
+   - The 0a final line is exactly (plan 3.5 step 11):
+     ALL CHECKS PASSED FOR STAGE 0a (83 preserved files, 5 checks; code and format checks are added in Stage 0b)
+     The numbers come from the run (provenance count, the tests' check count).
+   - The script must work in Windows PowerShell 5.1 with nothing extra installed.
+F. Every new file starts with the three-part header comment:
+     Purpose / Introduced in: Stage 0a (rebuild) / Architecture
+   with short beginner-friendly comments explaining what and why.
+
+RULES THAT WILL BE CHECKED AUTOMATICALLY IN 0b (follow them now)
+- Files at most 200 lines; functions at most 40 lines, counted from the line of
+  "{" to the line of "}" inclusive. run_checks.ps1 too (its functions as well).
+- Braces on every if / else / for / while / do body, even one line.
+- One statement per line; one declaration per statement (no "int a, b;").
+- No raw string literals. No exceptions, no assertions that stop the program,
+  no inheritance, no external libraries.
+- Format in the style of .clang-format (4-space indent, 80 columns).
+NEVER squeeze code to fit a limit, and never split a file only to pass a limit.
+If something cannot fit as planned, stop and tell the owner.
+
+CHECK YOUR WORK
+Run, from the repository root in PowerShell:
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+It must end with the exact 0a final line above. Also run
+  cmake-build-checks\ai_hologram_tests.exe --verbose
+once and confirm it prints the PASS lines and "5 checks, 0 failures".
+If any expected value does not match, do NOT change the expected value: stop
+and report the actual value (rule R22).
+
+THE DELIBERATE FAILURE CHECK (DF0a) IS DONE BY THE OWNER, NOT BY YOU
+Do not edit docs/ for it. The owner will do it after your report.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every file
+   created or changed with its line count, what you ran, the exact final line
+   of run_checks.ps1, the program output, and anything you were unsure about.
+2. Report to the owner: the list of files with line counts, the full output of
+   run_checks.ps1, and any question.
+3. Do not commit. Do not run any Git command except git status / git diff / git log.
