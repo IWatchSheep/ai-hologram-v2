@@ -1,0 +1,143 @@
+STAGE 3e PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.3.
+This file is docs/prompts/stage_3e_prompt.txt. (The file with the same name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 3e of the rebuild, and ONLY Stage 3e: C1's decision
+step and the run loop. This is the largest sub-stage. Stages 3a-3d are finished
+and committed. Do not change their behaviour.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+2. Read docs/stages/STAGE_03.md v1.3: sections 3.9, 3.11, 3.12 (the log
+   lines), 3.13, 3.15, 4 (the 3e rows and the R4 list), 5, 6.5, 7 (step 6), 9
+   and the revision history rows 1.2 and 1.3.
+3. Read tools/reference/stage3/ref_agents.py (the C1 class, the run loop
+   run_c1 and the result lines; the C0 class is 3f) and checks.py
+   (check_single_agent and everything it uses: C1_1, C1_2, C1_5, C1_6C_2,
+   C1_6C_5, C1_9, C1_12B, VF6_LINES, SP7_EXPECTED, Watch, seed_walls, seed_v1,
+   push_turn_north, Recorder). The reference follows the original C++
+   function by function: follow its ORDER exactly (when the hook is called,
+   when the reserve is computed, when the map is fetched, in which order
+   corrections are settled). They are the authority where the plan uses words.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 6)
+Create exactly these files, and no others:
+  src/agent/agent_types.h              src/agent/single_agent_state.h
+  src/agent/single_agent.h             src/agent/single_agent.cpp
+  src/agent/single_agent_records.cpp   src/agent/single_agent_check.cpp
+  src/agent/single_agent_investigate.cpp
+  src/agent/single_agent_pending.cpp   src/agent/single_agent_choose.cpp
+  src/agent/single_agent_active_test.cpp
+  src/agent/single_agent_search.cpp
+  src/agent/run_loop.h                 src/agent/run_loop.cpp
+  tests/agent_test_fixtures.h          tests/agent_test_fixtures.cpp
+  tests/expected_demo_lines.h          tests/expected_demo_lines.cpp
+  tests/test_single_agent.cpp          (C1-1, C1-10, C1-2, C1-5, C1-9, C1-12a, C1-12b)
+  tests/test_single_agent_cases.cpp    (C1-3, C1-4, C1-6a, C1-6b, VF5b, C1-6c-1, C1-6c-2, C1-7)
+  tests/test_single_agent_budget.cpp   (C1-11a, C1-11b, VF6, SP7-B1 ... SP7-B11)
+  tests/test_run_loop.cpp              (RL1, OB5, OB6)
+Change exactly these existing files:
+  tests/test_investigation.cpp, tests/test_investigation_more.cpp,
+  tests/test_model_v1.cpp, tests/test_agent_model.cpp,
+  tests/test_step_predictor.cpp   delete their local copies of makeObservation,
+                                  twoObservations, eastHistory, pushNorth and
+                                  alwaysBlocked, and use the ones in
+                                  agent_test_fixtures (plan 4, v1.3). No other
+                                  change; their checks must still pass.
+  CMakeLists.txt                  add the nine new src .cpp files to
+                                  ai_hologram_core and the six new test .cpp
+                                  files to ai_hologram_tests. Do NOT run
+                                  clang-format on CMakeLists.txt.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  notes/handoff_notes.md          append one note at the end.
+tests/agent_test_support.h/.cpp is full: do not add to it.
+Do NOT create anything of 3f-3g (no C0, no C0 run loop, no demos, no gate),
+and do not change currentStage() or the program output.
+
+DETAILS
+A. agent_types.h: AgentSettings {budgetPerStep 200, safeStopLimit 5,
+   maxWorldSteps 100, activeTestDelay 3}, Decision {isAction, action,
+   stopReason}, PlanKind {None, Goal, Fallback, Test}.
+B. single_agent_state.h: CommittedPrediction, DeferredInvestigation,
+   WaitingTrapTest and SingleAgentState exactly as plan 3.9, all public, with
+   activationHook (std::function<void(int)>, H1). The state's predictor model
+   is a lambda calling agentModel.current() at every evaluation, so the state
+   cannot be copied: delete its copy operations (and SingleAgent's).
+C. SingleAgent (single_agent.h) with the public interface of plan 3.9:
+   the constructor (first observation, settings, optional starting belief,
+   optional base model, "not dead" overrides), decide, finalCheck, logLines,
+   chooseCautiousAction (public, C1-6a), mismatchCount, correctionCount,
+   verifiedCount, safeStopCount, totalEvaluations, and the public member
+   `state`. Private helpers are split over the eight .cpp files exactly by
+   the jobs in plan 4. objectDead (inside the grid and readDeadStatus) is one
+   private helper (R4).
+D. decide, the check, handling a result, applying/reverting, pending work, the
+   trap V2 attempt, choose-and-commit, the active test, the main search, the
+   consequence surprise, committing and the safe stop: EXACTLY plan 3.9 and
+   ref_agents.py, in the same order. In particular:
+   - the activation hook is called after step 3 and before choosing, AND on
+     the early return of a deferred-again investigation (H1);
+   - the reserve is always reserveFor(state.corrections), computed when the
+     reference computes it;
+   - the dead-square map is a reference to state.deadCache's one map, fetched
+     with deadCache.get(...) where the reference calls current_map() (3.15 Q3);
+   - a wall correction does NOT call clearCache() itself (the predictor
+     clears on the changed walls); model and trap corrections do.
+E. run_loop.h / .cpp exactly as plan 3.11: RunResult; RunWatchers
+   {afterDecision, afterFinalCheck} (std::function, const references in,
+   void out; empty ones are not called); runSingleAgent(trueInitialState,
+   SingleAgent&, settings, watchers = {}); continueRun(environment, current,
+   worldSteps, agent, settings, watchers); the result lines through the
+   agent_log functions. The C0 overload is 3f.
+F. agent_test_fixtures (plan 4, v1.3): makeObservation, twoObservations,
+   eastHistory, pushNorth, alwaysBlocked, alwaysMovedEast, and the seeding of
+   a C1 state exactly as plan 3.14's seeds (wall corrections with ids 1, 2, ...
+   and nextCorrectionId = count + 1; V1 work with its history; a plan in
+   place; a committed action at step 1).
+   expected_demo_lines: the run lines C1_1 and C1_2 (each function within 40
+   lines), shared by C1-1, C1-2 and OB6 (and AD1 in 3f).
+G. Tests exactly as plan 6.5 and checks.py. Every fixture is a valid world.
+   Each check's description starts with its id. Expected after 3e: 309
+   checks, 0 failures.
+H. Three-part header in every new file (Introduced in: Stage 3e (rebuild)).
+   Beginner comments: the decision step's order and why it matters; what the
+   reserve protects; why the activation hook is empty in Stage 3 and why the
+   watchers can only watch (R6); deleted copy operations; std::function
+   members as hooks.
+I. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (163 preserved files, 309 checks, 153 code files checked, formatting checked)
+and the program output must be unchanged (55 lines, 50 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value, and the first differing line (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 6):
+  DF3e-1  make reserveFor always return 1.
+          Expected failing: exactly C1-2, C1-6c-2, VF6, SP7-B2, SP7-B3,
+          SP7-B4, SP7-B5, SP7-B6, SP7-B7, SP7-B10 and OB6 (11 checks).
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

@@ -107,6 +107,22 @@ void runPlannerTests(TestCounter& counter);
 // Runs the planner budget tests (PL4a, PL4b, PL5a, PL5b, PL6, PL7).
 void runPlannerBudgetTests(TestCounter& counter);
 
+// Runs the investigation tests (IV1 to IV7).
+void runInvestigationTests(TestCounter& counter);
+
+// Runs the further investigation tests (IV9 to IV11, VF1,
+// VF2, VF3a, VF3b, HC1, AT1, RC1).
+void runInvestigationMoreTests(TestCounter& counter);
+
+// Runs the model V1 tests (VF4a, VF4b, VF4c, VF5).
+void runModelV1Tests(TestCounter& counter);
+
+// Runs the verification tests (VF7a to VF7c, VF8a to VF8c).
+void runVerificationTests(TestCounter& counter);
+
+// Runs the trap and consequence tests (VF9a to VF13).
+void runTrapChecksTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

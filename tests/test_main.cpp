@@ -48,6 +48,11 @@ void runAgentTestGroups(TestCounter& counter) {
     runAgentModelTests(counter);
     runPlannerTests(counter);
     runPlannerBudgetTests(counter);
+    runInvestigationTests(counter);
+    runInvestigationMoreTests(counter);
+    runModelV1Tests(counter);
+    runVerificationTests(counter);
+    runTrapChecksTests(counter);
 }
 
 }  // namespace aih

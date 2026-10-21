@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 3 of the rebuild (Brief Section 10, Stage 3: the competent single agent) |
-| **Plan version** | 1.2 (after 3c: the shared test-helper file is full, so 3e's seeding helpers get a file of their own) |
+| **Plan version** | 1.3 (after 3d: one shared file for the agent tests' fixtures, removing five helpers written twice) |
 | **Date** | October 21, 2026 |
-| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). **v1.2 (a planning detail after 3c: one more test file, no change to behaviour) awaits the owner's agreement.** |
+| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). v1.2 (after 3c: one more test file) agreed by the owner: "sure I agree." **v1.3 (after 3d: the shared test fixtures, R4) awaits the owner's agreement.** |
 | **Governing documents** | The brief v1.1; the frozen protocol v1.0 (Phase B Sections 10–12 define C1 and C0); **Migration Addendum M1** (M1.3, M1.4); `docs/RULES.md` (R1–R24); `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 2, complete and tagged `stage-2-v2` (`a1a32d9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 3 (plan `docs/history/ai-hologram/docs/stages/STAGE_03.md` v1.2, tag `stage-3`, commit `7587f38`) **plus the IE-1 instrumentation hooks H1–H4 as built at `89ea9b6`** (M1.3 item 1; R5: instrumentation is designed in from the start). The original's `src/agent/` is the frozen C1 baseline. |
@@ -652,7 +652,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 | `tests/test_model_v1.cpp` | 130 | VF4a–VF5 | 3d |
 | `tests/test_verification.cpp` | 180 | VF7a–VF8c | 3d |
 | `tests/test_trap_checks.cpp` | 180 | VF9a–VF13 | 3d |
-| `tests/agent_test_seeds.h` / `.cpp` | 40 / 90 | v1.2: seeding a C1 state for tests: wall corrections (`seed wall`), model V1 work with its history (`seed v1`), a plan in place, a committed action at step 1 (used by C1-6b/6c, C1-11, VF6, SP7, OB5, and by the trace writer in 3g) | 3e |
+| `tests/agent_test_fixtures.h` / `.cpp` | 60 / 170 | v1.3 (was `agent_test_seeds`, v1.2): the agent tests' shared inputs (R4): observations and histories (`makeObservation`, `twoObservations`, `eastHistory`); the hand-written test models (`pushNorth`, `alwaysBlocked`, `alwaysMovedEast`); and seeding a C1 state: wall corrections (`seed wall`), model V1 work with its history (`seed v1`), a plan in place, a committed action at step 1 (used by C1-6b/6c, C1-11, VF6, SP7, OB5, and by the trace writer in 3g). The copies of the first five in `test_investigation.cpp`, `test_investigation_more.cpp`, `test_model_v1.cpp`, `test_agent_model.cpp` and `test_step_predictor.cpp` are deleted in 3e, and those files use the shared ones | 3e |
 | `tests/expected_demo_lines.h` / `.cpp` | 30 / 90 | the expected run lines of the two C1 demos (`C1_1`, `C1_2`), shared by C1-1, C1-2, OB6 and AD1 (R4) | 3e |
 | `tests/test_single_agent.cpp` | 190 | C1-1, C1-10, C1-2, C1-5, C1-9, C1-12a, C1-12b | 3e |
 | `tests/test_single_agent_cases.cpp` | 190 | C1-3, C1-4, C1-6a, C1-6b, VF5b, C1-6c-1, C1-6c-2, C1-7 | 3e |
@@ -681,7 +681,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 - `objectDead` is one private helper of C1;
 - every prediction goes through `StepPredictor`;
 - the demo layout comes only from `demoLayout()`;
-- the test text helpers come only from `golden_files`, the test worlds only from `agent_test_support` and `test_layouts`, the seeding of a C1 state only from `agent_test_seeds`, and the demos' expected run lines only from `expected_demo_lines`.
+- the test text helpers come only from `golden_files`, the test worlds only from `agent_test_support` and `test_layouts`, the observations, histories, test models and the seeding of a C1 state only from `agent_test_fixtures`, and the demos' expected run lines only from `expected_demo_lines`.
 
 **Splits planned in advance** (each file has one job):
 - the original's 230-line `planner.cpp` becomes three files;
@@ -945,3 +945,4 @@ Every prompt says:
 | 1.0 | 2026-10-21 | First draft. Everything was built first (R9, R11):<br>- the golden traces, from the original C++ at both commits;<br>- the reference, which reproduces all three golden files byte for byte;<br>- the 163-check mirror; the values of the new checks were confirmed against the original C++ (`orig_trace/unit_values_output_2026-10-21.txt`);<br>- the deliberate failure predictions.<br>The agent-demo text was checked against the original. |
 | 1.1 | 2026-10-21 | ChatGPT approved the v1.0 technical design (review 02): D-068, D-069, D-071 and D-072 accepted; the seven sub-stages, the file organisation and the 3a prompt accepted; independently verified (177 C++ checks, the 163 reference checks, all eight deliberate failure predictions, the golden hashes). D-070 accepted in principle: the synthetic cases are now called deterministically generated synthetic verification fixtures, and ChatGPT's narrow R21 clarification is recorded with the owner's approval. No other change. |
 | 1.2 | 2026-10-21 | After 3c (242 checks; Claude also compared the new planner with the reference on 3,156 searches over the 789 case worlds: identical). Cursor put the search helpers shared by the two planner test files into `tests/agent_test_support` (R4), which is now at 196 lines, so the seeding helpers planned for it in 3e get their own file, `tests/agent_test_seeds.h/.cpp`. 91 new code files; the final line says 170 code files. No change to behaviour, checks or golden values. |
+| 1.3 | 2026-10-21 | After 3d (277 checks). An R4 finding in Claude's review: five small test helpers are written twice. `makeObservation`, `twoObservations` and `eastHistory` are in two 3d test files; `pushNorth` and `alwaysBlocked` are in a 3c and a 3d file (`agent_test_support` was full, and Cursor kept them local). In 3e, the file planned in v1.2 for the seeding helpers becomes `tests/agent_test_fixtures.h/.cpp` and also holds these five; the copies are deleted. No change to behaviour, checks, counts or golden values. |
