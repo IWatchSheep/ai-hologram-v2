@@ -6,7 +6,7 @@
 | **Stage** | 1 of the rebuild (Brief Section 10, Stage 1: the grid world) |
 | **Plan version** | 1.3 (after Stage 1b: two review findings added to Stage 1c) |
 | **Date** | October 20, 2026 |
-| **Status** | **APPROVED.** v1.2 approved by ChatGPT and the owner (Stage 1b was built under it). v1.3, which changes only Stage 1c, approved by ChatGPT (its checklist correction made) and by the owner on 2026-10-20 ("I approve of it"). Stage 1c may begin after v1.3 is committed and ChatGPT has run the complete reference. |
+| **Status** | **COMPLETE** (2026-10-20). Plan v1.3 approved by ChatGPT and the owner. ChatGPT independently built and tested the final source and approved Stage 1 for the owner's gate. The completion gate (Section 10) passed. Tagged `stage-1-v2`. |
 | **Governing documents** | The brief v1.1; `docs/RULES.md` (R1–R24); Migration Addendum M1; `AGENTS.md`. |
 | **Builds on** | Stage 0, complete and tagged `stage-0-v2` (`148ea6e`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 1 (plan `docs/history/ai-hologram/docs/stages/STAGE_01.md` v1.4, tag `stage-1`). Its world code, `src/world/`, never changed from `stage-1` to the last commit `89ea9b6`, so it is also the world of the frozen C1 baseline (`stage-3`, `7587f38`). |
@@ -438,14 +438,14 @@ No other check fails: R8b checks only walls and R9 only the input. This predicti
 - **Handoff notes.** One per sub-stage.
 
 ## 10. Completion checklist (owner verification gate)
-- [ ] The plan was approved and committed before any Stage 1 code.
-- [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
-- [ ] The program output is exactly 3.8; the tests show `141 checks, 0 failures`; CTest 2/2; 0 checker violations (61 files).
-- [ ] G1 and G2 pass: the rebuilt world agrees with the original on all 5,184 rule cases and all 1,009 parser cases.
-- [ ] The golden readers pass all malformed-file tests (GN1–GN7, GR1–GR5).
-- [ ] All the deliberate failure checks gave exactly the predicted failures.
-- [ ] D-060 to D-063 recorded; handoff notes appended; prompts saved.
-- [ ] The owner can explain Section 11.
+- [x] The plan was approved and committed before any Stage 1 code.
+- [x] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
+- [x] The program output is exactly 3.8; the tests show `141 checks, 0 failures`; CTest 2/2; 0 checker violations (61 files).
+- [x] G1 and G2 pass: the rebuilt world agrees with the original on all 5,184 rule cases and all 1,009 parser cases.
+- [x] The golden readers pass all malformed-file tests (GN1–GN7, GR1–GR5).
+- [x] All the deliberate failure checks gave exactly the predicted failures.
+- [x] D-060 to D-064 recorded; handoff notes appended; prompts saved; every exchange with ChatGPT saved in `docs/reviews/stage1/`.
+- [x] The owner agrees with completion (D-065 replaces "the owner can explain Section 11"). His words on 2026-10-20: *"I don't need to explain them, remember I gave you and chatgpt creative freedom. If you both agree then I agree too. Because you both understood me when I detailed my plan before in the first project. So since your both smart and have ideas of your own you can fill in the gaps, next time just say do you agree not do you understand, but I agree."* Section 11 stays as a plain explanation for anyone reading the project.
 
 ## 11. Things the owner should understand by the end
 1. How (x, y) maps to the text, and why walls are stored as `walls[y][x]`.
@@ -456,10 +456,58 @@ No other check fails: R8b checks only walls and R9 only the input. This predicti
 
 ## 12. What actually happened (filled in at the end)
 ```
-Date completed:
-Commit tagged stage-1-v2:
-Checks:
-Did everything go as planned?
+Date completed: 2026-10-20.
+Commit tagged stage-1-v2: the commit that adds this record, on branch stage-1-work,
+fast-forwarded into main.
+
+Checks (owner's computer, Windows, CLion 2026.2.3.1, GCC 15.2.0, clang-format 22.0.0git):
+  ALL CHECKS PASSED (98 preserved files, 141 checks, 61 code files checked, formatting checked)
+  program output: 34 lines, 31 non-blank (exactly Section 3.8)
+  The same on a fresh clone of stage-1-work (962d453), built from nothing.
+  Independent Linux builds with -Werror by Claude (from GitHub) and by ChatGPT: no warnings,
+  141 checks, CTest 2/2, 0 checker violations.
+
+Equivalence with the original world (src/world at 7587f38):
+  G1: all 5,184 golden rule cases.  G2: all 1,009 golden parser cases.
+  Claude, beyond the golden files: the new parser on 20,000 fresh random inputs, and the new
+  applyAction on 100,000 random cases over 60 random layouts, identical to the original C++.
+  The demo part of the program output is byte-identical to the original runScriptedDemo.
+
+Work, in order (branch stage-1-work):
+  98ddff2  plan v1.1 (reference, golden values, provenance 98)
+  420301c  Stage 1a (105 checks)        79e6ced  plan v1.2
+  e09aee7  Stage 1b (139 checks)        43aca59  plan v1.3
+  962d453  Stage 1c (141 checks)
+
+Deliberate failure checks, all exactly as predicted by the reference:
+  DF1-P  (owner)  one character added to a golden file -> stopped at [provenance].
+  DF1a-1 (Cursor) border test without y == 9 -> T8, G2.
+  DF1a-2 (Cursor) isWall false outside the grid -> V6a-d.
+  DF1b-1 (Cursor) a blocked push moves the agent -> R4, G1.
+  DF1b-2 (Cursor) no "expect " prefix check -> GN3.
+  DF1c-1 (Cursor) four demo actions -> D1.
+  DF1c-2 (owner)  Pushed reported as Moved -> stopped at [tests]: R3, R5, G1, D1.
+
+Did everything go as planned? Mostly; the differences, all recorded in the revision history:
+  1. ChatGPT asked for the 13 original source files to be hash-protected too -> v1.1 (98 files).
+  2. After 1a, the golden test file was too full for G1, and its reader could read past the end
+     of a truncated file (found in Claude's review) -> v1.2: separate files, shared bounds-safe
+     readers with exact problem messages; ChatGPT added 11 malformed-file tests (GN1-6, GR1-5).
+  3. After 1b, a duplicated helper pair (R4) and a possible int overflow in parseInteger
+     (undefined behaviour) -> v1.3: one copy, at most 9 digits, GN7.
+  4. ChatGPT found a stale "129 checks" in the checklist -> corrected to 141.
+  5. In DF1b-2, removing only the prefix check left a helper unused, which -Werror rejects;
+     Cursor removed the helper for that run and restored both (disclosed).
+  6. Claude's final review package to ChatGPT left out the Stage 0 code-checker sources that
+     CMake needs; ChatGPT built with the copies from an earlier package (disclosed in its review).
+     Future packages will contain the whole buildable tree.
+No expected value was changed to make code pass. No golden value was changed.
+
+Lessons for the next stages:
+  - Golden values from the original code catch what hand-written tests miss; build them
+    first for every component that has an original (the C1 golden traces of M1.4 next).
+  - Test readers must be bounds-safe and tested with malformed input from the start.
+  - Review packages for ChatGPT should be the whole buildable tree (git archive of the commit).
 ```
 
 ## 13. Instructions to the coding assistant

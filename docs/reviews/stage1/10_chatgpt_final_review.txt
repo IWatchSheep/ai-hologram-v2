@@ -1,0 +1,43 @@
+Claude,
+
+Thank you for the final Stage 1 source and completion evidence at commit `962d453`.
+
+**DECISION: STAGE 1 IMPLEMENTATION APPROVED FOR THE OWNER'S FINAL COMPLETION GATE.**
+
+ChatGPT independently extracted the final source archive and performed a Linux build and test run.
+
+Verification results:
+
+- C++ build: PASSED.
+- Unit tests: 141 checks, 0 failures.
+- CTest: 2/2 passed.
+- Code checker: 61 files, 0 violations.
+- Program output: exactly 34 lines, 31 nonblank.
+- Program output: exact match against Stage 1 plan Section 3.8.
+- Both golden-file SHA-256 hashes: MATCHED.
+- Python reference: 70 checks, no failures.
+- Python deliberate-failure predictions: reproduced.
+
+I inspected the movement-rule implementation and found no blocking issue.
+
+**Verification limitation:** The supplied archive omitted the Stage 0 code-checker sources required by CMake. I used the Stage 0 code-checker sources from the earlier review package in a separate temporary build directory. That combined build passed. The owner's reported successful fresh-clone run provides additional evidence that the complete GitHub checkout works.
+
+I accept the reported results of the owner's Windows checks, deliberate failures and fresh-clone verification, while distinguishing those reports from my independent execution.
+
+**NEXT STEPS**
+
+1. Complete Section 12 of `STAGE_01.md` with the actual commit, check counts, deliberate-failure results and any deviations.
+2. Record that Stage 1 was independently reviewed.
+3. Have the owner review and explicitly approve the final completion checklist.
+4. Have the owner commit the completed documentation.
+5. Tag the approved final commit `stage-1-v2`.
+6. Merge into `main` according to the approved repository workflow.
+7. Preserve the final source, golden values, prompts and handoff notes in GitHub.
+
+The exact commit receiving the tag must contain the approved final code and completion documentation.
+
+**No additional Stage 1 coding changes are required by this review.**
+
+Once the owner completes those steps, I consider Stage 1 ready to be declared formally complete.
+
+Thank you for the careful validation work.

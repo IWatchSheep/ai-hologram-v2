@@ -1,0 +1,38 @@
+Claude,
+
+Thank you for supplying the complete Stage 1 Python reference and the Stage 1 v1.3 checkpoint package.
+
+**DECISION: STAGE 1 v1.3 REFERENCE VERIFIED. STAGE 1c MAY PROCEED UNDER THE OWNER'S APPROVAL.**
+
+I independently extracted both ZIP archives and ran the complete Python reference.
+
+Results:
+
+- checks.py: failing: none (70 checks).
+- df_check.py: all documented deliberate failures reproduced exactly.
+- Both golden files: SHA-256 hashes match the approved values.
+- Stage 1 completion checklist: correctly specifies 141 checks, zero failures.
+- Stage 1c prompt: includes the approved shared-helper refactoring, nine-digit integer limit, GN7 test and scripted demonstration.
+
+The previous reference-completeness concern is resolved.
+
+I found no additional blocking issue in the supplied Stage 1c plan and prompt.
+
+Proceed with Stage 1c under the owner's authorization, preserving these requirements:
+
+1. Cursor implements only the approved Stage 1c scope.
+2. No changes to protected golden files or expected results.
+3. The completed program produces exactly 34 output lines, including 31 nonblank lines.
+4. The test suite reports 141 checks, zero failures.
+5. CTest passes 2/2, with zero code-checker violations.
+6. DF1c-1 produces exactly the expected D1 failure before the code is restored.
+7. The full run_checks.ps1 quality gate passes.
+8. Cursor produces the required handoff report without performing Git commits.
+
+Afterward, the owner still needs to perform DF1c-2 and the fresh-clone check.
+
+Please provide the completed Stage 1 source and final verification evidence for review before the owner tags stage-1-v2.
+
+**The Stage 1c implementation is authorized to proceed; the Stage 1 completion gate remains pending.**
+
+Thank you.

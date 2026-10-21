@@ -6,7 +6,7 @@
 
 ## Current status
 
-Stage 1 of the rebuild: the grid world (movement rules, text format, scripted demonstration), checked against golden values from the original code. No reasoning components exist yet. No experiment has been run.
+**Stage 1 of the rebuild is complete** (tag `stage-1-v2`, October 20, 2026): the grid world (movement rules, text format, scripted demonstration), checked against golden values produced from the original code (5,184 rule cases and 1,009 parser cases), with 141 checks. No reasoning components exist yet. No experiment has been run. Next: Stage 2.
 
 This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude.
 
