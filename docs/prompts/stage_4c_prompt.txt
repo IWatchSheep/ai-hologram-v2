@@ -1,0 +1,173 @@
+STAGE 4c PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_04.md version 1.1.1.
+This file is docs/prompts/stage_4c_prompt.txt. (The file with a similar name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 4c of the rebuild, and ONLY Stage 4c: applying
+faults, the activation records, the run with faults, the run loop's new
+watch-only onObservation watcher, and moving actionIndex. Stages 4a and 4b are
+committed. This is the largest sub-stage (15 new code files) and the only one
+that changes Stage 3 agent code: those two changes must change NO behaviour
+(the Stage 3 gate G4-G7, all 789 cases, must still pass).
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/; read the reference files instead.
+2. Read docs/stages/STAGE_04.md: sections 1, 2, 3.4, 3.5, 3.6, 3.12, 3.13,
+   4 (the 4c rows and the R4 list), 5, 6.2, 7 (step 4), 8 (D-075, D-076), 9
+   and 13.
+3. Read tools/reference/stage4_rebuild/ref_faults.py, sections 3.4, 3.5 and
+   3.6 (rotated, make_faulty_model, previous_object, try_apply_fault,
+   ActivationRecord, activation_delay, reported_as, FaultInjector,
+   run_c1_watched, run_c0_watched, FaultRunResult, run_with_faults), and
+   checks.py, section "4c" (check_apply, check_f3_f4, check_f5_cache,
+   demo_material, demo_run, record, run_faults, check_activation, same_run,
+   plain_c1, plain_c0, DEMO1, check_fault_runs, check_run_watchers). They are
+   the authority where the plan uses words. The original's declarations are in
+   tools/reference/stage4_rebuild/orig_trace/original_src/experiment/
+   (fault_injector.h, fault_run.h, fault_apply.cpp, fault_injector.cpp,
+   fault_run.cpp). Read them for names and exact texts; our file layout is the
+   plan's, and our run with faults REUSES the Stage 3 loop (3.6) instead of
+   copying it as the original's fault_run.cpp did.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 4)
+Create exactly these files, and no others:
+  src/experiment/fault_model.h        src/experiment/fault_model.cpp
+  src/experiment/fault_apply.h        src/experiment/fault_apply.cpp
+  src/experiment/fault_injector.h     src/experiment/fault_injector.cpp
+  src/experiment/fault_run.h
+  src/experiment/fault_run.cpp        src/experiment/fault_run_naive.cpp
+  tests/test_fault_apply.cpp          (FI1, FI2)
+  tests/test_fault_apply_more.cpp     (FI3, FI4)
+  tests/test_fault_f5.cpp             (FI5, FI6)
+  tests/test_fault_activation.cpp     (FI7, FI8)
+  tests/test_fault_run.cpp            (FR1, FR4, IE-T1)
+  tests/test_fault_run_more.cpp       (FR5, FR6, FR7, RL2, RL3)
+Change exactly these existing files:
+  src/world/action.h, src/world/action.cpp   add int actionIndex(Action):
+                                  North 0, East 1, South 2, West 3 (D-076).
+  src/agent/agent_model.cpp       remove its private actionIndex and use the
+                                  shared one. Nothing else.
+  src/agent/run_loop.h, src/agent/run_loop.cpp, src/agent/run_loop_naive.cpp
+                                  onObservation (plan 3.12, D-075). Nothing else.
+  tests/fault_test_material.h/.cpp   add a hand-built event helper (like
+                                  checks.py event(): id, step, type and the
+                                  detail fields) and findActivation (the
+                                  record of one event id), both used by 4c's
+                                  tests and later ones (R4).
+  CMakeLists.txt                  add the five new src .cpp files to
+                                  ai_hologram_core and the six new test .cpp
+                                  files to ai_hologram_tests. Do NOT run
+                                  clang-format on CMakeLists.txt.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create anything of 4d-4g: no scorer, no shadow evaluation, no
+computation observer attached by the fault run, no CSV, no demonstration, no
+gate. Do not change currentStage() or the program output. src/agent/ must
+never include src/experiment/ (R7).
+
+WHAT 4c'S RUN WITH FAULTS CONTAINS (the rest is added later)
+The plan's 3.6 describes the finished run. In 4c, leave out everything that
+belongs to the scorer (4d) and the observer (4e):
+  - the activation hook is only injector.atActivationPoint(parts, t);
+  - afterDecision / afterFinalCheck only call the extra watchers;
+  - there is no observe flag yet and no observer is attached;
+  - FaultRunResult holds the RunResult exactly as runSingleAgent returned
+    it, decisionSteps and the activation records (scores come in 4d,
+    observed evaluations in 4e);
+  - FaultRunWatchers (afterDecision and afterFinalCheck) and
+    NaiveFaultRunWatchers (afterDecision) receive the agent, the
+    observation (and the decision for afterDecision) and the injector, as
+    const references; the scorer argument is added in 4d.
+Everything else is as 3.6: onObservation appends every observation to the
+run's true history (the injector reads it for F5); after runSingleAgent
+returns, the hook is emptied.
+
+DETAILS
+A. onObservation (3.12): RunWatchers gets a third member and
+   NaiveRunWatchers a second, std::function<void(const SingleAgent&,
+   const Observation&)> / std::function<void(const NaiveAgent&,
+   const Observation&)> onObservation, called with every observation just
+   before the agent receives it: before every decide, and before C1's
+   finalCheck. An empty one is not called. Nothing else in the loop changes
+   (continueRun passes it on like the other watchers).
+B. fault_model: FaultedActions (which actions are faulted and each one's
+   rotation, indexed by actionIndex), rotatedAction (left N->W->S->E->N,
+   right N->E->S->W->N), makeFaultyModel(table) taking a COPY of the table,
+   exactly as plan 3.4 and ref_faults.make_faulty_model.
+C. fault_apply: ReasonerParts (belief, action model, "not dead" overrides,
+   predictor, as references), partsOf(SingleAgentState&),
+   partsOf(NaiveAgentState&), ApplyOutcome {applied, reason}, and
+   tryApplyFault(event, parts, faultedActions, trueHistory), exactly as plan
+   3.4 and ref_faults.try_apply_fault: the checks in that order, the exact
+   reason texts, F1 flips only inside the grid, F5's previous square from the
+   TRUE history, clearCache() after every applied fault and never after a
+   refused one. It never touches the world or a budget. Use the shared names
+   (fault_event) and helpers (actionIndex, kActionOrder, world rules); write
+   no new copies (R4).
+D. fault_injector: ActivationStatus (Scheduled, Applied, NotApplicable,
+   Pending), ActivationRecord {eventId, type, scheduledStep, status,
+   applicationStep, reason}, activationDelay, reportedAs (the five exact
+   texts of 3.5), and FaultInjector (the events, one record each, the true
+   history it reads, its FaultedActions; atActivationPoint(parts, t) exactly
+   as ref_faults.FaultInjector.at_activation_point: list order; Scheduled at
+   step t is tried; Pending is tried at every later step; F1-F4 refused ->
+   NotApplicable, F5 refused -> Pending with the latest reason).
+E. fault_run: the two runWithFaults (C1 and C0), each calling the Stage 3
+   runSingleAgent with watchers (3.6, as limited above). Never a second copy
+   of the loop.
+F. Tests exactly as plan 6.2 and checks.py section 4c: FI1 (6), FI2 (4),
+   FI3 (7), FI4 (3), FI5 (6), FI6 (2), FI7 (2), FI8 (3), FR1 (2), FR4 (5),
+   IE-T1 (2), FR5, FR6 (2), FR7, RL2, RL3 = 48 new checks. Every expected value
+   is copied from checks.py. The demonstration runs are the demonstration
+   material of tests/fault_test_material (run index 6 is 500003-1, 2 is
+   500001-1, 5 is 500002-2). Use the Stage 3 test helpers (demoWorld, D2,
+   the frozen settings, C1_1 and C1_2's expected lines) as the Stage 3 tests
+   do (R4). Each check's description starts with its id.
+   Expected after 4c: 445 checks, 0 failures.
+G. Three-part header in every new file (Introduced in: Stage 4c (rebuild)).
+   Beginner comments: what "applying a fault" changes (only the reasoner's
+   parts, never the world); why a refused F5 is retried later and other
+   refused faults are not; why the run with faults reuses the Stage 3 loop
+   through watchers instead of copying it (one loop cannot drift); why
+   onObservation only watches.
+H. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (191 preserved files, 445 checks, 211 code files checked, formatting checked)
+and the program output must be unchanged (102 lines, 94 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value (rule R22). If any Stage 3 check fails
+(including G4-G7), stop and report it: the Stage 3 changes must not change
+behaviour.
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 4):
+  DF4c-1  in tryApplyFault, remove F5's check of the believed agent square
+          (the "the previous square is the believed agent square" refusal).
+          Expected failing, exactly these 2 checks: FI5 (the believed agent
+          square) and FI7 (500003-1-1 is applied at a different step).
+          Nothing else.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
