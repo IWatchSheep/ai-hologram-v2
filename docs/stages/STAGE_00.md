@@ -6,7 +6,7 @@
 | **Stage** | 0 of the rebuild (Brief Section 10, Stage 0: project skeleton) |
 | **Plan version** | 1.5 (two reference corrections found by the equivalence test after follow-up 1; follow-up 2) |
 | **Date** | October 20, 2026 |
-| **Status** | **APPROVED.** v1.4 approved by ChatGPT and the owner (follow-up 1 was built under it). v1.5 approved by ChatGPT, which also built and tested the complete Stage 0 source independently, and by the owner on 2026-10-20 ("I approve"). Follow-up 2 may begin after v1.5 is committed. The completion gate (Section 10) has not yet passed. |
+| **Status** | **COMPLETE** (2026-10-20). Plan v1.5 approved by ChatGPT and the owner; the completion gate (Section 10) passed; tagged `stage-0-v2`. |
 | **Governing documents** | The brief v1.1; `docs/RULES.md` (R1–R24, approved); `AGENTS.md`. The Experiment 1 protocol is not affected by Stage 0. |
 | **Builds on** | The first commit of `ai-hologram-v2` (`0484b6d`): governing documents, provenance, history, references, `run_checks.ps1` (provenance only). |
 | **Reference** | `tools/reference/stage0/ref_code_checker.py` and `snippets.py` (R9, R10): the code checker's rules, built and run before this plan, producing every expected value in Section 6.2. `equivalence_fuzz.py` compares the built C++ checker with the reference on thousands of random files (v1.5). `snippets.py` checks itself (`mismatches: none (53 cases)`, `file-kind mismatches: none (12 cases)`). |
@@ -300,7 +300,7 @@ Each CKn is **one** check: `checkText(path, text)` returns exactly the listed (l
 |---|---|---|---|---|
 | 1 | — | The owner commits this approved plan, the reference (`tools/reference/stage0/`) and the 0a prompt | | |
 | 2 | **0a** | CMake (core library, program, tests), project info, test runner, `run_checks.ps1` steps 1–6 and 9–11 | P1, P2, TS1–TS3 | DF0a: edit one character in `docs/EXPERIMENT_1_PROTOCOL.md`. `run_checks.ps1` must stop at `[provenance]` naming that file; the owner restores it with `git checkout -- docs/EXPERIMENT_1_PROTOCOL.md`. |
-| 3 | **0b** | The code checker (library, tool, CTest `code_checks`, `--list-cpp`), its tests, the split of `run_checks.ps1` into five files (3.5), steps 7–8, and the formatting of the 0a files (`src/main.cpp` and `tests/test_project_info.cpp` differ from `.clang-format` in two places: line wrapping only) | CK1–CK54, FS1–FS12 | DF0b-1: change the function-length limit from 40 to 41 (the C++ and the PowerShell rule use the one constant). Exactly CK3, CK22, CK25, CK29, CK31, CK32, CK33, CK35, CK36, CK37, CK50, CK51 and CK52 must fail. DF0b-2: make the braces rule ignore `else`. Exactly CK7 must fail. DF0b-3: make `isLambdaIntroducer` always return false. Exactly CK29, CK31, CK32, CK33, CK34, CK50, CK51 and CK52 must fail. (CK34 too, because the declaration rule uses the same one test, as Section 4 requires. v1.0–v1.3 left CK34 out: the reference's `df_check.py` had disabled only the function rule's use. Cursor found this in 0b; corrected in v1.4.) DF0b-6: make the lambda-head rule reject every `(` after the parameter list (no `noexcept(...)` or `decltype(...)` groups). Exactly CK51 and CK52 must fail. DF0b-7: make `checkedKind` stop exempting `tools/reference/`. Exactly FS4 and FS10 must fail. (DF0b-1, -2, -3, -6 and -7 were tried on the reference: `df_check.py`.) DF0b-4: add `int a, b;` inside `main()` in `src/main.cpp`. The CTest test `code_checks` fails, so `run_checks.ps1` stops at `[ctest]` (step 6 runs before step 7) with a non-zero exit code; running `cmake-build-checks\code_checker.exe .` directly reports `src/main.cpp:<line>: STYLE-DECLARATIONS more than one declaration in one statement`. After the line is removed, the full run passes. (v1.0–v1.3 wrongly said `[code]`; corrected after ChatGPT's v1.3 review. The order of the steps is unchanged.) DF0b-5: add an unused local variable `int unused = 0;` inside `main()`. `run_checks.ps1` must stop at `[build]`, showing the compiler's `-Werror=unused-variable` message. DF0b-8: in `src/main.cpp`, join the two lines of the second `std::cout` statement into one line longer than 80 columns. `run_checks.ps1` must stop at `[format]`, naming `src/main.cpp`. |
+| 3 | **0b** | The code checker (library, tool, CTest `code_checks`, `--list-cpp`), its tests, the split of `run_checks.ps1` into five files (3.5), steps 7–8, and the formatting of the 0a files (`src/main.cpp` and `tests/test_project_info.cpp` differ from `.clang-format` in two places: line wrapping only) | CK1–CK54, FS1–FS12 | DF0b-1: change the function-length limit from 40 to 41 (the C++ and the PowerShell rule use the one constant). Exactly CK3, CK22, CK25, CK29, CK31, CK32, CK33, CK35, CK36, CK37, CK50, CK51 and CK52 must fail. DF0b-2: make the braces rule ignore `else`. Exactly CK7 must fail. DF0b-3: make `isLambdaIntroducer` always return false. Exactly CK29, CK31, CK32, CK33, CK34, CK50, CK51 and CK52 must fail. (CK34 too, because the declaration rule uses the same one test, as Section 4 requires. v1.0–v1.3 left CK34 out: the reference's `df_check.py` had disabled only the function rule's use. Cursor found this in 0b; corrected in v1.4.) DF0b-6: make the lambda-head rule reject every `(` after the parameter list (no `noexcept(...)` or `decltype(...)` groups). Exactly CK51 and CK52 must fail. DF0b-7: make `checkedKind` stop exempting `tools/reference/`. Exactly FS4 and FS10 must fail. (DF0b-1, -2, -3, -6 and -7 were tried on the reference: `df_check.py`.) DF0b-4: in `main()` in `src/main.cpp`, replace `return 0;` with `int a = 0, b = 0;` followed by `return a + b;` (as run; see Section 12: the earlier wording `int a, b;` stops at `[build]` instead, because unused variables are compiler errors). The CTest test `code_checks` fails, so `run_checks.ps1` stops at `[ctest]` (step 6 runs before step 7) with a non-zero exit code; running `cmake-build-checks\code_checker.exe .` directly reports `src/main.cpp:<line>: STYLE-DECLARATIONS more than one declaration in one statement`. After the line is removed, the full run passes. (v1.0–v1.3 wrongly said `[code]`; corrected after ChatGPT's v1.3 review. The order of the steps is unchanged.) DF0b-5: add an unused local variable `int unused = 0;` inside `main()`. `run_checks.ps1` must stop at `[build]`, showing the compiler's `-Werror=unused-variable` message. DF0b-8: in `src/main.cpp`, join the two lines of the second `std::cout` statement into one line longer than 80 columns. `run_checks.ps1` must stop at `[format]`, naming `src/main.cpp`. |
 | 4 | — | Fresh clone check: the owner clones the repository into a new folder, and `run_checks.ps1` passes there | | |
 | 5 | — | Completion gate (Section 10), review by ChatGPT, tag `stage-0-v2` | | |
 
@@ -326,14 +326,14 @@ Work goes on a branch `stage-0-work` (R17). The owner commits and pushes it, Cla
 - **Handoff notes.** One per sub-stage, in `notes/handoff_notes.md`.
 
 ## 10. Completion checklist (owner verification gate)
-- [ ] The plan was approved and committed before any code.
-- [ ] `run_checks.ps1` passes on the owner's computer, **and on a fresh clone** (step 4).
-- [ ] Program output exactly as in 3.2; tests `71 checks, 0 failures`; CTest 2/2.
-- [ ] The code checker finds 0 violations in the repository, including in its own code and in `run_checks.ps1`.
-- [ ] The deliberate failure checks gave exactly the predicted failures.
-- [ ] No warnings in the build (enforced by step 4).
-- [ ] D-050 to D-059 recorded; handoff notes appended; prompts saved in `docs/prompts/`.
-- [ ] The owner can explain: what each `run_checks.ps1` step does; why the checker exists; what a deliberate failure check proves.
+- [x] The plan was approved and committed before any code.
+- [x] `run_checks.ps1` passes on the owner's computer, **and on a fresh clone** (step 4).
+- [x] Program output exactly as in 3.2; tests `71 checks, 0 failures`; CTest 2/2.
+- [x] The code checker finds 0 violations in the repository, including in its own code and in `run_checks.ps1`.
+- [x] The deliberate failure checks gave exactly the predicted failures.
+- [x] No warnings in the build (enforced by step 4).
+- [x] D-050 to D-059 recorded; handoff notes appended; prompts saved in `docs/prompts/`.
+- [x] The owner can explain: what each `run_checks.ps1` step does; why the checker exists; what a deliberate failure check proves. (Confirmed by the owner on 2026-10-20: "i agree".)
 
 ## 11. Things the owner should understand by the end
 1. Why every rule is now checked by a program, not a promise.
@@ -343,10 +343,59 @@ Work goes on a branch `stage-0-work` (R17). The owner commits and pushes it, Cla
 
 ## 12. What actually happened (filled in at the end)
 ```
-Date completed:
-Commit tagged stage-0-v2:
-Checks:
-Did everything go as planned?
+Date completed: 2026-10-20.
+Commit tagged stage-0-v2: the commit that adds this record, on branch stage-0-work, fast-forwarded into main.
+
+Checks (owner's computer, Windows, CLion 2026.2.3.1, GCC 15.2.0, clang-format 22.0.0git):
+  ALL CHECKS PASSED (83 preserved files, 71 checks, 32 code files checked, formatting checked)
+  The same line on a fresh clone of stage-0-work (full build from nothing).
+  Program output: the two lines of 3.2. CTest 2/2. Code checker: 32 files, 0 violations.
+  Independent builds with -Werror on Linux by Claude (GCC) and by ChatGPT: no warnings, all tests pass.
+
+Work, in order (branch stage-0-work):
+  e62b9b0  plan v1.2 (on main)            f1f8086  Stage 0a (5 checks)
+  4d34bdc  plan v1.3                      f15206a  Stage 0b (69 checks)
+  2a34eef  plan v1.4                      bd78c2e  follow-up 1 (70 checks)
+  a822c84  plan v1.5                      f83fa10  follow-up 2 (71 checks)
+
+Deliberate failure checks, all as predicted (after the corrections below):
+  DF0a    (owner)  one letter added to the frozen protocol -> stopped at [provenance], naming it.
+  DF0b-1  (Cursor) function limit 41 -> exactly the 13 predicted tests failed.
+  DF0b-2  (Cursor) else ignored -> exactly CK7.
+  DF0b-3  (Cursor) isLambdaIntroducer false -> exactly the 8 predicted tests (with CK34).
+  DF0b-6  (Cursor) no noexcept(...)/decltype(...) groups -> exactly CK51, CK52.
+  DF0b-7  (Cursor) tools/reference/ not exempt -> exactly FS4, FS10.
+  DF0b-4  (owner)  two declarations in main() -> stopped at [ctest]; code_checks failed;
+                   code_checker named src/main.cpp:16 STYLE-DECLARATIONS.
+  DF0b-5  (owner)  unused variable -> stopped at [build]: -Werror=unused-variable.
+  DF0b-8  (owner)  over-long line -> stopped at [format], naming src/main.cpp:14.
+
+Equivalence of the C++ checker with the Python reference: identical complete output on the
+original repository (141 files, 125 violations), on 800 mutated files, and on 30,000 random
+small files (equivalence_fuzz.py, 10 seeds).
+
+Did everything go as planned? No. The things that went differently, all recorded in the
+revision history and corrected openly:
+  1. run_checks.ps1 reached 198 of 200 lines in 0a (plan estimate 180) -> split by job (D-057).
+  2. Plan v1.0's checker rules missed several lambda and include cases (ChatGPT's review) -> v1.1.
+  3. Lambdas with noexcept(false) were missed (ChatGPT) -> v1.2.
+  4. DF0b-4's stopping point was wrongly given as [code]; CTest's code_checks runs first
+     (ChatGPT) -> [ctest].
+  5. DF0b-3's prediction left out CK34 (Cursor found it) -> v1.4.
+  6. Three checker files exceeded 200 lines in 0b; Cursor's own checker caught them and
+     Cursor shortened comments, without squeezing code (Claude read them in full).
+     Character helpers had been copied in four files -> one shared set (D-059).
+  7. Two bugs in Claude's Python reference (a '{' at position 0, and output order), found by
+     random-file comparison; the C++ already followed the plan -> reference fixed, CK54 (v1.5).
+  8. DF0b-4 as written (int a, b;) would stop at [build], because unused variables are errors;
+     Claude found this on a copy before the owner ran it, and the owner ran
+     "int a = 0, b = 0; return a + b;" instead, which reached [ctest] as predicted.
+  9. Two of Claude's hand-counted expected line numbers were wrong (CK50, CK52); the
+     reference's values were used. The calibration file count was misstated (66, not 141).
+No expected value was ever changed to make code pass.
+
+Room for later stages: declaration_rule.cpp (200), function_rule.cpp (199) and
+text_cleaner.cpp (199) are at the limit; any change to them needs a plan-approved split.
 ```
 
 ## 13. Instructions to the coding assistant

@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Stage 0 of the rebuild: project skeleton, test program, code checker and run script.** This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude. Stage 0 is complete apart from its gate: Stage 0a (project skeleton, test program and run script) and Stage 0b (the code checker and the complete run script) are built; the fresh-clone check, review and tag of the completion gate remain.
+**Stage 0 of the rebuild is complete.** This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude. **Stage 0 is complete** (tag `stage-0-v2`, October 20, 2026): a C++17 project skeleton, a quiet test program (71 checks), a code checker that enforces the size, style and architecture rules automatically, and `run_checks.ps1`, which runs every check and stops at the first failure. Next: Stage 1.
 
 Carried over unchanged, with recorded provenance ([`docs/PROVENANCE.md`](docs/PROVENANCE.md)): the project brief, the **frozen** Experiment 1 protocol v1.0 and its validation record, the owner's design inputs, the Python reference implementations, and the full history of the original repository's plans, decisions and prompts.
 
