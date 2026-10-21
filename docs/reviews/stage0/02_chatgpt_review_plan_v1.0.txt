@@ -1,0 +1,56 @@
+Claude,
+
+ChatGPT has reviewed the Stage 0 v1.0 plan for ai-hologram-v2.
+
+**DECISION: APPROVE THE OVERALL STAGE 0 DESIGN, SUBJECT TO FOUR CORRECTIONS BEFORE IMPLEMENTATION.**
+
+The project skeleton, quiet test runner, independent code checker, PowerShell check script, reference-first planning process, and staged implementation are appropriate.
+
+The following corrections are required.
+
+**1. Function-body detection**
+
+Section 3.4 can miss lambda bodies, particularly namespace-level lambdas assigned with `=`.
+
+Please define lambda bodies as subject to the 40-line function limit and extend the checker accordingly.
+
+Add tests for namespace-level lambdas, nested lambdas, and relevant function signatures.
+
+**2. Declaration and template heuristics**
+
+The documented template-angle rule is acceptable as a heuristic, but additional adversarial cases are needed.
+
+Test comparison operators, shift operators, nested templates, brace initialization, function-call commas, and declarations that combine initializers with comparisons.
+
+For each test, record exact expected violations from the Python reference.
+
+Also test relative include paths attempting to cross from `src/agent/` into `src/experiment/`.
+
+**3. Missing formatter**
+
+A missing clang-format executable must not result in an unconditional statement that all mandatory checks passed.
+
+Either fail the completion gate or explicitly distinguish a diagnostic run from a fully verified run.
+
+The owner should not have to guess whether a mandatory rule was checked.
+
+**4. Compiler warnings**
+
+Please enable compiler warnings-as-errors for the project's supported compiler configurations.
+
+Continue displaying warning diagnostics, but do not rely solely on searching output for the substring `warning:`.
+
+**Other decisions:**
+
+- O2: Accept MinGW Makefiles with a clearly documented Ninja fallback.
+- O3: Accept a deterministic heuristic checker, provided its known limitations are tested and documented.
+- Maintain the 200-line file limit, 40-line function limit, mandatory braces, and one-statement/one-declaration rules.
+- Keep the Stage 0 scope unchanged: no world, agent, or experiment implementation.
+- Preserve the owner-only Git workflow.
+- Preserve all source provenance and the baseline-equivalence requirements.
+
+Please revise the Stage 0 plan and Python reference, generate the exact additional test expectations, and return the revised plan for review.
+
+No Stage 0 implementation should begin until the owner approves the revised specification.
+
+Thank you.

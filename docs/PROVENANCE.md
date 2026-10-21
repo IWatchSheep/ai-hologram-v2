@@ -98,3 +98,32 @@ To verify a file against the original repository yourself: `git show 1b8c143:<so
 | `docs/EXPERIMENT_1_MIGRATION_ADDENDUM_M1.md` | `8a16df816d2729ee13910372099ef978617a57af14f08785a16cbbc02691a7a3` |
 
 The original C1 baseline (C++) is not copied: it is frozen at tag `stage-3` (commit `7587f38`) of the original repository, and the rebuilt C1 must pass the equivalence gate of Migration Addendum M1 before it is tagged `c1-baseline-v2`.
+
+## Golden values produced from the original code (added in Stage 1 of the rebuild, D-061)
+
+These files were **generated** on October 20, 2026 by a tool compiled only from the original repository's world code, `IWatchSheep/ai-hologram` commit `7587f38` (`src/world`, identical at `stage-1` and `89ea9b6`). The tool's source, the copied original files, their hashes, and the exact commands are in `tools/reference/stage1/orig_trace/README.md`. The Python reference reproduces both files byte for byte. Tests G1 and G2 of the Stage 1 plan bind the rebuilt C++ to them.
+
+| File | Produced from | SHA-256 |
+|---|---|---|
+| `tools/reference/stage1/golden/world_rules_golden.txt` | original `applyAction`, `outcomeName`, `isGoalReached`, `parseWorld` at `7587f38` | `f8e13c1d7f01e352ad5bd98e5459f0b5213d10422f096c026cdfb3a031d5c505` |
+| `tools/reference/stage1/golden/world_parse_golden.txt` | original `parseWorld`, `renderWorld` at `7587f38` | `205b7c078370426a175275b72ee7686280f362dd2ca944d5f96476e11f6512c9` |
+
+## Original source files kept for the golden tool (added in Stage 1 of the rebuild, ChatGPT's review)
+
+Copied **byte for byte** from `IWatchSheep/ai-hologram` commit `7587f38` (tag `stage-3`), path `src/<file>`; `src/world` is identical at `stage-1` and `89ea9b6`. Each hash was verified against `git show 7587f38:src/<file> | sha256sum` on October 20, 2026. They are reference material only: never built into the project, and exempt from the size and style rules.
+
+| File here | Source path at `7587f38` | SHA-256 |
+|---|---|---|
+| `tools/reference/stage1/orig_trace/original_src/demo/scripted_demo.cpp` | `src/demo/scripted_demo.cpp` | `4fd66f9f76946f833b0a92ea98777cb32052e4108e1956890693cdd90b5752ff` |
+| `tools/reference/stage1/orig_trace/original_src/demo/scripted_demo.h` | `src/demo/scripted_demo.h` | `62b3180257e20b3e65e9a4adfb66318389e08819aa0a020e5c7570c04a30f2ac` |
+| `tools/reference/stage1/orig_trace/original_src/world/action.cpp` | `src/world/action.cpp` | `354660e75eb4150fde4089033c0aff762ff9422fba11f0543a25b54c1d9fd713` |
+| `tools/reference/stage1/orig_trace/original_src/world/action.h` | `src/world/action.h` | `def1bf29f141b78f8c4e9f4daa17e6cf25509394949446ef95d625919d1261b3` |
+| `tools/reference/stage1/orig_trace/original_src/world/environment.cpp` | `src/world/environment.cpp` | `353947ef24e484c74c391dcd984e57fdba8cf7c0dd14b62425d54e8e603cfd34` |
+| `tools/reference/stage1/orig_trace/original_src/world/environment.h` | `src/world/environment.h` | `804497ef32d5dfd1c429602fa7218c20bd49579a85875e41fdb9607e92a6bb61` |
+| `tools/reference/stage1/orig_trace/original_src/world/position.h` | `src/world/position.h` | `21876ea74d3091b0a87797d81fe1726bd735d9acf032e1b1e284d1afe782a413` |
+| `tools/reference/stage1/orig_trace/original_src/world/rules.cpp` | `src/world/rules.cpp` | `9578a574e1d268c466470ec006b92aaa00c056944b8f7b0968a318fcb71d7ad4` |
+| `tools/reference/stage1/orig_trace/original_src/world/rules.h` | `src/world/rules.h` | `45a2b9ea2f03f7bf2b18ea6cf6837e7fcd6a4ced8c529d0d0f75bc44e63ec343` |
+| `tools/reference/stage1/orig_trace/original_src/world/world_state.cpp` | `src/world/world_state.cpp` | `38c09d368977e3b09bc94c293253a275890680d40c9681e87ecfc89a6ddab9c6` |
+| `tools/reference/stage1/orig_trace/original_src/world/world_state.h` | `src/world/world_state.h` | `50af28b5eb3ab3be77f055630a8e5bfb8a98cc8e418486b108f8bce6198e1130` |
+| `tools/reference/stage1/orig_trace/original_src/world/world_text.cpp` | `src/world/world_text.cpp` | `b3a227b06ed12ff06dbda0bb5b99ce0de84a11099952502e9238afb27cd0c30b` |
+| `tools/reference/stage1/orig_trace/original_src/world/world_text.h` | `src/world/world_text.h` | `ce8398ac6a57867aa1b0a21f53c4fac045a59a6f6adce6cd5ced8757e5680ff4` |

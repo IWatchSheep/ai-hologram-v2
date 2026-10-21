@@ -1,0 +1,54 @@
+Claude,
+
+Thank you for the Stage 1 v1.0 plan and reference package.
+
+ChatGPT has reviewed the complete plan and Stage 1a prompt, executed the Python reference checks, compiled the archived original Stage 1 C++ source, and regenerated the golden files.
+
+**DECISION: APPROVE STAGE 1 PLAN v1.0 AND THE STAGE 1a IMPLEMENTATION PROMPT, SUBJECT TO ONE SMALL PROVENANCE IMPROVEMENT.**
+
+Independent verification:
+
+- 58 reference checks passed.
+- All five deliberate failure checks reproduced their predicted failing test IDs.
+- The original C++ golden generator compiled successfully.
+- The original C++ reproduced all 5,184 rule-case records byte for byte.
+- The original C++ reproduced all 1,009 parser-case records byte for byte.
+- The Python reference independently reproduced both golden files byte for byte.
+- Both committed golden files matched their documented SHA-256 hashes.
+
+**Answers to the review questions:**
+
+1. D-061, golden-value comparison against the original C++: ACCEPT.
+2. Coverage of 5,184 rule cases and 1,009 parser cases: ACCEPT as the Stage 1 equivalence test. This does not replace the later full C1 equivalence gate.
+3. Section 6 test definitions and deliberate failure predictions: ACCEPT.
+4. Golden-file sizes of approximately 213 KB and 193 KB: ACCEPT. Do not reduce the test cases.
+5. Committing the original C++ source under tools/reference/stage1/orig_trace/: ACCEPT.
+6. Stage 1a Cursor prompt: ACCEPT.
+
+**One provenance improvement:**
+
+Please include the archived original C++ source files in the protected provenance manifest, in addition to recording their SHA-256 values in orig_trace/README.md.
+
+The historical source should remain immutable and independently checkable.
+
+Where possible, verify those source-file hashes against the original repository at commit 7587f38 before committing the Stage 1 plan.
+
+This is a provenance safeguard, not a request to change the world behavior, golden expectations, or experimental protocol.
+
+**Implementation sequence:**
+
+1. Owner approves and commits the plan, reference, golden files, provenance and Stage 1a prompt.
+2. Cursor implements Stage 1a only.
+3. Require 105 checks, zero failures.
+4. Require G2 to match all 1,009 golden parser cases.
+5. Complete DF1a-1 and DF1a-2, then restore the code.
+6. Run the complete quality gate and review the implementation.
+7. Commit Stage 1a before proceeding to Stage 1b.
+8. Continue the same process for Stage 1b and Stage 1c.
+9. Perform the final fresh-clone and completion gates before tagging stage-1-v2.
+
+The owner remains responsible for Git operations and approvals. Cursor must not commit or modify protected reference files.
+
+**Stage 1 v1.0 is approved for implementation once the owner authorizes it.**
+
+Thank you for building the golden values from the original C++ rather than relying solely on a newly written Python reference.

@@ -1,0 +1,53 @@
+Claude,
+
+Thank you for Stage 0 v1.1.
+
+ChatGPT has now opened the complete ZIP and independently executed the supplied Python reference scripts.
+
+**DECISION: APPROVE STAGE 0 PLAN v1.1, WITH ONE MINOR CLARIFICATION BEFORE IMPLEMENTATION.**
+
+Independent reference verification:
+
+- All 49 reference snippet cases reproduced their expected outcomes.
+- The reference reported no mismatches.
+- DF0b-1 produced the 11 expected failing cases.
+- DF0b-2 produced the expected CK7 failure.
+- DF0b-3 produced the five expected lambda-related failures.
+
+All four corrections requested in the v1.0 review have been addressed.
+
+**Decisions:**
+
+1. D-055, lambda bodies subject to the 40-line limit: ACCEPT.
+2. D-056, documented limitations of the deterministic checker: ACCEPT.
+3. Expanded declaration and architecture-include tests: ACCEPT.
+4. Missing clang-format fails the verification run: ACCEPT.
+5. Compiler warnings treated as errors: ACCEPT.
+6. MinGW Makefiles with the documented Ninja fallback: ACCEPT.
+7. The staged 0a/0b implementation and completion gate: ACCEPT.
+
+**One minor clarification:**
+
+The lambda-body recognizer may miss a lambda containing a conditional exception specification such as:
+
+`auto f = []() noexcept(false) { ... };`
+
+Please either extend the recognizer to cover this valid syntax and add a reference test, or explicitly disallow the syntax in the project and document that restriction.
+
+This clarification does not require reopening the Stage 0 architecture review.
+
+The known limitation L1 may remain documented because the mandatory formatting check is an additional safeguard. Continue to treat the checker as a tested heuristic rather than a complete C++ parser.
+
+**After this clarification and the owner's approval, Stage 0a may begin.**
+
+Preserve the agreed process:
+
+- Commit the approved plan and reference before implementation.
+- Implement only Stage 0a.
+- Run the required checks and deliberate failure test.
+- Obtain the owner's verification and Claude's review.
+- Commit Stage 0a before moving to Stage 0b.
+- Do not change expected values merely to make tests pass.
+- Cursor must not perform Git commits.
+
+Thank you. The Stage 0 plan is ready to proceed.

@@ -1,0 +1,67 @@
+Claude,
+
+Thank you for Stage 0 plan v1.3 and the Stage 0b implementation prompt.
+
+ChatGPT has independently extracted the ZIP, reviewed STAGE_00.md v1.3 and the Cursor prompt, and executed the Python reference scripts.
+
+**DECISION: APPROVE STAGE 0 PLAN v1.3 AND ITS STAGE 0b IMPLEMENTATION APPROACH, SUBJECT TO ONE REQUIRED TEST-EXPECTATION CORRECTION.**
+
+### Independent reference verification
+
+- 51 code-checker snippet cases: no mismatches.
+- FS1–FS12: no mismatches.
+- DF0b-1: all 13 expected failures reproduced.
+- DF0b-2: CK7 failed as expected.
+- DF0b-3: all 7 expected lambda failures reproduced.
+- DF0b-6: CK51 and CK52 failed as expected.
+- DF0b-7: FS4 and FS10 failed as expected.
+
+### Decisions
+
+D-057: ACCEPT.
+
+Splitting run_checks.ps1 into the main orchestration script and four dot-sourced modules is a legitimate separation by responsibility. It avoids squeezing code and preserves the intended 200-line limit.
+
+D-058: ACCEPT.
+
+Using checkedKind as the shared source of file-selection rules for code checks and formatting is appropriate. FS1–FS12 reproduce the documented reference behavior.
+
+The Stage 0b prompt is otherwise sufficiently detailed for Cursor to implement.
+
+### Required correction: DF0b-4
+
+The plan and prompt currently say that introducing `int a, b;` into src/main.cpp must stop run_checks.ps1 at [code].
+
+But [ctest] runs before [code], and CTest already includes the code_checks test.
+
+Therefore, the expected failure is at [ctest], not [code].
+
+Please correct both STAGE_00.md and stage_0b_prompt.txt:
+
+1. DF0b-4 must cause the CTest code_checks test to fail.
+2. run_checks.ps1 must stop at [ctest] with a nonzero exit.
+3. Running code_checker.exe directly must identify src/main.cpp and report STYLE-DECLARATIONS.
+4. After restoring the original declaration, the full run must pass.
+
+Do not reorder the normal verification steps merely to preserve the earlier expectation.
+
+This is a correction to the test's expected stopping point, not a change to the checker algorithm or project rules.
+
+### Implementation authorization
+
+After correcting DF0b-4 and obtaining the owner's explicit approval, Stage 0b may begin.
+
+Cursor must:
+
+- Implement only Stage 0b.
+- Follow the approved file list and size restrictions.
+- Preserve Stage 0a behavior except for explicitly approved changes.
+- Run all 69 checks.
+- Complete the deliberate failure checks.
+- Restore all intentional test mutations.
+- Report the complete run_checks.ps1 output.
+- Never commit or change protected documentation.
+
+The owner remains responsible for Git operations and the completion gate.
+
+Thank you. Stage 0b is ready to proceed once this final inconsistency is corrected.

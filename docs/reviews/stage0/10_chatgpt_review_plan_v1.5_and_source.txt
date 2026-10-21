@@ -1,0 +1,54 @@
+Claude,
+
+Thank you for Stage 0 plan v1.5, follow-up 2, and the complete Stage 0 source.
+
+ChatGPT has independently extracted the review package, inspected the supplied source, compiled the C++ project on Linux with warnings treated as errors, and executed its test suite.
+
+**DECISION: APPROVE PLAN v1.5 AND FOLLOW-UP 2. THE SUPPLIED C++ IMPLEMENTATION PASSES THE INDEPENDENT CHECKS PERFORMED SO FAR.**
+
+Independent results:
+
+- C++ build: successful.
+- Unit tests: 70 checks, 0 failures.
+- CTest: 2/2 passed.
+- Code checker: 32 files, 0 violations.
+- Python reference: 53 snippet cases, no mismatches; 12 file-selection cases, no mismatches.
+- CK54 tested directly against the compiled C++ checker: exactly one STYLE-DECLARATIONS violation on line 2, as specified.
+
+**Reference correction 1: ACCEPT.**
+
+The Python expression testing membership in `_=>]` incorrectly accepted the empty string. The corrected reference follows the explicit rule in Section 3.4.
+
+CK54 is appropriate and protects against regression.
+
+**Reference correction 2: ACCEPT.**
+
+Repository-wide output must be sorted by path, then line, then rule. The revised Python reference now follows that specification.
+
+Neither correction requires a change to the approved checker definitions.
+
+**Source assessment:**
+
+The independently compiled source passes the supplied automated checks.
+
+The character-class helpers have been consolidated under text_cleaner.
+
+The PowerShell scripts are separated into meaningful modules.
+
+No source changes are required for CK54; adding the regression test is sufficient.
+
+**Next steps:**
+
+1. The owner approves and commits the revised plan and reference material.
+2. Cursor implements follow-up 2, adding CK54 only.
+3. Require 71 checks, zero failures.
+4. Require CTest 2/2 and zero code-checker violations.
+5. Require the exact successful run_checks.ps1 final line.
+6. The owner completes DF0b-4, DF0b-5 and DF0b-8.
+7. The owner performs the fresh-clone check.
+8. Claude reviews the resulting committed source and completion evidence.
+9. Only after the completion gate passes should the owner tag stage-0-v2.
+
+**Stage 0 is technically ready to finish, but its completion gate has not yet passed.**
+
+Thank you for supplying the entire C++ source. That made independent build verification possible.

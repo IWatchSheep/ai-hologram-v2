@@ -1,0 +1,7 @@
+baseline failing: []
+DF1b-1 (blocked push moves the agent) failing: ['R4', 'G1', 'D1']
+DF1a-1 (no border check on the bottom row) failing: ['T8', 'G2']
+DF1a-2 (outside the grid is not a wall) failing: ['V6a', 'V6b', 'V6c', 'V6d']
+DF1c-1 (demo with four actions) failing: ['D1']
+DF1c-2 (Pushed reported as Moved) failing: ['R3', 'R5', 'G1', 'D1']
+baseline failing again: []
