@@ -7,6 +7,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ref_world as rw  # noqa: E402
+import ref_golden_readers as grd  # noqa: E402
 
 DEMO = rw.DEMO_LAYOUT
 STAR = ['##########', '#........#', '#........#', '#..A....*#', '#........#',
@@ -179,23 +180,51 @@ def check_environment():
     return c
 
 
+def golden_lines(name):
+    with open(os.path.join(GOLDEN_DIR, name)) as f:
+        lines = f.read().split('\n')
+    if lines and lines[-1] == '':
+        lines = lines[:-1]
+    return lines
+
+
 def golden_rules_ok():
-    import gen_golden
-    with open(os.path.join(GOLDEN_DIR, 'world_rules_golden.txt')) as f:
-        expected = f.read()
-    lines = expected.splitlines()
-    cases = [x for x in lines if ' -> ' in x]
-    return gen_golden.rules_golden_text() == expected and len(cases) == 5184
+    ok, cases, _ = grd.check_rules_golden_lines(golden_lines('world_rules_golden.txt'))
+    return ok and cases == 5184
 
 
 def golden_parse_ok():
-    import gen_golden
-    with open(os.path.join(GOLDEN_DIR, 'world_parse_golden.txt')) as f:
-        expected = f.read()
-    results = [gen_golden.parse_result_line(n, rows)
-               for n, rows in enumerate(gen_golden.parse_inputs(), 1)]
-    count = sum(1 for x in expected.splitlines() if x.startswith('case '))
-    return gen_golden.merged_parse_text(results) == expected and count == 1009
+    ok, cases, _ = grd.check_parse_golden_lines(golden_lines('world_parse_golden.txt'))
+    return ok and cases == 1009
+
+
+# Malformed golden files (v1.2, ChatGPT's safeguard): each must give exactly this
+# (ok, cases, problem); never a crash.
+EMPTY_WORLD_ERROR = 'expect ERROR ' + rw.MSG_LINES
+READER_CASES = {
+    'GN1': ('parse', ['case 1 lines 10'] + DEMO[:3], (False, 0, 'case 1: missing input lines')),
+    'GN2': ('parse', ['case 1 lines 2', 'a', 'b'], (False, 0, 'case 1: missing expect line')),
+    'GN3': ('parse', ['case 1 lines 0', 'result OK'], (False, 0, 'case 1: malformed expect line')),
+    'GN4': ('parse', ['case 1 lines -1', EMPTY_WORLD_ERROR], (False, 0, 'line 1: invalid case header')),
+    'GN5': ('parse', ['case 1 lines x', EMPTY_WORLD_ERROR], (False, 0, 'line 1: invalid case header')),
+    'GN6': ('parse', ['case 1 lines 0', EMPTY_WORLD_ERROR], (True, 1, '')),
+    'GR1': ('rules', ['layout L1'] + DEMO[:4], (False, 0, 'line 1: truncated layout L1')),
+    'GR2': ('rules', ['layout L1'] + DEMO + ['L1 3 3 5 3'], (False, 0, 'line 12: malformed case line')),
+    'GR3': ('rules', ['layout L1'] + DEMO + ['L9 3 3 5 3 East -> Moved 4 3 5 3 0'],
+            (False, 0, 'line 12: unknown layout L9')),
+    'GR4': ('rules', ['layout L1'] + DEMO + ['L1 3 3 5 3 East -> Moved 4 3 5 3'],
+            (False, 1, 'line 12: expected [L1 3 3 5 3 East -> Moved 4 3 5 3] '
+                       'actual [L1 3 3 5 3 East -> Moved 4 3 5 3 0]')),
+    'GR5': ('rules', ['layout L1'] + DEMO + ['L1 3 3 5 3 East -> Moved 4 3 5 3 0'], (True, 1, '')),
+}
+
+
+def check_readers():
+    c = {}
+    for cid, (kind, lines, expected) in READER_CASES.items():
+        reader = grd.check_parse_golden_lines if kind == 'parse' else grd.check_rules_golden_lines
+        c[cid] = reader(lines) == expected
+    return c
 
 
 DEMO_TEXT = ('\nInitial world:\n' + ''.join(r + '\n' for r in DEMO) + '\n'
@@ -214,6 +243,7 @@ def all_checks():
     c.update(check_environment())
     c['G1'] = golden_rules_ok()
     c['G2'] = golden_parse_ok()
+    c.update(check_readers())
     c['D1'] = rw.scripted_demo() == DEMO_TEXT
     return c
 

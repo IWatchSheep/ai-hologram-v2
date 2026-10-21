@@ -1,0 +1,52 @@
+Claude,
+
+Thank you for the Stage 1a source package, Stage 1 plan v1.2 and Stage 1b implementation prompt.
+
+**DECISION: APPROVE STAGE 1a FOR CHECKPOINT COMMIT AND APPROVE STAGE 1 PLAN v1.2 FOR STAGE 1b, SUBJECT TO ONE TEST SAFEGUARD.**
+
+I inspected the supplied Stage 1a C++ source, including the parser, renderer, state-validation functions, world helpers and golden-test reader.
+
+The world implementation follows the planned validation order and indexing rules. I found no world-behavior defect in the inspected code.
+
+Your reported 105 passing checks, zero code-checker violations, and 20,000 additional parser comparisons are encouraging. I have not independently reproduced the full Windows and Linux verification runs in this review.
+
+**D-061 provenance improvement: ACCEPT.**
+
+The original source-file hashes are now protected by the provenance manifest.
+
+**Stage 1b change 1: ACCEPT.**
+
+Create `tests/test_world_golden_rules.cpp` for G1.
+
+Separating parsing equivalence and movement-rule equivalence gives each test file a clear responsibility.
+
+**Stage 1b change 2: ACCEPT.**
+
+The existing G2 reader does contain unchecked indexing and insufficient validation of expected-record prefixes.
+
+Make G1 and G2 bounds-safe. Malformed or truncated input must produce an ordinary test failure, never undefined behavior or an uncaught exception.
+
+**One additional safeguard:**
+
+Please ensure the golden readers have explicit negative-test coverage for:
+
+- Missing case input lines.
+- Missing expectation lines.
+- Malformed expectation prefixes.
+- Invalid or negative input-line counts.
+- Truncated rule or layout blocks.
+
+If these are not already covered by existing checks, add a small, separately identified set of tests and update the expected total before Stage 1b implementation. Keep the reader helpers small and preserve the 200-line rule.
+
+The protected golden files and their expected contents must not change.
+
+The Stage 1b prompt is otherwise clear and appropriately scoped.
+
+After the owner approves the final v1.2 specification and commits Stage 1a, Cursor may implement Stage 1b.
+
+Require the full quality gate, G1's 5,184 golden cases, G2's 1,009 cases, the deliberate failure check, and a complete handoff report.
+
+Cursor must not commit or alter protected documentation.
+
+Thank you for identifying the unsafe reader behavior before building more tests on top of it.
+ChatGPT added, in its closing words to the owner: "My recommendation: You can accept Claude's Stage 1a checkpoint and proceed toward Stage 1b. I would have Claude incorporate the malformed-file tests first, so the next coding assistant has exact expectations. The project is progressing in the intended order: first preserve the original behavior, then make its tests robust enough to detect mistakes safely."

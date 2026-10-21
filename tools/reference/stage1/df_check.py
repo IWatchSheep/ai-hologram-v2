@@ -103,4 +103,36 @@ def apply_pushed_reported_as_moved(w, action):
 rw.apply_action = apply_pushed_reported_as_moved
 print('DF1c-2 (Pushed reported as Moved) failing:', checks.failing())
 rw.apply_action = original_apply
+
+# DF1b-2 (Cursor, sub-stage 1b): the parse reader stops checking the 'expect ' prefix.
+import ref_golden_readers as grd  # noqa: E402
+original_reader = grd.check_parse_golden_lines
+
+
+def reader_without_prefix_check(lines):
+    cases = 0
+    i = 0
+    while i < len(lines):
+        ok, n, k = grd.read_case_header(lines[i])
+        if not ok:
+            return False, cases, f'line {i + 1}: invalid case header'
+        i += 1
+        if i + k > len(lines):
+            return False, cases, f'case {n}: missing input lines'
+        rows = lines[i:i + k]
+        i += k
+        if i >= len(lines):
+            return False, cases, f'case {n}: missing expect line'
+        expected = lines[i][len('expect '):]
+        i += 1
+        actual = grd.format_parse_result(rows)
+        cases += 1
+        if actual != expected:
+            return False, cases, f'case {n}: expected [{expected}] actual [{actual}]'
+    return True, cases, ''
+
+
+grd.check_parse_golden_lines = reader_without_prefix_check
+print('DF1b-2 (no expect-prefix check) failing:', checks.failing())
+grd.check_parse_golden_lines = original_reader
 print('baseline failing again:', checks.failing())

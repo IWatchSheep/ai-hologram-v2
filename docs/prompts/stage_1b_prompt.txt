@@ -1,0 +1,102 @@
+STAGE 1b PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_01.md version 1.2.
+
+You are implementing Stage 1b of the rebuild, and ONLY Stage 1b.
+Stage 1a is finished and committed. Do not change its behaviour.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+2. Read docs/stages/STAGE_01.md v1.2: sections 3.4, 3.6, 3.7, 4, 5, 6.5, 6.6,
+   6.7, 7 (step 3), and the revision history row 1.2.
+3. Read tools/reference/stage1/ref_world.py (apply_action, Environment) and
+   checks.py (check_rules, check_environment) for the exact behaviour and the
+   exact test data. They are the authority where the plan uses words.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 3)
+Create exactly these files, and no others:
+  src/world/rules.h               src/world/rules.cpp
+  src/world/environment.h         src/world/environment.cpp
+  tests/test_rules.cpp            (R1a-d, R2-R7, R8a-c, R9, R10, R11a-b, N2)
+  tests/test_environment.cpp      (E1-E4)
+  tests/test_world_golden_rules.cpp   (G1, GR1-GR5)
+  tests/golden_readers.h          (GoldenCheck, checkParseGoldenLines,
+                                   checkRulesGoldenLines)
+  tests/golden_parse_reader.cpp   (the parse reader, moved out of
+                                   test_world_golden.cpp)
+  tests/golden_rules_reader.cpp   (the rules reader)
+Change exactly these existing files:
+  CMakeLists.txt                  add the two .cpp files to ai_hologram_core
+                                  and the three test files to ai_hologram_tests.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  tests/test_world_golden.cpp     G2 now calls checkParseGoldenLines (its old
+                                  reader code moves to golden_parse_reader.cpp);
+                                  add GN1-GN6. G2's result must not change.
+  tests/golden_files.h / .cpp     add parseInteger(text, value) - the one
+                                  integer test: optional '-', then digits only.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create the demo or change currentStage() or the program output (1c).
+
+DETAILS
+A. applyAction exactly as plan 3.4, in this order: validity (InvalidState,
+   state unchanged), wall at T (Blocked), T not the object (Moved), wall
+   beyond the object (Blocked, state unchanged), otherwise Pushed. It takes
+   const WorldState& and returns a NEW state (ActionResult {state, outcome});
+   it never changes its input. outcomeName gives Moved, Pushed, Blocked,
+   InvalidState.
+B. Environment: private state; the constructor copies the initial state;
+   step(action) applies the rules, stores the result and adds 1 to the step
+   count every time (InvalidState included); state() const; stepCount() const.
+C. The golden readers (plan 6.7, v1.2) follow
+   tools/reference/stage1/ref_golden_readers.py EXACTLY: the same order of
+   checks and the same problem messages, character for character. Each takes
+   the file's lines and returns GoldenCheck {ok, cases, problem}. Before
+   every access, check that the line exists; never read out of range; no
+   exceptions. G1 reads world_rules_golden.txt and passes only if ok and
+   cases == 5184; G2 the same with world_parse_golden.txt and 1009. On
+   failure the check's description includes the problem text (or the count).
+   GN1-GN6 and GR1-GR5: the exact lines and expected (ok, cases, problem)
+   are in plan 6.7 and in checks.py (READER_CASES); each is one check
+   comparing all three values.
+D. Each check's description starts with its id. Expected after 1b:
+   139 checks, 0 failures.
+E. Beginner comments (plan Section 9: enum class and switch, class and
+   private, constructors, const member functions, returning a new value
+   instead of changing the input, and why: later stages use the same function
+   to PREDICT without changing the real world). Three-part header in every
+   new file (Introduced in: Stage 1b (rebuild)).
+F. Format every new or changed C++ file with CLion's clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (98 preserved files, 139 checks, 58 code files checked, formatting checked)
+If any expected value or golden case does not match, do NOT change it: stop
+and report the id or line, the expected and the actual text (rule R22).
+
+DELIBERATE FAILURE CHECKS YOU DO (plan 7, step 3), one at a time:
+  DF1b-1  in applyAction, make a push into a wall still move the agent
+          (return the state with the agent moved, outcome Blocked).
+          Expected failing: exactly R4 and G1.
+  DF1b-2  remove the parse reader's "expect " prefix check.
+          Expected failing: exactly GN3.
+For each: make the one change, build, run cmake-build-checks\ai_hologram_tests.exe,
+copy the FAIL lines into your report, undo the change exactly. Confirm with
+run_checks.ps1 at the end that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the two deliberate
+   failure results, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
