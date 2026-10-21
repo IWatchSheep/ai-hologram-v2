@@ -36,6 +36,7 @@ endfunction()
 # The library holds the code shared by the program and the tests.
 add_library(ai_hologram_core STATIC
             src/core/project_info.cpp
+            src/demo/prediction_demo.cpp
             src/demo/scripted_demo.cpp
             src/compare/difference_text.cpp
             src/compare/state_difference.cpp

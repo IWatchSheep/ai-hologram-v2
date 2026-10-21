@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 2 of the rebuild (Brief Section 10, Stage 2: prediction and comparison) |
-| **Plan version** | 1.1 (one R4 finding from the Stage 2b review, applied in 2c) |
+| **Plan version** | 1.2 (a name clash found by Cursor in 2c, resolved by sharing one demo layout) |
 | **Date** | October 20, 2026 |
-| **Status** | **APPROVED.** v1.0 approved by ChatGPT and the owner (Stages 2a and 2b were built under it). v1.1 adds one shared helper (no change to behaviour, checks or counts); the owner agreed on 2026-10-20 ("yes i agree."), and ChatGPT sees it in its final review of the whole tree. |
+| **Status** | v1.1 **APPROVED** (the owner on 2026-10-20: "yes i agree."). **v1.2 corrects a planning error found by Cursor in 2c (no change to behaviour, checks or counts) and awaits the owner's agreement; ChatGPT sees it in its final review of the whole tree.** |
 | **Governing documents** | The brief v1.1; `docs/RULES.md` (R1–R24); Migration Addendum M1; `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 1, complete and tagged `stage-1-v2` (`5c2b3f9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 2 (plan `docs/history/ai-hologram/docs/stages/STAGE_02.md` v1.3, tag `stage-2`). Its code (`src/model`, `src/compare`, `src/demo/prediction_demo.*`) never changed from `stage-2` to `89ea9b6`, so it is also the prediction and comparison code inside the frozen C1 baseline (`stage-3`, `7587f38`). |
@@ -181,6 +181,7 @@ All new code is in namespace `aih`, compiled into `ai_hologram_core`.
 | `src/compare/difference_text.h` / `.cpp` | 30 / 70 | `describeDifferences` (3.5) | 2b |
 | `src/demo/prediction_demo.h` / `.cpp` | 25 / 130 | `runPredictionDemos` (3.7) | 2c |
 | `src/demo/scripted_demo.h` / `.cpp` | — | Exposes `demoLayout()`; the demo text is unchanged | 2c (changed) |
+| `tests/test_layouts.h` / `.cpp` | — | v1.2: its own `demoLayout()` (the same 10 lines) is removed; `test_layouts.h` includes `demo/scripted_demo.h`, so every test uses the one shared layout | 2c (changed) |
 | `src/main.cpp`, `src/core/project_info.cpp` | — | Header (3.8), then both demos; `currentStage()` returns 2 | 2c (changed) |
 | `tests/test_budget_counter.cpp` | 90 | BC1–BC4b | 2a |
 | `tests/test_world_model.cpp` | 180 | WM1a–WM8 | 2a |
@@ -198,7 +199,7 @@ All new code is in namespace `aih`, compiled into `ai_hologram_core`.
 - predictions only through `WorldModel::predict` and the counter;
 - wall comparison only in `compareStates`;
 - position text only in `difference_text`;
-- the demo layout only in `scripted_demo` (`demoLayout()`);
+- the demo layout only in `scripted_demo` (`demoLayout()`). Since v1.2, the tests use it too: `tests/test_layouts` no longer defines its own `demoLayout()`, and includes `demo/scripted_demo.h` instead;
 - text helpers (`splitWords`, `startsWith`, `parseInteger`, `readLines`, and from 2c `actionFromName`) only in `golden_files`;
 - test layouts only in `test_layouts`.
 
@@ -372,3 +373,4 @@ Every prompt says:
 |---|---|---|
 | 1.0 | 2026-10-20 | First draft. The reference, the reader, the 36-check mirror, the deliberate failure predictions and the golden file (produced from the original C++, reproduced byte for byte by the reference) were all built first (R9, R11). The demo text was checked against the original. |
 | 1.1 | 2026-10-20 | After Stage 2b. All 176 checks passed. G3 matched all 1,000 golden cases, and Claude compared the new comparison code with the original on 20,000 fresh random prediction cases: identical. One R4 finding: the lookup from an action name to an `Action` was written twice, once in each golden reader. In 2c it becomes one helper, `actionFromName`, in `golden_files`. No change to behaviour, checks, counts or golden values. |
+| 1.2 | 2026-10-20 | **A planning error, found by Cursor in 2c.** Since Stage 1, `tests/test_layouts` already defined `aih::demoLayout()` with exactly the same 10 lines. Plan 3.7 asked for a second `aih::demoLayout()` in `scripted_demo`, and two definitions of one function cannot link. Cursor stopped at `[build]` and reported it under NEEDS THE OWNER, proposing the fix adopted here: `tests/test_layouts` drops its copy and includes `demo/scripted_demo.h`, so there is one demo layout for the program and the tests (R4). Claude tried it on a copy: 177 checks, 0 failures; the program output is exactly 3.8; both demo parts are byte-identical to the original. No change to behaviour, checks, counts or golden values. Cursor finishes 2c with follow-up 1. |

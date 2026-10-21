@@ -1,9 +1,10 @@
 // Purpose: Implements readLines, reading a text file into
 // lines and removing carriage returns, parseInteger, the
 // one integer test shared by the golden readers, and
-// splitWords and startsWith, shared by both readers too.
+// splitWords and startsWith, shared by both readers too,
+// and actionFromName, the one action-name lookup.
 // Introduced in: Stage 1a (rebuild); parseInteger in 1b;
-// splitWords and startsWith in Stage 1c
+// splitWords and startsWith in Stage 1c; actionFromName in 2c
 // Architecture: std::ifstream reads the file one line at a
 // time with std::getline, which removes the newline but keeps
 // a carriage return left over from Windows line endings, so
@@ -17,6 +18,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
+#include "world/action.h"
 
 namespace aih {
 
@@ -94,6 +97,18 @@ bool startsWith(const std::string& line, const std::string& prefix) {
         return false;
     }
     return line.compare(0, prefix.size(), prefix) == 0;
+}
+
+bool actionFromName(const std::string& name, Action& action) {
+    const Action actions[] = {Action::North, Action::East, Action::South,
+                              Action::West};
+    for (const Action candidate : actions) {
+        if (actionName(candidate) == name) {
+            action = candidate;
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace aih

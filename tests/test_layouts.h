@@ -12,14 +12,11 @@
 #include <string>
 #include <vector>
 
+#include "demo/scripted_demo.h"
 #include "world/position.h"
 #include "world/world_state.h"
 
 namespace aih {
-
-// The DEMO layout: agent (3, 3), object (5, 3), destination
-// (8, 3), with two wall cells at (4, 6) and (5, 6).
-std::vector<std::string> demoLayout();
 
 // The STAR layout: the object stands on the destination (*).
 std::vector<std::string> starLayout();

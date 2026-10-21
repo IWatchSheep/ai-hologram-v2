@@ -23,20 +23,6 @@
 namespace aih {
 namespace {
 
-// Turns one of the four action names into its Action, by
-// comparing with actionName, the one place names are given.
-bool actionForName(const std::string& name, Action& action) {
-    const Action actions[] = {Action::North, Action::East, Action::South,
-                              Action::West};
-    for (const Action candidate : actions) {
-        if (actionName(candidate) == name) {
-            action = candidate;
-            return true;
-        }
-    }
-    return false;
-}
-
 // Reads "<id> <ax> <ay> <ox> <oy> <Action>" from a left side.
 bool readCaseLeft(const std::string& left, std::string& layoutId,
                   Position& agent, Position& object, Action& action) {
@@ -44,7 +30,7 @@ bool readCaseLeft(const std::string& left, std::string& layoutId,
     if (parts.size() != 6) {
         return false;
     }
-    if (!actionForName(parts[5], action)) {
+    if (!actionFromName(parts[5], action)) {
         return false;
     }
     std::vector<int> numbers;

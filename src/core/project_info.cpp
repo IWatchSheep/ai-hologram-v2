@@ -14,7 +14,7 @@ std::string projectName() {
 }
 
 int currentStage() {
-    return 1;
+    return 2;
 }
 
 }  // namespace aih

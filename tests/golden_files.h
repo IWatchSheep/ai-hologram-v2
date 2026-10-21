@@ -2,9 +2,10 @@
 // text file into lines for the golden tests, parseInteger,
 // the one integer test for the golden readers, and
 // splitWords and startsWith, the one word-splitting and
-// prefix tests shared by both golden readers.
+// prefix tests shared by both golden readers, and
+// actionFromName, the one action-name lookup.
 // Introduced in: Stage 1a (rebuild); parseInteger in 1b;
-// splitWords and startsWith in Stage 1c
+// splitWords and startsWith in Stage 1c; actionFromName in 2c
 // Architecture: File reading and these small text helpers
 // live here only (rule R4), so both golden readers of this
 // stage share exactly the same code instead of two copies.
@@ -14,6 +15,8 @@
 
 #include <string>
 #include <vector>
+
+#include "world/action.h"
 
 namespace aih {
 
@@ -37,6 +40,12 @@ std::vector<std::string> splitWords(const std::string& text);
 
 // Returns whether line starts with the whole prefix.
 bool startsWith(const std::string& line, const std::string& prefix);
+
+// Turns one of the four action names into its Action, by
+// comparing with actionName, the one place names are given.
+// On success it returns true and sets action; otherwise it
+// returns false.
+bool actionFromName(const std::string& name, Action& action);
 
 }  // namespace aih
 

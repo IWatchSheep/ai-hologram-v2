@@ -40,16 +40,7 @@ bool readHeader(const std::string& line, int& number, Action& action,
         parts[4] != "differences") {
         return false;
     }
-    const Action actions[] = {Action::North, Action::East, Action::South,
-                              Action::West};
-    bool found = false;
-    for (const Action candidate : actions) {
-        if (actionName(candidate) == parts[3]) {
-            action = candidate;
-            found = true;
-        }
-    }
-    if (!found) {
+    if (!actionFromName(parts[3], action)) {
         return false;
     }
     if (!parseInteger(parts[1], number)) {

@@ -9,8 +9,15 @@
 #define AI_HOLOGRAM_SRC_DEMO_SCRIPTED_DEMO_H
 
 #include <iosfwd>
+#include <string>
+#include <vector>
 
 namespace aih {
+
+// Returns the ten text lines of the demonstration layout.
+// This is the one place the layout is written (rule R4):
+// the scripted demo and both prediction demos use it.
+std::vector<std::string> demoLayout();
 
 // Runs the scripted demonstration, writing to out.
 // std::ostream& is a reference to an output stream: the

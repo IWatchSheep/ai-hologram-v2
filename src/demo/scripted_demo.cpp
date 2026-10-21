@@ -48,11 +48,14 @@ void printSteps(std::ostream& out, Environment& environment,
 
 }  // namespace
 
+std::vector<std::string> demoLayout() {
+    return {"##########", "#........#", "#........#", "#..A.O..D#",
+            "#........#", "#........#", "#...##...#", "#........#",
+            "#........#", "##########"};
+}
+
 void runScriptedDemo(std::ostream& out) {
-    const std::vector<std::string> layout = {
-        "##########", "#........#", "#........#", "#..A.O..D#", "#........#",
-        "#........#", "#...##...#", "#........#", "#........#", "##########"};
-    const ParseResult parsed = parseWorld(layout);
+    const ParseResult parsed = parseWorld(demoLayout());
     if (!parsed.world.has_value()) {
         out << "Demo layout is invalid: " << parsed.error << '\n';
         return;

@@ -1,0 +1,29 @@
+STAGE 2c FOLLOW-UP 1 (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_02.md version 1.2.
+
+Thank you for stopping at the demoLayout() name clash and reporting it under
+NEEDS THE OWNER instead of working around it. It was a planning error.
+The owner and Claude approve YOUR suggested resolution (option 1); it is now
+plan v1.2 (revision history row 1.2, and the R4 list in Section 4).
+
+Keep all the Stage 2c work already in the working tree. Follow AGENTS.md and
+.cursor/rules/ai-hologram.mdc as before.
+
+1. tests/test_layouts.h / .cpp (now on the allowed list): remove their own
+   demoLayout() declaration and definition, and add
+   #include "demo/scripted_demo.h" to test_layouts.h, so every existing test
+   caller uses the one shared demoLayout(). Change nothing else in those two
+   files, and no other test file.
+2. Format the two files with CLion's clang-format -i.
+3. Run powershell -ExecutionPolicy Bypass -File .\run_checks.ps1. It must end:
+   ALL CHECKS PASSED (111 preserved files, 177 checks, 79 code files checked, formatting checked)
+   and show "program output: 55 lines, 50 non-blank".
+4. Then do the deliberate failure check of the original 2c prompt:
+   DF2c-1  make the prediction demos use BudgetCounter(4) instead of 10.
+           Expected failing: exactly D2.
+   Undo it exactly and run run_checks.ps1 again.
+5. Append ONE handoff note covering all of Stage 2c (the original prompt and
+   this follow-up): what you built, every file created or changed with its
+   line count (all lines), the DF2c-1 result, the exact final line, and the
+   name clash you found.
+6. Report to the owner with the full run_checks.ps1 output. Do not commit.
