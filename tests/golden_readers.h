@@ -35,6 +35,11 @@ GoldenCheck checkParseGoldenLines(const std::vector<std::string>& lines);
 // its action to its layout and compared in full.
 GoldenCheck checkRulesGoldenLines(const std::vector<std::string>& lines);
 
+// Checks prediction_golden.txt lines: each case gives a
+// header, 10 belief lines, 10 true-world lines, a result
+// line and its difference lines, all rebuilt and compared.
+GoldenCheck checkPredictionGoldenLines(const std::vector<std::string>& lines);
+
 }  // namespace aih
 
 #endif  // AI_HOLOGRAM_TESTS_GOLDEN_READERS_H

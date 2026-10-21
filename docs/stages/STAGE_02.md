@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 2 of the rebuild (Brief Section 10, Stage 2: prediction and comparison) |
-| **Plan version** | 1.0 |
+| **Plan version** | 1.1 (one R4 finding from the Stage 2b review, applied in 2c) |
 | **Date** | October 20, 2026 |
-| **Status** | **APPROVED.** ChatGPT approved v1.0 with no changes, after building the repository, running the reference, reproducing all six deliberate failure predictions and verifying the golden file byte for byte. The owner agreed on 2026-10-20 ("I approve it."). Stage 2a may begin after this plan is committed. |
+| **Status** | **APPROVED.** v1.0 approved by ChatGPT and the owner (Stages 2a and 2b were built under it). v1.1 adds one shared helper (no change to behaviour, checks or counts); the owner agreed on 2026-10-20 ("yes i agree."), and ChatGPT sees it in its final review of the whole tree. |
 | **Governing documents** | The brief v1.1; `docs/RULES.md` (R1–R24); Migration Addendum M1; `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 1, complete and tagged `stage-1-v2` (`5c2b3f9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 2 (plan `docs/history/ai-hologram/docs/stages/STAGE_02.md` v1.3, tag `stage-2`). Its code (`src/model`, `src/compare`, `src/demo/prediction_demo.*`) never changed from `stage-2` to `89ea9b6`, so it is also the prediction and comparison code inside the frozen C1 baseline (`stage-3`, `7587f38`). |
@@ -199,7 +199,7 @@ All new code is in namespace `aih`, compiled into `ai_hologram_core`.
 - wall comparison only in `compareStates`;
 - position text only in `difference_text`;
 - the demo layout only in `scripted_demo` (`demoLayout()`);
-- text helpers (`splitWords`, `startsWith`, `parseInteger`, `readLines`) only in `golden_files`;
+- text helpers (`splitWords`, `startsWith`, `parseInteger`, `readLines`, and from 2c `actionFromName`) only in `golden_files`;
 - test layouts only in `test_layouts`.
 
 ## 5. Expected output
@@ -310,7 +310,7 @@ Base = parsed OPEN (agent (4,4), object (7,7), destination (1,8)).
 | 1 | — | The owner commits this plan, `tools/reference/stage2/`, the provenance update (111), the decisions and the 2a prompt, on a new branch `stage-2-work` | | **Owner, DF2-P:** add one character to `prediction_golden.txt`. It must stop at `[provenance]`; restore it with `git checkout`. |
 | 2 | **2a** | belief, prediction, budget counter, world model | BC, WM (157) | **Cursor, DF2a-1:** `tryUse` uses `>` instead of `>=`. Exactly BC2, BC4a, BC4b and WM3 must fail. **Cursor, DF2a-2:** the custom-model constructor ignores its model and always uses `applyAction`. Exactly WM6 must fail. |
 | 3 | **2b** | comparison, difference text, prediction-golden reader | CM, G3, PN (176) | **Cursor, DF2b-1:** the wall test becomes "predicted blocked and observed free" (the original Stage 2 check). Exactly CM5b, CM10 and G3 must fail. **Cursor, DF2b-2:** walls are reported column by column. Exactly CM6, CM10 and G3 must fail. |
-| 4 | **2c** | prediction demo, `demoLayout()`, main, `currentStage()` = 2, README | D2 (177) | **Cursor, DF2c-1:** the demos' budget limit is 4 instead of 10. Exactly D2 must fail. **Owner, DF2c-2:** in `difference_text.cpp`, change `", observed "` to `", seen "`. `run_checks.ps1` must stop at `[tests]` with exactly CM10, G3 and D2 failing. |
+| 4 | **2c** | prediction demo, `demoLayout()`, main, `currentStage()` = 2, README; **and the 2b review finding (v1.1):** the action-name lookup, written twice (`actionForName` in `golden_rules_reader.cpp` and a loop in `golden_prediction_reader.cpp`), becomes one helper, `actionFromName(name, action)`, in `golden_files` | D2 (177) | **Cursor, DF2c-1:** the demos' budget limit is 4 instead of 10. Exactly D2 must fail. **Owner, DF2c-2:** in `difference_text.cpp`, change `", observed "` to `", seen "`. `run_checks.ps1` must stop at `[tests]` with exactly CM10, G3 and D2 failing. |
 | 5 | — | Fresh clone of `stage-2-work`: `run_checks.ps1` passes | | |
 | 6 | — | ChatGPT reviews the **whole buildable tree** of the final commit (`git archive`); completion gate; tag `stage-2-v2`; merge into `main` | | |
 
@@ -371,3 +371,4 @@ Every prompt says:
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-10-20 | First draft. The reference, the reader, the 36-check mirror, the deliberate failure predictions and the golden file (produced from the original C++, reproduced byte for byte by the reference) were all built first (R9, R11). The demo text was checked against the original. |
+| 1.1 | 2026-10-20 | After Stage 2b. All 176 checks passed. G3 matched all 1,000 golden cases, and Claude compared the new comparison code with the original on 20,000 fresh random prediction cases: identical. One R4 finding: the lookup from an action name to an `Action` was written twice, once in each golden reader. In 2c it becomes one helper, `actionFromName`, in `golden_files`. No change to behaviour, checks, counts or golden values. |

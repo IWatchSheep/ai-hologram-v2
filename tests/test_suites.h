@@ -67,6 +67,15 @@ void runBudgetCounterTests(TestCounter& counter);
 // Runs the world model tests (WM1a to WM8).
 void runWorldModelTests(TestCounter& counter);
 
+// Runs the state comparison tests (CM1 to CM6).
+void runCompareStatesTests(TestCounter& counter);
+
+// Runs the prediction comparison tests (CM7 to CM10).
+void runComparePredictionsTests(TestCounter& counter);
+
+// Runs the prediction golden tests (G3, PN1 to PN7).
+void runPredictionGoldenTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

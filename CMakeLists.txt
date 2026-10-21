@@ -37,6 +37,8 @@ endfunction()
 add_library(ai_hologram_core STATIC
             src/core/project_info.cpp
             src/demo/scripted_demo.cpp
+            src/compare/difference_text.cpp
+            src/compare/state_difference.cpp
             src/model/budget_counter.cpp
             src/model/world_model.cpp
             src/world/action.cpp
@@ -76,6 +78,7 @@ ai_hologram_apply_warnings(code_checker)
 add_executable(ai_hologram_tests
                tests/golden_files.cpp
                tests/golden_parse_reader.cpp
+               tests/golden_prediction_reader.cpp
                tests/golden_rules_reader.cpp
                tests/test_code_checker_architecture.cpp
                tests/test_code_checker_declarations.cpp
@@ -85,7 +88,10 @@ add_executable(ai_hologram_tests
                tests/test_environment.cpp
                tests/test_layouts.cpp
                tests/test_budget_counter.cpp
+               tests/test_compare_predictions.cpp
+               tests/test_compare_states.cpp
                tests/test_main.cpp
+               tests/test_prediction_golden.cpp
                tests/test_project_info.cpp
                tests/test_rules.cpp
                tests/test_support.cpp
