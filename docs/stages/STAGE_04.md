@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 4 of the rebuild (Brief Section 10, Stage 4: fault injection and measurement) |
-| **Plan version** | 1.1.1 (1.1 after ChatGPT's review 02: two documentation clarifications; 1.1.1 corrects one stale table cell, Section 7 step 2) |
+| **Plan version** | 1.2 (1.1 after ChatGPT's review 02: two documentation clarifications; 1.1.1 corrects one stale table cell, Section 7 step 2; 1.2 gives the Stage 4 test groups their own header, `tests/stage4_suites.h`, because `tests/test_suites.h` is full) |
 | **Date** | October 21, 2026 |
-| **Status** | **APPROVED by ChatGPT** (review 02: "APPROVE THE STAGE 4 TECHNICAL DESIGN, SUBJECT TO TWO DOCUMENTATION CLARIFICATIONS AND THE OWNER'S EXPLICIT APPROVAL"; D-073 to D-080 accepted, D-077, D-079 and D-080 with conditions recorded here). v1.1 makes the two clarifications. **Agreed by the owner** (D-064, D-065): "yes I agree, when you say so I will run step 3." |
+| **Status** | **APPROVED by ChatGPT** (review 02: "APPROVE THE STAGE 4 TECHNICAL DESIGN, SUBJECT TO TWO DOCUMENTATION CLARIFICATIONS AND THE OWNER'S EXPLICIT APPROVAL"; D-073 to D-080 accepted, D-077, D-079 and D-080 with conditions recorded here). v1.1 makes the two clarifications. **Agreed by the owner** (D-064, D-065): "yes I agree, when you say so I will run step 3." v1.2 (one new header, R1): awaits the owner's agreement. |
 | **Governing documents** | The brief v1.1; the frozen protocol v1.0 (Phase A 4.2–4.4 and 5, Phase B 12.2–12.6, Sections 13.8, 13.12 and 14; amendments A3 and A4); **Migration Addendum M1** (M1.3, M1.4, M1.5); `docs/RULES.md` (R1–R24); `AGENTS.md`; decisions D-030 to D-045 of the original (carried over, unchanged), D-064 to D-072. |
 | **Builds on** | Stage 3, complete and tagged `stage-3-v2` (`ec4613f`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 4 (plan `docs/history/ai-hologram/docs/stages/STAGE_04.md` v1.2.2), **code-complete at `89ea9b6`** (618 checks; the original's Stage 4 gate and `stage-4` tag were never done, Section 12 of that plan). Its `src/experiment/` and `src/demo/fault_demo.*` are what this stage rebuilds. |
@@ -218,9 +218,11 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 | `tests/fault_gate.h` / `.cpp` | 40 / 75 | `kGoldenFaultCaseCount` (563), `runFaultGate` | 4g |
 | `tests/test_fault_reader.cpp` | 190 | FN1–FN10, FT1, FT2 | 4g |
 | `tests/test_fault_gate.cpp` | 120 | G8, G9, G10 | 4g |
-| `tests/test_suites.h`, `test_main.cpp`, `CMakeLists.txt` | — | new groups and files | 4a–4g (changed) |
+| `tests/stage4_suites.h` | 90 | the declarations of every Stage 4 test group (v1.2): the 4a–4c declarations move here from `tests/test_suites.h`, which reached the 200-line limit at 4c; 4d–4g add theirs here | 4d |
+| `tests/test_suites.h` | — | the 4a–4c group declarations (4a–4c); in 4d they move to `tests/stage4_suites.h` and it holds Stages 0–3 again | 4a–4d (changed) |
+| `tests/test_main.cpp`, `CMakeLists.txt` | — | new groups and files | 4a–4g (changed) |
 
-**75 new code files.** The code checker sees 178 → 187 (4a) → 196 (4b) → 211 (4c) → 219 (4d) → 229 (4e) → 242 (4f) → **254** (4g).
+**76 new code files** (75 in v1.1, and `tests/stage4_suites.h` in v1.2). The code checker sees 178 → 187 (4a) → 196 (4b) → 211 (4c) → 220 (4d) → 230 (4e) → 243 (4f) → **255** (4g).
 
 **R4, one helper per job:** `SeededRandom`; `actionIndex` (moved); `kActionOrder` (Stage 3); `positionText` (cells `(x, y)`); the fault-type, target, direction and rotation names (`fault_event`); `reportedAs` and `activationDelay`; the CSV field helpers; `computeDeadSquares` and `readDeadStatus` (Stage 3) for every shadow map and read; `computeFootprintForTwoPredictions` and `compareFootprint` (Stage 3) for every prediction comparison; the demonstration material (`fault_test_material`); the recording observer; `applyTraceSeeds`; the Stage 3 trace readers, printer, text and blocks.
 
@@ -246,7 +248,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 
   The 537 are Stage 3's 342 and the 195 of Section 6. `checks.py` mirrors all 195: `failing: none (195 checks)` (`checks_output_2026-10-21.txt`).
 - **CTest:** 2/2. **Code checker:** 0 violations (the file counts of Section 4). The test program takes about 15 seconds in the Debug build of `run_checks.ps1` (G8 replays 563 fault runs with scoring).
-- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (191 preserved files, 537 checks, 254 code files checked, formatting checked)`. The 191 are Stage 3's 163, the 26 original files of `orig_trace/original_src/` (24 of `src/experiment` and `fault_demo.h/.cpp`, at `89ea9b6`) and the 2 golden files.
+- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (191 preserved files, 537 checks, 255 code files checked, formatting checked)`. The 191 are Stage 3's 163, the 26 original files of `orig_trace/original_src/` (24 of `src/experiment` and `fault_demo.h/.cpp`, at `89ea9b6`) and the 2 golden files.
 
 ## 6. Tests
 Each check's description starts with its id. Exact values are in `checks.py`, which follows the original tests (`89ea9b6`, `tests/test_*`) check by check, with the original ids, except: the layout tests are **LY** (Stage 3 uses LG for the log); the demonstration-experiment tables FR2, FR3, SC5, SH5 (per run) and CSV2 are **not separate tests**, because the gate compares every one of their fields for the same 16 runs (cases `demo-*`) and FD1 compares CSV2's sixteen rows (D-077); the new checks are FR7, RL2, RL3, FN, FT and G8–G10. Fixtures are valid worlds (D is Stage 3's `demoWorld()`, D2 is D with a wall at (4, 3)).
@@ -361,7 +363,7 @@ Each sub-stage is committed by the owner on `stage-4-work`, after Claude's revie
 ## 10. Completion checklist (owner verification gate)
 - [ ] The plan was agreed and committed before any Stage 4 code.
 - [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone** made by the owner, with the exact final line of Section 5.
-- [ ] The program output is exactly Section 5, at 170 lines; the tests show `537 checks, 0 failures`; CTest 2/2; 0 checker violations (254 files).
+- [ ] The program output is exactly Section 5, at 170 lines; the tests show `537 checks, 0 failures`; CTest 2/2; 0 checker violations (255 files).
 - [ ] **After the run-loop change (`onObservation`), G4 and G5 still pass all 789 fault-free cases** (Stage 3's gate, exactly 789 required, G6 and G7 still passing).
 - [ ] **G8 passes all 563 fault cases** (exactly 563 required), and **G9 and G10 prove the exact-count guard**.
 - [ ] **The golden records are unchanged**: the five golden files of Stages 3 and 4 match `docs/PROVENANCE.sha256` (the `[provenance]` step).
@@ -400,6 +402,7 @@ Every prompt says:
 ## Revision history
 | Version | Date | Change |
 |---|---|---|
+| 1.2 | 2026-10-21 | One new header, reported at Claude's review of 4c: `tests/test_suites.h` reached exactly 200 lines (R1) with the 4a–4c group declarations, and 4d–4g add eleven more groups. Rather than squeeze it, the Stage 4 group declarations get their own header `tests/stage4_suites.h` (created in 4d; the 4a–4c declarations move into it unchanged). Code files 220 (4d), 230 (4e), 243 (4f), 255 (4g); the final line becomes `ALL CHECKS PASSED (191 preserved files, 537 checks, 255 code files checked, formatting checked)`. No change to behaviour, checks, check counts, golden values or the program output. |
 | 1.1.1 | 2026-10-21 | Correction of one stale table cell, reported by Cursor at 4a: Section 7 step 2 still named the first DF4a-1 idea (`below`'s rejection test with `>`), which Claude had dropped before review because it fails nothing (a draw exactly equal to the threshold practically never occurs). It now names the change that was checked on the reference (`df_check_output_2026-10-21.txt`) and given in the 4a prompt: `shuffle` from the front, exactly RN4. Also records the owner's agreement to v1.1 in the Status. No change to behaviour, checks, counts or golden values. |
 | 1.1 | 2026-10-21 | After ChatGPT's review 02 (design approved; D-073 to D-080 accepted, D-077, D-079 and D-080 with conditions). The two documentation clarifications: the 4a prompt names this approved version; the completion checklist states that G4/G5 must still pass all 789 fault-free cases after the run-loop change, that G8 must pass all 563 fault cases and G9/G10 prove the count guard, that the golden records stay unchanged, and that the completion evidence states D-077's coverage and the owner's fresh clone. Also recorded: how later readers handle Q7 (3.11), and the conditions of D-079 and D-080. No change to behaviour, checks, counts or golden values. |
 | 1.0 | 2026-10-21 | First draft. Built first (R9, R11): the golden fault traces from the original C++ at `89ea9b6` (563 cases, each cross-checked against the original `runWithFaults`); the reference, which reproduces them byte for byte, the original demonstration text and the program output; the 195-check mirror; the deliberate failure predictions. |

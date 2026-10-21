@@ -1,0 +1,150 @@
+STAGE 4d PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_04.md version 1.2.
+This file is docs/prompts/stage_4d_prompt.txt. (The file with a similar name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 4d of the rebuild, and ONLY Stage 4d: the scorer
+(the read-only view, claims, the event life, the committed-prediction shadow),
+connected to the run with faults. Stages 4a-4c are committed. Do not change
+their behaviour or Stage 3's.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/; read the reference files instead.
+2. Read docs/stages/STAGE_04.md: sections 1, 2, 3.6, 3.7, 3.8, 3.13, 4 (the
+   4d rows, the new tests/stage4_suites.h row, and the R4 list), 5, 6.3,
+   7 (step 5), 9, 13 and the revision history entry for v1.2.
+3. Read tools/reference/stage4_rebuild/ref_scorer.py: ScoredView, view_of,
+   EventScore, RunScore, claim_value_is_true, element_of_event, same_element,
+   source_of, and the Scorer class EXCEPT the observer callbacks (attach_view,
+   awaiting, on_evaluation, on_dead_read, on_heuristic, observed evaluations)
+   and the shadow computations shadow_input, evaluation_effective and
+   shadow_map, which are 4e. Read ref_faults.run_with_faults for how the
+   scorer is called, and checks.py sections "4d" (check_scorer, wall_record,
+   check_scorer_life). They are the authority where the plan uses words. The
+   original's declarations are in tools/reference/stage4_rebuild/orig_trace/
+   original_src/experiment/scorer.h (and scorer.cpp, scorer_life.cpp,
+   scorer_commit.cpp): read them for names; our file layout is the plan's.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 5)
+Create exactly these files, and no others:
+  src/experiment/scorer_types.h       ScoredView, EndState, EventScore, RunScore
+  src/experiment/scorer.h             viewOf, claimValueIsTrue, Scorer
+  src/experiment/scorer.cpp           views, claimValueIsTrue, activeNow, the
+                                      phase entry points, finish
+  src/experiment/scorer_claims.cpp    endPhase steps (1) and (2): claims and
+                                      mismatch records
+  src/experiment/scorer_life.cpp      endPhase step (3): the event life
+  src/experiment/scorer_commit.cpp    committedEffective, afterDecide
+  tests/test_scorer.cpp               (SC1, SC2, SC3)
+  tests/test_scorer_life.cpp          (SC4, SC6)
+  tests/stage4_suites.h               the declarations of every Stage 4 test
+                                      group (plan v1.2, see below)
+Change exactly these existing files:
+  src/experiment/fault_run.h, fault_run.cpp, fault_run_naive.cpp
+                                  call the scorer (plan 3.6 steps 2, 3 and 5);
+                                  FaultRunResult gains the event scores and the
+                                  run score; the extra watchers also receive
+                                  the scorer as a const reference.
+  tests/test_suites.h             MOVE the eleven Stage 4 group declarations
+                                  (runSeededRandomTests ... runFaultRunMoreTests)
+                                  out of it, unchanged, into
+                                  tests/stage4_suites.h. Nothing else changes.
+  tests/test_main.cpp             include tests/stage4_suites.h; add the new
+                                  groups to the Stage 4 group function.
+  CMakeLists.txt                  add the four new src .cpp files to
+                                  ai_hologram_core and the two new test .cpp
+                                  files to ai_hologram_tests (a header is not
+                                  listed). Do NOT run clang-format on it.
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create anything of 4e-4g: no observer attached by the fault run, no
+observe flag, no shadow evaluation of observed computations (shadow.h/.cpp,
+scorer_observe.cpp), no CSV, no demonstration, no gate. Do not change
+currentStage() or the program output. src/agent/ must never include
+src/experiment/ (R7).
+
+WHY tests/stage4_suites.h (plan v1.2)
+tests/test_suites.h reached exactly 200 lines (R1) at 4c, and 4d-4g add eleven
+more groups. Rather than squeeze it, every Stage 4 group is declared in
+tests/stage4_suites.h: the 4a-4c declarations move there with their comments
+unchanged, and from now on each sub-stage adds its groups there. Give it the
+three-part header (Introduced in: Stage 4d (rebuild)) and include only what it
+needs (test_support.h for TestCounter).
+
+WHAT 4d'S RUN WITH FAULTS CONTAINS
+As plan 3.6, except item 4 (the observer, 4e): the hook is
+scorer.endPhaseA(view, t); injector.atActivationPoint(parts, t);
+scorer.afterActivation(view, records, t). afterDecision calls
+scorer.afterDecide(view, decision) and then the extra watcher; C1's
+afterFinalCheck calls scorer.endFinalCheck(view) and then the extra watcher.
+After runSingleAgent returns: the hook is emptied, scorer.finish(view), and the
+FaultRunResult is built (the RunResult as returned, decisionSteps, the
+activation records, the event scores, the run score). The scorer only reads:
+it never writes to an agent.
+
+DETAILS
+A. ScoredView: read-only pointers to belief, action model, "not dead" and
+   "dead" overrides, corrections, mismatches and the committed prediction
+   (the last three null for C0); viewOf for each agent state.
+B. claimValueIsTrue exactly as plan 3.8 and ref_scorer.claim_value_is_true,
+   including the object claim (D-042: trueHistory[s - 2], s the latest
+   mismatch record's step; false when there is no mismatch, s < 2, or out of
+   range).
+C. The Scorer exactly as plan 3.7 and ref_scorer.Scorer: activeNow; the phase
+   entry points (endPhaseA, afterActivation, endFinalCheck, afterDecide,
+   finish); endPhase in the order (1) claims, (2) mismatch records, (3) the
+   event life, then the committed causes cleared; committedEffective (the
+   committed-prediction shadow, built inline as the reference does, using the
+   Stage 3 footprint helpers computeFootprintForTwoPredictions and
+   compareFootprint, R4); justified safe stops in afterDecide. Use the shared
+   names (fault_event) and helpers; write no new copies (R4).
+D. Tests exactly as plan 6.3 and checks.py section 4d: SC1 (3), SC2 (2),
+   SC3 (6), SC4 (7), SC6 (2) = 20 new checks. Every expected value is copied
+   from checks.py; SC4 is the hand-driven event life of check_scorer_life,
+   step by step. Use the shared helpers (tests/fault_test_material,
+   agent test support), R4. Each check's description starts with its id.
+   Expected after 4d: 465 checks, 0 failures.
+E. Three-part header in every new file (Introduced in: Stage 4d (rebuild)).
+   Beginner comments: what a phase is and why a claim is judged against the
+   events active at the START of its phase; what "active", "Corrected" and
+   "Overwritten" mean; why the scorer only reads the agent (it measures, it
+   must never help).
+F. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (191 preserved files, 465 checks, 220 code files checked, formatting checked)
+and the program output must be unchanged (102 lines, 94 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 5):
+  DF4d-1  in endPhase step (1), judge a claim against the events active at
+          the END of its phase (active now and activated) instead of the
+          events active at its start.
+          Expected failing, exactly these 4 checks: SC1 (the event) and
+          SC1 (the run), SC4 (corrected at step 3) and SC4 (the totals at
+          the end). Nothing else.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
