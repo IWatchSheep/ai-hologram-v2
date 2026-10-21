@@ -1,0 +1,102 @@
+AI Hologram v2 -- Stage 3
+Grid world with a competent single agent (C1), a naive agent (C0) and scripted demonstrations.
+No faults are injected, no two-agent reasoning exists, and no experiment is run.
+
+Initial world:
+##########
+#........#
+#........#
+#..A.O..D#
+#........#
+#........#
+#...##...#
+#........#
+#........#
+##########
+
+Step 1: East -> Moved
+Step 2: East -> Pushed
+Step 3: East -> Pushed
+Step 4: East -> Pushed
+Step 5: East -> Blocked
+
+Final world:
+##########
+#........#
+#........#
+#......A*#
+#........#
+#........#
+#...##...#
+#........#
+#........#
+##########
+Goal reached: yes
+Steps taken: 5
+
+Prediction demo 1: correct belief
+Step 1: East | predicted Moved, observed Moved | match
+Step 2: East | predicted Pushed, observed Pushed | match
+Step 3: East | predicted Pushed, observed Pushed | match
+Step 4: East | predicted Pushed, observed Pushed | match
+Step 5: East | predicted Blocked, observed Blocked | match
+Mismatches: 0
+Model evaluations used: 5
+
+Prediction demo 2: belief wrongly includes a wall at (6, 3)
+Step 1: East | predicted Moved, observed Moved | MISMATCH
+  - wall at (6, 3): predicted blocked, observed free
+Step 2: East | predicted Pushed, observed Pushed | match
+Step 3: East | predicted Pushed, observed Pushed | match
+Step 4: East | predicted Pushed, observed Pushed | match
+Step 5: East | predicted Blocked, observed Blocked | match
+Mismatches: 1
+Model evaluations used: 5
+Note: in these demos the belief is replaced by the observation after every step.
+How beliefs are corrected is decided in Stage 3.
+
+Single-agent demonstrations use illustrative settings: budget 200 per step,
+safe-stop limit 5, step limit 100, active-test delay 3 (not the experiment's values).
+
+C1 demo 1: correct belief
+Plan: search found a plan of 4 actions
+Step 1: East | predicted Moved, observed Moved | match
+Step 2: East | predicted Pushed, observed Pushed | match
+Step 3: East | predicted Pushed, observed Pushed | match
+Step 4: East | predicted Pushed, observed Pushed | match
+Result: Success after 4 world steps, 0 safe stops
+Mismatches: 0
+Corrections: 0 (0 verified)
+Model evaluations used: 19
+
+C1 demo 2: belief wrongly has no wall at (4, 3)
+Plan: search found a plan of 4 actions
+Step 1: East | predicted Moved, observed Blocked | MISMATCH
+  - investigation: wall at (4, 3) believed free, recorded blocked (source S2)
+  - correction 1: wall at (4, 3) set to blocked: CONSISTENT
+Plan: fallback toward the best state found (10 actions)
+Step 2: North | predicted Moved, observed Moved | match
+Step 3: East | predicted Moved, observed Moved | match
+Step 4: East | predicted Moved, observed Moved | match
+Plan: active test of correction 1 (2 actions)
+Step 5: West | predicted Moved, observed Moved | match
+Step 6: South | predicted Blocked, observed Blocked | match
+  - correction 1: VERIFIED
+Plan: search found a plan of 12 actions
+Step 7: East | predicted Moved, observed Moved | match
+Step 8: South | predicted Pushed, observed Pushed | match
+Step 9: South | predicted Pushed, observed Pushed | match
+Step 10: West | predicted Moved, observed Moved | match
+Step 11: South | predicted Moved, observed Moved | match
+Step 12: East | predicted Pushed, observed Pushed | match
+Step 13: East | predicted Pushed, observed Pushed | match
+Step 14: East | predicted Pushed, observed Pushed | match
+Step 15: South | predicted Moved, observed Moved | match
+Step 16: East | predicted Moved, observed Moved | match
+Step 17: North | predicted Pushed, observed Pushed | match
+Step 18: North | predicted Pushed, observed Pushed | match
+Result: Success after 18 world steps, 0 safe stops
+Mismatches: 1
+Corrections: 1 (1 verified)
+Model evaluations used: 414
+Note: demo 2's wrong belief is hand-written; it is not fault injection.

@@ -23,7 +23,7 @@ AI Hologram tests whether two cooperating reasoning agents, a **spatial agent** 
 - Edit `docs/`, `tools/reference/`, `LICENSE`, `.gitignore`, `.gitattributes`, `.clang-format`, `.cursor/` or this file.
 - Change an expected value in a test to make it pass. Stop and report the actual value; Claude and the owner decide whether the code, the reference or the plan is wrong (R22).
 - Weaken C1 (the baseline) or adjust anything because of how a two-agent condition performs.
-- Run any agent on pilot layouts (seeds 900000–900039) or confirmatory layouts (100000–100399). Development uses demonstration seeds 500000–500009 and hand-built worlds only (R21).
+- Run any agent on pilot layouts (seeds 900000–900039) or confirmatory layouts (100000–100399). Development uses demonstration seeds 500000–500009, hand-built worlds, and deterministic synthetic verification fixtures from an independent generator only (R21, clarified by D-070).
 - Create scratch, debug or temporary files; rename, move or delete files.
 
 ## 5. Coding rules (details in `docs/RULES.md`)

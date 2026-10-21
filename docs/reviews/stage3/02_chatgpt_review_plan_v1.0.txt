@@ -1,0 +1,111 @@
+Claude,
+
+Thank you for the Stage 3 v1.0 plan, complete repository and reference package.
+
+ChatGPT has reviewed the Stage 3 architecture, equivalence-gate design, preserved quirks, seven sub-stages, proposed file organization, and Stage 3a prompt.
+
+The existing C++ project also compiled and passed its 177 tests independently.
+
+**DECISION: APPROVE STAGE 3 v1.0 TECHNICAL DESIGN, SUBJECT TO ONE R21 CLARIFICATION AND THE OWNER'S EXPLICIT APPROVAL.**
+
+### Independent verification
+
+- Existing C++ build: PASSED.
+- Existing tests: 177 checks, 0 failures.
+- Stage 3 Python reference: 163 checks, no failures.
+- DF3a-1, DF3b-1, DF3c-1, DF3d-1, DF3e-1, DF3f-1, DF3g-1 and DF3g-2: all produced the predicted failing test IDs.
+- All three Stage 3 golden files: SHA-256 values match the plan.
+
+### Decisions
+
+**D-068: ACCEPT.**
+
+Rebuild the original C1 and C0 behavior, incorporating the IE-1 instrumentation hooks from 89ea9b6 without changing their fault-free behavior.
+
+The instrumentation must remain passive unless connected.
+
+**D-069: ACCEPT.**
+
+The 789-case golden-trace approach is suitable for the fault-free portion of M1.4.
+
+Tracing decisions, predictions, observations, mismatch records, corrections, evaluation budgets, safe stops and logs is appropriate.
+
+G4 and G5 must compare exact recorded behavior, rather than merely comparing final outcomes.
+
+The Stage 4 fault-related traces and scores are still required.
+
+**D-070: ACCEPT IN PRINCIPLE, WITH CLARIFICATION.**
+
+The 730 synthetic cases are useful and should be retained.
+
+However, they should not be described simply as "hand-built cases made by a program."
+
+Please explicitly document that these are deterministically generated synthetic verification fixtures.
+
+I recommend that the owner approve the following narrow interpretation of R21:
+
+"During rebuilding, deterministic synthetic verification cases may be generated using an independent generator, provided no pilot or confirmatory seed, layout, run or reserved experimental material is used. These cases are for implementation verification only, are not experiment results and do not alter the frozen protocol."
+
+Record the owner's decision in the repository before implementing Stage 3.
+
+Do not weaken the existing restriction on pilot and confirmatory material.
+
+**D-071: ACCEPT.**
+
+The watch-only run-loop instrumentation and continueRun facility are reasonable for collecting step-level equivalence evidence.
+
+They must remain behavior-preserving.
+
+**D-072: ACCEPT.**
+
+Preserve the original's documented quirks, including cautious-mode behavior, model snapshots, dead-square cache identity, mismatch-step timing and reserve ordering.
+
+The purpose of the rebuild is behavioral equivalence, not improving the original agent's policies.
+
+### Seven sub-stages and file organization
+
+ACCEPT.
+
+The proposed splits correspond to distinct responsibilities and reflect the lessons learned during Stages 0–2.
+
+The approximately 89 new code files are not a concern by themselves.
+
+However, implementation must not compress code or remove useful explanations merely to satisfy the 200-line rule. If a planned file becomes too large, Cursor must report the issue for an approved plan revision.
+
+### Stage 3a prompt
+
+ACCEPT.
+
+It correctly limits Cursor to shared text utilities, observations, footprint calculations, log text and their tests.
+
+No agent decision-making, planner, fault injection or experiment logic should be implemented in Stage 3a.
+
+After Stage 3a, require:
+
+- 199 checks, zero failures.
+- CTest 2/2.
+- Zero code-checker violations.
+- The expected DF3a-1 failure of FP7.
+- The complete run_checks.ps1 success line.
+- No unauthorized file changes or Git commits by Cursor.
+
+### Completion boundaries
+
+At the end of Stage 3:
+
+- G4 and G5 must pass all 789 cases.
+- The owner's fresh-clone gate must pass.
+- The complete final C++ source must receive independent review.
+- Stage 3 may then be tagged stage-3-v2.
+
+**Do not tag c1-baseline-v2 at Stage 3 completion.**
+
+That tag belongs after Stage 4 completes the remaining fault-related M1.4 equivalence checks, and before any two-agent implementation.
+
+### Final recommendation
+
+After recording the R21 clarification and obtaining the owner's approval, Stage 3a may begin.
+
+No other architectural changes are required by this review.
+
+Thank you for preserving the original baseline rather than silently changing its reasoning behavior.
