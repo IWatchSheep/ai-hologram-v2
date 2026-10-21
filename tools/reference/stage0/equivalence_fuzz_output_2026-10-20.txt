@@ -1,0 +1,11 @@
+seed 1: code checks: 3000 files, 4484 violations: IDENTICAL
+seed 2: code checks: 3000 files, 4580 violations: IDENTICAL
+seed 3: code checks: 3000 files, 4502 violations: IDENTICAL
+seed 4: code checks: 3000 files, 4580 violations: IDENTICAL
+seed 5: code checks: 3000 files, 4726 violations: IDENTICAL
+seed 6: code checks: 3000 files, 4373 violations: IDENTICAL
+seed 7: code checks: 3000 files, 4542 violations: IDENTICAL
+seed 8: code checks: 3000 files, 4683 violations: IDENTICAL
+seed 9: code checks: 3000 files, 4628 violations: IDENTICAL
+seed 10: code checks: 3000 files, 4458 violations: IDENTICAL
+all identical

@@ -1,0 +1,24 @@
+STAGE 0b FOLLOW-UP 2 (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_00.md version 1.5.
+
+Thank you for follow-up 1. Claude compared your checker with the reference on
+30,000 random files and found two differences, both bugs in Claude's Python
+reference, not in your C++ (plan revision history row 1.5). The reference is
+fixed. This follow-up adds ONE test and changes no checker code.
+Follow AGENTS.md and .cursor/rules/ai-hologram.mdc as before.
+
+1. Read docs/stages/STAGE_00.md v1.5: revision history row 1.5 and row CK54
+   in 6.2. Read CK54's text in tools/reference/stage0/snippets.py.
+2. In tests/test_code_checker_declarations.cpp add CK54, next to CK53, with
+   the exact text from snippets.py:
+     "{\n    int a, b;\n}\nint x\n"
+   path "src/a.cpp", kind Cpp, expected exactly [(2, STYLE-DECLARATIONS)].
+   Description starts with "CK54:". Do not change any file in
+   tools/code_checker/. If CK54 fails, do NOT change the expected value or
+   the checker: stop and report the actual result (rule R22).
+3. Run CLion's clang-format -i on that one test file only.
+4. Run powershell -ExecutionPolicy Bypass -File .\run_checks.ps1. It must end:
+   ALL CHECKS PASSED (83 preserved files, 71 checks, 32 code files checked, formatting checked)
+5. Append a short handoff note (follow-up 2): the change, the file's line count
+   (all lines), the final line. Report to the owner with the full
+   run_checks.ps1 output. Do not commit.

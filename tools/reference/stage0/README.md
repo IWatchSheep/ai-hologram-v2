@@ -5,7 +5,8 @@ Claude's Python reference for the Stage 0 code checker, built and run **before**
 | File | What it is |
 |---|---|
 | `ref_code_checker.py` | The checker's rules, exactly as plan Section 3.4 describes them. `python3 ref_code_checker.py <folder>` checks a repository folder, choosing files with `checked_kind` (plan 3.4), and prints `code checks: <files> files, <violations> violations`. Run the scripts from this folder. |
-| `snippets.py` | CK1–CK27 and CK29–CK53 (CK28 is a formatting test in C++ only): the snippet texts and their expected (line, rule) lists. Running it prints each result and `mismatches: none (52 cases)`; it also holds FS1–FS12 (which files are checked) and prints `file-kind mismatches: none (12 cases)`. |
+| `snippets.py` | CK1–CK27 and CK29–CK54 (CK28 is a formatting test in C++ only): the snippet texts and their expected (line, rule) lists. Running it prints each result and `mismatches: none (53 cases)`; it also holds FS1–FS12 (which files are checked) and prints `file-kind mismatches: none (12 cases)`. |
+| `equivalence_fuzz.py` | Compares the built C++ checker with this reference on 3,000 random small files per seed: `python3 equivalence_fuzz.py <code_checker> <scratch folder> [seeds]`. Recorded run: `equivalence_fuzz_output_2026-10-20.txt` (10 seeds, all identical). |
 | `df_check.py` | The deliberate failure checks DF0b-1, DF0b-2, DF0b-3, DF0b-6 and DF0b-7 tried on the reference first (R11). |
 | `snippets_output_2026-10-20.txt`, `df_check_output_2026-10-20.txt` | The recorded outputs. |
 
@@ -16,7 +17,7 @@ Predicted and confirmed on the reference:
 - DF0b-6 (no `noexcept(...)`/`decltype(...)` groups in lambda heads): exactly CK51, CK52 fail.
 - DF0b-7 (`tools/reference/` no longer exempt): exactly FS4, FS10 fail.
 
-Plan version: STAGE_00 v1.4 (v1.4: CK53, DF0b-3 corrected; v1.3: which files are checked, `checked_kind`; v1.1: lambda bodies, lambda-aware declarations, include paths; v1.2: `noexcept(...)` and `decltype(...)` in lambda heads).
+Plan version: STAGE_00 v1.5 (v1.5: two reference bugs fixed, a `{` at position 0 and output order, CK54; v1.4: CK53, DF0b-3 corrected; v1.3: which files are checked, `checked_kind`; v1.1: lambda bodies, lambda-aware declarations, include paths; v1.2: `noexcept(...)` and `decltype(...)` in lambda heads).
 
 Calibration: on the original repository's C++ at `89ea9b6` (141 `.h`/`.cpp` files) the reference finds 125 violations (10 SIZE-FILE, 28 SIZE-FUNCTION, 58 STYLE-BRACES, 29 STYLE-STATEMENTS), all genuine on review.
 

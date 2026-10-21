@@ -182,7 +182,7 @@ def check_declarations(cleaned, toks):
                     prevc = cleaned[j] if j >= 0 else ''
                     if prevc == ']' and closes_lambda_intro(cleaned, j):
                         comma_line = None; i += 1; continue
-                    if prevc.isalnum() or prevc in '_=>]':
+                    if prevc != '' and (prevc.isalnum() or prevc in '_=>]'):
                         # could be an initializer like x{1, 2} or = {...}: track as nesting
                         brc += 1; i += 1; continue
                     comma_line = None
@@ -364,20 +364,22 @@ def format_v(path, vs):
 
 
 if __name__ == '__main__':
+    # Output is sorted by path over the WHOLE repository (plan 3.4), not
+    # folder by folder (corrected in plan v1.5).
     root = sys.argv[1]
-    total = 0
-    files = 0
+    checked = []
     for d, dirs, fs in os.walk(root):
-        dirs[:] = sorted(x for x in dirs if x != '.git')
-        for f in sorted(fs):
+        dirs[:] = [x for x in dirs if x != '.git']
+        for f in fs:
             full = os.path.join(d, f)
             rel = os.path.relpath(full, root).replace('\\', '/')
             kind = checked_kind(rel)
-            if kind == '':
-                continue
-            files += 1
-            vs = check_text(rel, open(full, encoding='utf-8').read().replace('\r\n', '\n'), kind)
-            for line in format_v(rel, vs):
-                print(line)
-            total += len(vs)
-    print(f'code checks: {files} files, {total} violations')
+            if kind != '':
+                checked.append((rel, full, kind))
+    total = 0
+    for rel, full, kind in sorted(checked):
+        vs = check_text(rel, open(full, encoding='utf-8').read().replace('\r\n', '\n'), kind)
+        for line in format_v(rel, vs):
+            print(line)
+        total += len(vs)
+    print(f'code checks: {len(checked)} files, {total} violations')
