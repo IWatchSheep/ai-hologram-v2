@@ -33,11 +33,6 @@ struct DeclarationScan {
     int at = 0;
 };
 
-bool isAlphaNumeric(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-           (c >= '0' && c <= '9');
-}
-
 // Collects the character ranges of enum bodies from tokens.
 std::vector<std::pair<int, int>> enumRangesOf(
     const std::vector<Token>& tokens) {
@@ -65,6 +60,7 @@ std::vector<std::pair<int, int>> enumRangesOf(
     return ranges;
 }
 
+// True when position is in an enum body (commas there are allowed).
 bool inEnum(const DeclarationScan& scan, int position) {
     for (const std::pair<int, int>& range : scan.enumRanges) {
         if (range.first < position && position < range.second) {
@@ -99,9 +95,10 @@ bool closesLambdaIntro(const DeclarationScan& scan, int position) {
     return isLambdaIntroducer(previous);
 }
 
-// True when the text before i, blanks trimmed, ends in template.
+// True when the text before i ends in template (empty at 0, CK53).
 bool beforeEndsWithTemplate(const std::string& cleaned, int i) {
-    std::size_t last = cleaned.find_last_not_of(" \t\n\r", i - 1);
+    std::size_t last =
+        i == 0 ? std::string::npos : cleaned.find_last_not_of(" \t\n\r", i - 1);
     bool found = last != std::string::npos && last >= 7;
     return found && cleaned.compare(last - 7, 8, "template") == 0;
 }
@@ -113,7 +110,7 @@ void scanAngle(DeclarationScan& scan, char c) {
     char prev = scan.at > 0 ? cleaned[scan.at - 1] : ' ';
     int size = static_cast<int>(cleaned.size());
     char next = scan.at + 1 < size ? cleaned[scan.at + 1] : ' ';
-    bool followsWord = isAlphaNumeric(prev) || prev == '_';
+    bool followsWord = isWordChar(prev);
     bool opens = (followsWord || beforeEndsWithTemplate(cleaned, scan.at)) &&
                  next != '<' && next != '=';
     if (c == '<' && opens) {
@@ -140,10 +137,13 @@ void scanBrace(DeclarationScan& scan, char c) {
         }
         return;
     }
-    std::size_t found = cleaned.find_last_not_of(" \t\n", scan.at - 1);
+    // Position 0 has nothing before it, so no search (CK53).
+    std::size_t found = scan.at == 0
+                            ? std::string::npos
+                            : cleaned.find_last_not_of(" \t\n", scan.at - 1);
     int j = found == std::string::npos ? -1 : static_cast<int>(found);
     char prev = j >= 0 ? cleaned[j] : '\0';
-    bool initial = isAlphaNumeric(prev) || prev == '_' || prev == '=';
+    bool initial = isWordChar(prev) || prev == '=';
     if (prev == ']' && closesLambdaIntro(scan, j)) {
         scan.commaLine = 0;
     } else if (initial || prev == '>' || prev == ']') {

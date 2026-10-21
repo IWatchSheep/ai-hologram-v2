@@ -23,6 +23,7 @@ struct Scope {
     int openLine = 1;
 };
 
+// True when a token in the head has the given text.
 bool headHas(const std::vector<Token>& head, const std::string& value) {
     for (const Token& token : head) {
         if (token.value == value) {
@@ -48,10 +49,8 @@ bool onlySpecifiers(const std::vector<Token>& tokens, int start) {
             k = close + 1;
             continue;
         }
-        if (word == "(" || word == ")" || word == "=" || word == "[") {
-            return false;
-        }
-        if (word == "]") {
+        if (word == "(" || word == ")" || word == "=" || word == "[" ||
+            word == "]") {
             return false;
         }
         k = k + 1;
@@ -96,6 +95,7 @@ bool lambdaInHead(const std::vector<Token>& head) {
     return false;
 }
 
+// True when the head holds class, struct, union or enum.
 bool headHasClassWord(const std::vector<Token>& head) {
     return headHas(head, "class") || headHas(head, "struct") ||
            headHas(head, "union") || headHas(head, "enum");

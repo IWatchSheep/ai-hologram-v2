@@ -16,23 +16,10 @@ namespace aih {
 
 namespace {
 
-// True for the characters a PowerShell name may contain.
+// True for the characters a PowerShell name may contain:
+// a word character (letter, digit or '_') or '-'.
 bool isNameChar(char c) {
-    if (c >= 'a' && c <= 'z') {
-        return true;
-    }
-    if (c >= 'A' && c <= 'Z') {
-        return true;
-    }
-    if (c >= '0' && c <= '9') {
-        return true;
-    }
-    return c == '_' || c == '-';
-}
-
-// True when the character is a space or a tab.
-bool isBlank(char c) {
-    return c == ' ' || c == '\t';
+    return isWordChar(c) || c == '-';
 }
 
 // Lowercases one letter; other characters stay as they are.
@@ -48,7 +35,7 @@ char lowerChar(char c) {
 bool isFunctionStart(const std::string& line) {
     int size = static_cast<int>(line.size());
     int i = 0;
-    while (i < size && isBlank(line[i])) {
+    while (i < size && isSpaceChar(line[i])) {
         i = i + 1;
     }
     std::string word = "function";
@@ -58,10 +45,10 @@ bool isFunctionStart(const std::string& line) {
         }
         i = i + 1;
     }
-    if (i >= size || !isBlank(line[i])) {
+    if (i >= size || !isSpaceChar(line[i])) {
         return false;
     }
-    while (i < size && isBlank(line[i])) {
+    while (i < size && isSpaceChar(line[i])) {
         i = i + 1;
     }
     return i < size && isNameChar(line[i]);

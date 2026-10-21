@@ -38,6 +38,14 @@ struct CleanResult {
     std::vector<int> rawStringLines;
 };
 
+// The one set of character classes every rule uses (R4):
+// a letter is a-z or A-Z, a word character is a letter, a
+// digit or '_', and a space character is space, tab, '\r',
+// '\f' or '\v' (a newline is not a space character).
+bool isLetter(char c);
+bool isWordChar(char c);
+bool isSpaceChar(char c);
+
 // Replaces comments and literal contents with spaces, keeping
 // every line break, and records raw string lines.
 CleanResult cleanText(const std::string& text);

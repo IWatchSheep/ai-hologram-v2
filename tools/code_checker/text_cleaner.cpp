@@ -11,8 +11,6 @@
 
 namespace aih {
 
-namespace {
-
 bool isLetter(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
@@ -20,6 +18,12 @@ bool isLetter(char c) {
 bool isWordChar(char c) {
     return isLetter(c) || (c >= '0' && c <= '9') || c == '_';
 }
+
+bool isSpaceChar(char c) {
+    return c == ' ' || c == '\t' || c == '\r' || c == '\f' || c == '\v';
+}
+
+namespace {
 
 // True when text starts with prefix at position at.
 bool startsWith(const std::string& text, int at, const std::string& prefix) {
@@ -157,8 +161,7 @@ std::vector<Token> tokenize(const std::string& cleaned) {
         if (c == '\n') {
             line = line + 1;
             i = i + 1;
-        } else if (c == ' ' || c == '\t' || c == '\r' || c == '\f' ||
-                   c == '\v') {
+        } else if (isSpaceChar(c)) {
             i = i + 1;
         } else if (isLetter(c) || c == '_') {
             tokens.push_back(readWord(cleaned, i, line, false));

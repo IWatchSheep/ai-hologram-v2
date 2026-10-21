@@ -17,25 +17,6 @@ namespace aih {
 
 namespace {
 
-// True for blanks and other spacing characters.
-bool isSpace(char c) {
-    return c == ' ' || c == '\t' || c == '\r' || c == '\f' || c == '\v';
-}
-
-// True for letters, digits and underscore (word characters).
-bool isWordChar(char c) {
-    if (c >= 'a' && c <= 'z') {
-        return true;
-    }
-    if (c >= 'A' && c <= 'Z') {
-        return true;
-    }
-    if (c >= '0' && c <= '9') {
-        return true;
-    }
-    return c == '_';
-}
-
 // Replaces every backslash in text with a forward slash.
 std::string withForwardSlashes(const std::string& text) {
     std::string result = text;
@@ -53,14 +34,14 @@ std::string withForwardSlashes(const std::string& text) {
 bool isIncludeLine(const std::string& line) {
     int size = static_cast<int>(line.size());
     int i = 0;
-    while (i < size && isSpace(line[i])) {
+    while (i < size && isSpaceChar(line[i])) {
         i = i + 1;
     }
     if (i >= size || line[i] != '#') {
         return false;
     }
     i = i + 1;
-    while (i < size && isSpace(line[i])) {
+    while (i < size && isSpaceChar(line[i])) {
         i = i + 1;
     }
     std::string word = "include";

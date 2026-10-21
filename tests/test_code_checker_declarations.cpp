@@ -73,6 +73,13 @@ void checkOperatorDeclarations(TestCounter& counter) {
                  FileKind::Cpp, {{4, "STYLE-DECLARATIONS"}});
 }
 
+// CK53: a '<' at the very first character of the file.
+void checkFirstCharacter(TestCounter& counter) {
+    checkSnippet(counter, "CK53: less-than at the first character", "src/a.cpp",
+                 "<\nint p, q;\ntemplate\n", FileKind::Cpp,
+                 {{2, "STYLE-DECLARATIONS"}});
+}
+
 // CK43 to CK46: calls, parentheses and the known limitations.
 void checkCallDeclarations(TestCounter& counter) {
     checkSnippet(counter, "CK43: commas inside calls pass", "src/a.cpp",
@@ -101,6 +108,7 @@ void runCodeCheckerDeclarationTests(TestCounter& counter) {
     checkStructuredDeclarations(counter);
     checkOperatorDeclarations(counter);
     checkCallDeclarations(counter);
+    checkFirstCharacter(counter);
 }
 
 }  // namespace aih
