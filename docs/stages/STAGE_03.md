@@ -6,7 +6,7 @@
 | **Stage** | 3 of the rebuild (Brief Section 10, Stage 3: the competent single agent) |
 | **Plan version** | 1.6 (after ChatGPT's Stage 3 review: the gate requires exactly 789 cases) |
 | **Date** | October 21, 2026 |
-| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). v1.2 (after 3c: one more test file) agreed by the owner: "sure I agree." v1.3 (after 3d: the shared test fixtures, R4) agreed by the owner: "yes I agree." v1.4 (during 3g: the trace reader in three files, general seeding helpers) committed by the owner (`43f47eb`) and given to Cursor. v1.5 (during 3g: the trace printer in its own file) agreed by the owner: "yes I agree". **v1.6 (after ChatGPT's review 04: the gate requires exactly 789 cases; G6, G7) awaits the owner's agreement.** |
+| **Status** | **COMPLETE** (2026-10-21). ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). v1.2 agreed by the owner ("sure I agree."); v1.3 agreed ("yes I agree."); v1.4 committed by the owner (`43f47eb`) and given to Cursor; v1.5 agreed ("yes I agree"); v1.6 agreed ("yes I agree, thank you all three of you. good fun."). ChatGPT independently built and tested the whole tree at `7ed4258` (review 04: one required correction) and the correction at `336d4d9` (review 06: "FINAL DECISION: APPROVED"). The completion gate (Section 10) passed. Tagged `stage-3-v2`. `c1-baseline-v2` is not tagged: it waits for the fault-related M1.4 checks of Stage 4. |
 | **Governing documents** | The brief v1.1; the frozen protocol v1.0 (Phase B Sections 10–12 define C1 and C0); **Migration Addendum M1** (M1.3, M1.4); `docs/RULES.md` (R1–R24); `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 2, complete and tagged `stage-2-v2` (`a1a32d9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 3 (plan `docs/history/ai-hologram/docs/stages/STAGE_03.md` v1.2, tag `stage-3`, commit `7587f38`) **plus the IE-1 instrumentation hooks H1–H4 as built at `89ea9b6`** (M1.3 item 1; R5: instrumentation is designed in from the start). The original's `src/agent/` is the frozen C1 baseline. |
@@ -914,14 +914,14 @@ Each sub-stage is committed by the owner on `stage-3-work`, after Claude's revie
 - **Handoff notes.** One per sub-stage. **Review notes.** Every exchange with ChatGPT goes in `docs/reviews/stage3/`.
 
 ## 10. Completion checklist (owner verification gate)
-- [ ] The plan was agreed and committed before any Stage 3 code.
-- [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
-- [ ] The program output is exactly 3.12, at 102 lines; the tests show `342 checks, 0 failures`; CTest 2/2; 0 checker violations (178 files).
-- [ ] G4 and G5 pass all 789 cases (exactly 789 required), G6 and G7 pass, and TN1–TN15 pass.
-- [ ] All deliberate failure checks gave exactly the predicted failures.
-- [ ] D-068 to D-072 recorded (D-070 with the owner's approval of the R21 clarification); handoff notes appended; prompts and review notes saved.
-- [ ] ChatGPT reviewed the whole buildable tree of the final commit.
-- [ ] The owner agrees (D-065).
+- [x] The plan was agreed and committed before any Stage 3 code.
+- [x] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
+- [x] The program output is exactly 3.12, at 102 lines; the tests show `342 checks, 0 failures`; CTest 2/2; 0 checker violations (178 files).
+- [x] G4 and G5 pass all 789 cases (exactly 789 required), G6 and G7 pass, and TN1–TN15 pass.
+- [x] All deliberate failure checks gave exactly the predicted failures.
+- [x] D-068 to D-072 recorded (D-070 with the owner's approval of the R21 clarification); handoff notes appended; prompts and review notes saved.
+- [x] ChatGPT reviewed the whole buildable tree of the final commit.
+- [x] The owner agrees (D-065).
 
 ## 11. Plain explanation (for any reader)
 1. **C1 is the strong single agent** the two-agent idea must beat. It plans, predicts, acts, checks its prediction against what it sees, and investigates and corrects when they disagree.
@@ -932,10 +932,98 @@ Each sub-stage is committed by the owner on `stage-3-work`, after Claude's revie
 
 ## 12. What actually happened (filled in at the end)
 ```
-Date completed:
-Commit tagged stage-3-v2:
-Checks:
-Did everything go as planned?
+Date completed: 2026-10-21.
+Commit tagged stage-3-v2: the commit that adds this record, on branch stage-3-work,
+merged into main. c1-baseline-v2 is NOT tagged (M1.3): it waits for the fault-related
+M1.4 checks in Stage 4, and comes before any two-agent code.
+
+Checks (owner's computer, Windows, CLion 2026.2.3.1, GCC 15.2.0, clang-format 22.0.0git):
+  ALL CHECKS PASSED (163 preserved files, 342 checks, 178 code files checked, formatting checked)
+  program output: 102 lines, 94 non-blank (exactly tools/reference/stage3/expected_program_output.txt)
+  The same on fresh clones of stage-3-work at 7ed4258 (340 checks, 176 files) and at
+  336d4d9 (342 checks, 178 files), built from nothing.
+  Independent Linux builds with warnings as errors: Claude after every sub-stage and at
+  336d4d9; ChatGPT at 7ed4258 (340 checks, CTest 2/2, 176 files, 0 violations) and at
+  336d4d9 (342 checks, 178 files, 0 violations; CTest not completed in its time window).
+
+Equivalence with the original C1 and C0 (M1.4, part 1; D-068, D-069, D-070):
+  G4: all 789 cases (39 named, 20 demonstration seeds, 730 synthetic fixtures) traced by
+  the rebuilt agents are identical, line by line at every decision step, to
+  c1_traces.txt (from 7587f38, identical from 89ea9b6).
+  G5: all 789 observer blocks are identical to c1_observers.txt (89ea9b6, IE-1 H1-H4).
+  The gate requires exactly 789 cases (v1.6); G6 proves matching but truncated files fail,
+  G7 is its control. Golden SHA-256 unchanged: cases 27d69906..., traces ce3679e3...,
+  observers e38505b0...
+  Claude, beyond the gate: the new planner equals the reference on 3,156 searches over the
+  789 case worlds (after 3c); the rebuilt agents equalled all 789 golden traces and observer
+  blocks through Claude's own harness and the real run loop before the gate was built
+  (after 3f).
+  This is the first part of M1.4 only. The fault cases follow in Stage 4.
+
+Work, in order (branch stage-3-work):
+  11afd7f  plan v1.1 (reference, 789 golden traces, provenance 163, D-068 to D-072)
+  aa51e00  3a (199 checks)
+  f2bbedb  3b (215)
+  ddb7c34  3c (242), plan v1.2
+  59eceb1  3d (277), plan v1.3
+  5c66863  3e (309)
+  35782eb  3g prompt (saved before 3f was committed; see below)
+  f60d553  3f (317)
+  43f47eb  plan v1.4 (during 3g)
+  6135e0c  plan v1.5 (during 3g)
+  7ed4258  3g (340)
+  96d49b8  plan v1.6 (ChatGPT review 04)
+  336d4d9  3g correction (342)
+
+Deliberate failure checks, all exactly as predicted (R11):
+  DF3-P  (owner)  one character added to c1_traces.txt -> stopped at [provenance] (at its
+                  line-ending check, part of the same guard, because Add-Content adds CRLF).
+  DF3a-1 (Cursor) footprint rule (iii) dropped -> FP7.
+  DF3b-1 (Cursor) dead-square overrides in the other order -> DS5b.
+  DF3c-1 (Cursor) search reserve test "<" instead of "<=" -> PL4a, PL4b, PL5a, PL5b.
+  DF3d-1 (Cursor) object candidate checked against history.front() -> VF2.
+  DF3e-1 (Cursor) reserveFor always 1 -> C1-2, C1-6c-2, VF6, SP7-B2 to B7, SP7-B10, OB6 (11).
+  DF3f-1 (Cursor) C0 clears its plan every decision -> C0-2, C0-4, C0-5, OB7.
+  DF3g-1 (Cursor) trap V2 test left waiting -> exactly G4 and G5 (only the gate catches it).
+  DF3g-2 (owner)  "active test" -> "active check" in agent_log.cpp -> stopped at [tests]:
+                  LG1, C1-2, VF6, OB6, AD1, G4.
+  DF3g-3 (Cursor) the required-count check removed -> exactly G6.
+
+Did everything go as planned? Mostly; the differences, all recorded in the revision history:
+  1. ChatGPT approved plan v1.0 with one clarification (R21, D-070) -> v1.1.
+  2. After 3c, agent_test_support was full (196 lines) -> v1.2: seeding helpers in their
+     own file.
+  3. After 3d, Claude found five small test helpers written twice (R4) -> v1.3: one shared
+     tests/agent_test_fixtures, the copies deleted in 3e.
+  4. In 3g Cursor stopped twice, rightly, under R1: a faithful trace reader is about 240
+     lines and the writer 331, against planned files of 195 -> v1.4 (reader in three files;
+     general seeding helpers instead of renumbering after repeated calls) and v1.5 (the
+     printer in its own file). Claude's size estimates were too low.
+  5. ChatGPT's whole-tree review found that the gate compared the two files' case counts
+     but did not require 789 -> v1.6: runTraceGate with the required count, G6, G7.
+  6. For 3b and 3f the owner pasted the ORIGINAL project's prompt from docs/history instead
+     of docs/prompts. Both times Cursor followed the approved plan, said so, and the commit
+     messages record it; the intended prompts are committed. From 3g on, each prompt was
+     also sent as a loose text file to paste.
+  7. The 3g prompt was committed (35782eb) just before the 3f work (f60d553), because the 3f
+     prompt file had to be supplied again; both messages say so.
+  8. Small slips, each undone at once: clang-format run once on CMakeLists.txt (3d); Python
+     run once, leaving __pycache__ folders that the owner deleted (3e).
+No expected value was changed to make code pass. No golden value was changed. No agent ran
+on pilot or confirmatory material.
+
+Lessons for the next stages:
+  - Estimate a C++ translation of the reference at about 1.6 times its Python lines
+    (braces on every body, one statement per line); plan the file split before Cursor starts.
+  - A gate must assert its own coverage (the exact number of cases), not only agreement
+    between two files that could both be truncated (ChatGPT, review 04).
+  - Give every prompt as a loose text file to paste, and say in its first lines that the
+    file of the same name in docs/history is not it.
+  - The owner copies zip contents by hand; give commands that do not depend on a zip being
+    in Downloads.
+  - Stopping under NEEDS THE OWNER worked every time; keep it.
+  - Stage 4 adds the fault cases of M1.4 and must leave G4 to G7 unchanged; c1-baseline-v2
+    is tagged only after Stage 4's fault checks pass, and before any two-agent code.
 ```
 
 ## 13. Instructions to the coding assistant

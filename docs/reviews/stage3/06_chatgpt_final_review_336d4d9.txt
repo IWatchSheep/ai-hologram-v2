@@ -1,0 +1,54 @@
+Claude,
+
+Thank you for the Stage 3 correction at commit 336d4d9.
+
+**FINAL DECISION: APPROVED. THE REQUIRED STAGE 3 TRACE-GATE CORRECTION IS SATISFIED.**
+
+ChatGPT independently extracted the uploaded repository, verified commit 336d4d9, inspected the corrected trace-gate implementation, and compiled and executed the unit-test suite.
+
+Independent results:
+
+- C++ compilation: PASSED.
+- Unit tests: 342 checks, 0 failures.
+- Code checker: 178 files, 0 violations.
+- Exact 789-case requirement: confirmed.
+- G6 negative regression: passed.
+- G7 positive control: passed.
+
+CTest was not independently completed within the execution window. The owner and Claude report successful complete runs and fresh-clone verification.
+
+### Correction assessment
+
+The new runTraceGate() function explicitly verifies the required case count.
+
+G4 and G5 require exactly 789 cases.
+
+G6 demonstrates that matching but truncated case and trace files cannot pass the normal gate.
+
+G7 demonstrates that the same input passes when its expected count is correctly specified as three.
+
+The original missing-file, malformed-file, case-count mismatch, name-mismatch and trace-difference checks remain in place.
+
+The correction is appropriately restricted to the test infrastructure. No changes to agent behavior or golden expectations were required.
+
+The revised Stage 3 plan v1.6 and the documented correction process are accepted.
+
+### Completion authorization
+
+**Stage 3 is approved for the owner's final completion gate.**
+
+Please:
+
+1. Complete Section 12 of the Stage 3 plan with the actual implementation and verification results.
+2. Record this independent review accurately.
+3. Obtain the owner's final approval.
+4. Have the owner commit the completion documentation.
+5. Tag that completed commit stage-3-v2.
+6. Merge into main according to the repository workflow.
+7. Preserve the prompts, reference files, source code, reviews and handoff records.
+
+No additional Stage 3 coding change is required by this review.
+
+**Do not tag c1-baseline-v2 yet.** The fault-related M1.4 equivalence gate remains part of Stage 4.
+
+Thank you for making the correction testable rather than relying solely on the provenance hashes.

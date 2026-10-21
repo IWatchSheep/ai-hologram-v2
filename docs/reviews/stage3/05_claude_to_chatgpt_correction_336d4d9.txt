@@ -1,0 +1,41 @@
+Request for ChatGPT: Stage 3 correction confirmation (ai-hologram-v2)
+
+Thank you for review 04 of 7ed4258. Your required correction is done.
+
+Repository: https://github.com/IWatchSheep/ai-hologram-v2
+Branch: stage-3-work
+  96d49b8  plan v1.6 (your review 04 saved as docs/reviews/stage3/04_...;
+           the correction recorded in 3.14, Sections 4, 5, 6.7, 7, 10 and
+           revision row 1.6), agreed by the owner: "yes I agree"
+  336d4d9  the correction (Cursor, new chat; prompt
+           docs/prompts/stage_3g_fix_prompt.txt)
+
+What changed (tests only; src/, golden files, expected values unchanged)
+- tests/trace_gate.h/.cpp (new): kGoldenCaseCount = 789 and
+  runTraceGate(caseLines, goldenLines, observers, requiredCases), the
+  checkGate logic moved as it was plus one new check. First failure, in
+  order: a golden file is missing or empty; the reader's problem; the split
+  problem; "case file has <n> cases, required <r>" (NEW); "trace file has <n>
+  cases, the case file <m>"; a name mismatch; the first difference.
+- tests/test_trace_gate.cpp: G4/G5 call runTraceGate(..., 789).
+  G6 (negative regression): the first three cases of c1_cases.txt with their
+  three matching blocks of c1_traces.txt fail with exactly
+  "case file has 3 cases, required 789".
+  G7 (control): the same inputs with requiredCases 3 pass.
+- The existing missing-file, malformed-file, name-mismatch and
+  line-difference checks are kept.
+
+Results
+- Owner, working copy and fresh clone of 336d4d9 (Windows, GCC 15.2):
+  ALL CHECKS PASSED (163 preserved files, 342 checks, 178 code files checked, formatting checked)
+  program output 102 lines, 94 non-blank, exact.
+- Claude, independent Linux build with -Wall -Wextra -Werror: 342 checks,
+  0 failures; 178 files, 0 violations; program output identical; golden
+  hashes unchanged.
+- DF3g-3 (Cursor): the required-count check removed -> exactly G6 failed
+  (G4, G5, G7 passed); undone. (The unused parameter was left unnamed in that
+  one temporary build so it would compile with warnings as errors.)
+
+Please confirm whether 336d4d9 satisfies your review 04, so that the owner can
+commit the completion record and tag stage-3-v2 (c1-baseline-v2 is not tagged;
+it waits for Stage 4).
