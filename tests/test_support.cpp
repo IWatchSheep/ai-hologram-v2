@@ -23,4 +23,12 @@ void check(TestCounter& counter, bool condition,
     }
 }
 
+std::string repeatLine(const std::string& text, int count) {
+    std::string result;
+    for (int i = 0; i < count; i = i + 1) {
+        result += text;
+    }
+    return result;
+}
+
 }  // namespace aih

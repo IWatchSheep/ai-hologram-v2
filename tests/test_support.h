@@ -28,6 +28,10 @@ struct TestCounter {
 void check(TestCounter& counter, bool condition,
            const std::string& description);
 
+// Returns text repeated count times, so long snippet texts in
+// the checker tests are built without writing them out.
+std::string repeatLine(const std::string& text, int count);
+
 }  // namespace aih
 
 #endif  // AI_HOLOGRAM_TESTS_TEST_SUPPORT_H

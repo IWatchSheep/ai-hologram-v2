@@ -4,12 +4,38 @@
 // Introduced in: Stage 0a (rebuild)
 // Architecture: Groups are declared in test_suites.h. Output is
 // quiet unless the first argument is --verbose (rule R15).
+// The snippet helpers live here because every checker group
+// uses them and they belong to no single group.
 
 #include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
 
+#include "checker.h"
 #include "test_suites.h"
 #include "test_support.h"
+
+namespace aih {
+
+void checkSnippet(TestCounter& counter, const std::string& description,
+                  const std::string& path, const std::string& text,
+                  FileKind kind,
+                  const std::vector<std::pair<int, std::string>>& expected) {
+    std::vector<Violation> violations = checkText(path, text, kind);
+    std::vector<std::pair<int, std::string>> actual;
+    for (const Violation& violation : violations) {
+        actual.push_back(std::make_pair(violation.line, violation.rule));
+    }
+    check(counter, actual == expected, description);
+}
+
+void checkKind(TestCounter& counter, const std::string& description,
+               const std::string& path, FileKind expected) {
+    check(counter, checkedKind(path) == expected, description);
+}
+
+}  // namespace aih
 
 int main(int argc, char* argv[]) {
     aih::TestCounter counter;
@@ -19,6 +45,10 @@ int main(int argc, char* argv[]) {
         }
     }
     aih::runProjectInfoTests(counter);
+    aih::runCodeCheckerSizeTests(counter);
+    aih::runCodeCheckerStyleTests(counter);
+    aih::runCodeCheckerDeclarationTests(counter);
+    aih::runCodeCheckerArchitectureTests(counter);
     std::cout << counter.checks << " checks, " << counter.failures
               << " failures\n";
     if (counter.failures == 0) {

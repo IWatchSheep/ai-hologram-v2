@@ -1,7 +1,9 @@
 # Purpose: Builds the library, program and test program for Stage 0a.
 # Introduced in: Stage 0a (rebuild)
 # Architecture: One static library holds the project code, the program
-# and the tests both use it, and CTest runs the test program.
+# and the tests both use it, and CTest runs the test program. Stage 0b
+# adds the code checker library and program, whose rules the tests
+# also use, and a second CTest test that runs the checker itself.
 
 cmake_minimum_required(VERSION 3.20)
 project(ai_hologram_v2 VERSION 0.0.0 LANGUAGES CXX)
@@ -41,15 +43,40 @@ add_executable(ai_hologram src/main.cpp)
 target_link_libraries(ai_hologram PRIVATE ai_hologram_core)
 ai_hologram_apply_warnings(ai_hologram)
 
+# The code checker rules live in their own static library, so
+# the checker program and the test program share them (R4).
+add_library(code_checker_core STATIC
+            tools/code_checker/architecture_rule.cpp
+            tools/code_checker/checker.cpp
+            tools/code_checker/declaration_rule.cpp
+            tools/code_checker/function_rule.cpp
+            tools/code_checker/size_rules.cpp
+            tools/code_checker/style_rules.cpp
+            tools/code_checker/text_cleaner.cpp)
+target_include_directories(code_checker_core PUBLIC tools/code_checker)
+ai_hologram_apply_warnings(code_checker_core)
+
+# The checker program adds only its entry point to the library.
+add_executable(code_checker tools/code_checker/checker_main.cpp)
+target_link_libraries(code_checker PRIVATE code_checker_core)
+ai_hologram_apply_warnings(code_checker)
+
 # The test program lists its files by name, so nothing is picked
 # up by accident.
 add_executable(ai_hologram_tests
+               tests/test_code_checker_architecture.cpp
+               tests/test_code_checker_declarations.cpp
+               tests/test_code_checker_size.cpp
+               tests/test_code_checker_style.cpp
                tests/test_main.cpp
                tests/test_project_info.cpp
                tests/test_support.cpp)
-target_link_libraries(ai_hologram_tests PRIVATE ai_hologram_core)
+target_link_libraries(ai_hologram_tests
+                      PRIVATE ai_hologram_core code_checker_core)
 ai_hologram_apply_warnings(ai_hologram_tests)
 
-# CTest runs the test program as its one test in Stage 0a.
+# CTest runs the test program and, from Stage 0b, the code
+# checker over the whole repository.
 enable_testing()
 add_test(NAME correctness_tests COMMAND ai_hologram_tests)
+add_test(NAME code_checks COMMAND code_checker ${CMAKE_SOURCE_DIR})

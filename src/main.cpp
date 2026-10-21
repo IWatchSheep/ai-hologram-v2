@@ -9,8 +9,8 @@
 #include "core/project_info.h"
 
 int main() {
-    std::cout << aih::projectName() << " v2 -- Stage "
-              << aih::currentStage() << "\n";
+    std::cout << aih::projectName() << " v2 -- Stage " << aih::currentStage()
+              << "\n";
     std::cout << "Project skeleton: build, tests and code checks "
                  "only. No world, agents or experiments yet.\n";
     return 0;
