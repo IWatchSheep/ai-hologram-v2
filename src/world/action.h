@@ -21,6 +21,11 @@ enum class Action { North, East, South, West };
 // Returns the readable name of a direction, such as "North".
 std::string actionName(Action action);
 
+// The one shared index of an action (D-076, rule R4): North
+// 0, East 1, South 2, West 3. The agent model and the fault
+// model both use this, so they can never disagree.
+int actionIndex(Action action);
+
 // Returns the one-cell change for a direction: North is
 // (0, -1), East is (1, 0), South is (0, 1) and West is (-1, 0).
 Position offsetFor(Action action);

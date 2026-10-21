@@ -54,6 +54,9 @@ RunResult runSingleAgent(const WorldState& trueInitialState, NaiveAgent& agent,
     current.state = trueInitialState;
     int worldSteps = 0;
     while (true) {
+        if (watchers.onObservation) {
+            watchers.onObservation(agent, current);
+        }
         const Decision decision = agent.decide(current);
         if (watchers.afterDecision) {
             watchers.afterDecision(agent, current, decision);

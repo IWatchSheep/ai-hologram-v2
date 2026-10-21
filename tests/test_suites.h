@@ -166,6 +166,24 @@ void runFaultEventsTests(TestCounter& counter);
 // confirmatory; material only, D-080).
 void runFaultEventSetsTests(TestCounter& counter);
 
+// Runs the fault apply tests (FI1, FI2).
+void runFaultApplyTests(TestCounter& counter);
+
+// Runs the fault apply more tests (FI3, FI4).
+void runFaultApplyMoreTests(TestCounter& counter);
+
+// Runs the fault F5 tests (FI5, FI6).
+void runFaultF5Tests(TestCounter& counter);
+
+// Runs the fault activation tests (FI7, FI8).
+void runFaultActivationTests(TestCounter& counter);
+
+// Runs the fault run tests (FR1, FR4, IE-T1).
+void runFaultRunTests(TestCounter& counter);
+
+// Runs the fault run more tests (FR5, FR6, FR7, RL2, RL3).
+void runFaultRunMoreTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

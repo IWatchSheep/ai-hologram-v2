@@ -68,9 +68,14 @@ add_library(ai_hologram_core STATIC
             src/demo/agent_demo.cpp
             src/demo/prediction_demo.cpp
             src/demo/scripted_demo.cpp
+            src/experiment/fault_apply.cpp
             src/experiment/fault_event.cpp
             src/experiment/fault_event_text.cpp
             src/experiment/fault_events.cpp
+            src/experiment/fault_injector.cpp
+            src/experiment/fault_model.cpp
+            src/experiment/fault_run.cpp
+            src/experiment/fault_run_naive.cpp
             src/experiment/layout_generator.cpp
             src/experiment/seeded_random.cpp
             src/experiment/true_search.cpp
@@ -159,8 +164,14 @@ add_executable(ai_hologram_tests
                tests/test_footprint.cpp
                tests/test_footprint_rows.cpp
                tests/test_layouts.cpp
+               tests/test_fault_activation.cpp
+               tests/test_fault_apply.cpp
+               tests/test_fault_apply_more.cpp
                tests/test_fault_event_sets.cpp
                tests/test_fault_events.cpp
+               tests/test_fault_f5.cpp
+               tests/test_fault_run.cpp
+               tests/test_fault_run_more.cpp
                tests/test_layout_generator.cpp
                tests/test_layout_sets.cpp
                tests/test_seeded_random.cpp

@@ -45,6 +45,11 @@ struct RunWatchers {
     std::function<void(const SingleAgent&, const Observation&, const Decision&)>
         afterDecision;
     std::function<void(const SingleAgent&, const Observation&)> afterFinalCheck;
+    // Called with every observation just before the agent
+    // receives it (decide, and C1's final check). It only
+    // watches (D-075): the fault run keeps the true history
+    // through it, and the agent never reads it back.
+    std::function<void(const SingleAgent&, const Observation&)> onObservation;
 };
 
 // Runs C1 from a true initial state. When the object is
@@ -68,6 +73,9 @@ RunResult continueRun(Environment& environment, Observation current,
 struct NaiveRunWatchers {
     std::function<void(const NaiveAgent&, const Observation&, const Decision&)>
         afterDecision;
+    // Called with every observation just before C0 receives
+    // it. It only watches (D-075), exactly as C1's does.
+    std::function<void(const NaiveAgent&, const Observation&)> onObservation;
 };
 
 // Runs C0 from a true initial state (plan 3.11). The same

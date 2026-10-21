@@ -12,10 +12,12 @@
 #define AI_HOLOGRAM_TESTS_FAULT_TEST_MATERIAL_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "experiment/fault_event.h"
 #include "experiment/fault_events.h"
+#include "experiment/fault_injector.h"
 #include "world/world_state.h"
 
 namespace aih {
@@ -45,6 +47,18 @@ FaultTestMaterial demonstrationFaultMaterial();
 // All events of an event list as one flat list, in run order.
 std::vector<FaultEvent> flattenEvents(
     const std::vector<std::vector<FaultEvent>>& events);
+
+// One hand-built event, like checks.py event(): the id,
+// step and type are set, and every detail field keeps its
+// default until the test sets the ones its type needs.
+FaultEvent handBuiltEvent(const std::string& id, int step, FaultType type);
+
+// The activation record of one event id, like checks.py
+// record(): the first record with that id. Tests only ask
+// for ids that exist; a missing id gives an empty record,
+// so the check that uses it fails instead of crashing.
+const ActivationRecord& findActivation(
+    const std::vector<ActivationRecord>& records, const std::string& eventId);
 
 // The FE4 validity check of checks.py list_valid, shared by
 // both fault-event test files (R4): 3 sorted distinct steps

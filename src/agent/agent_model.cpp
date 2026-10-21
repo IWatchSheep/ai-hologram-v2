@@ -19,22 +19,6 @@
 #include "world/world_state.h"
 
 namespace aih {
-namespace {
-
-// Turns an action into an index 0..3 following kActionOrder
-// (North, East, South, West), so the restored marks can live
-// in a small fixed-size array with one mark per action.
-int actionIndex(Action action) {
-    for (int index = 0; index < 4; index = index + 1) {
-        const std::size_t at = static_cast<std::size_t>(index);
-        if (kActionOrder[at] == action) {
-            return index;
-        }
-    }
-    return 0;
-}
-
-}  // namespace
 
 AgentActionModel::AgentActionModel() : baseModel_(applyAction) {
 }

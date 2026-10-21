@@ -32,6 +32,24 @@ std::string actionName(Action action) {
     return "Unknown";
 }
 
+int actionIndex(Action action) {
+    switch (action) {
+        case Action::North: {
+            return 0;
+        }
+        case Action::East: {
+            return 1;
+        }
+        case Action::South: {
+            return 2;
+        }
+        case Action::West: {
+            return 3;
+        }
+    }
+    return 0;
+}
+
 Position offsetFor(Action action) {
     switch (action) {
         case Action::North: {

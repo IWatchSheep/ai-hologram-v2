@@ -67,6 +67,9 @@ std::optional<RunResult> finishRun(Environment& environment, SingleAgent& agent,
     if (!reached && worldSteps < settings.maxWorldSteps) {
         return std::nullopt;
     }
+    if (watchers.onObservation) {
+        watchers.onObservation(agent, next);
+    }
     agent.finalCheck(next);
     if (watchers.afterFinalCheck) {
         watchers.afterFinalCheck(agent, next);
@@ -95,6 +98,9 @@ RunResult continueRun(Environment& environment, Observation current,
                       int worldSteps, SingleAgent& agent,
                       AgentSettings settings, RunWatchers watchers) {
     while (true) {
+        if (watchers.onObservation) {
+            watchers.onObservation(agent, current);
+        }
         const Decision decision = agent.decide(current);
         if (watchers.afterDecision) {
             watchers.afterDecision(agent, current, decision);

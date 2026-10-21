@@ -71,6 +71,12 @@ void runStage4TestGroups(TestCounter& counter) {
     runLayoutSetsTests(counter);
     runFaultEventsTests(counter);
     runFaultEventSetsTests(counter);
+    runFaultApplyTests(counter);
+    runFaultApplyMoreTests(counter);
+    runFaultF5Tests(counter);
+    runFaultActivationTests(counter);
+    runFaultRunTests(counter);
+    runFaultRunMoreTests(counter);
 }
 
 }  // namespace aih

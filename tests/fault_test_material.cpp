@@ -74,6 +74,25 @@ FaultTestMaterial demonstrationFaultMaterial() {
     return buildFaultMaterial(500000, 4, 2, 4242);
 }
 
+FaultEvent handBuiltEvent(const std::string& id, int step, FaultType type) {
+    FaultEvent event;
+    event.id = id;
+    event.step = step;
+    event.type = type;
+    return event;
+}
+
+const ActivationRecord& findActivation(
+    const std::vector<ActivationRecord>& records, const std::string& eventId) {
+    for (const ActivationRecord& record : records) {
+        if (record.eventId == eventId) {
+            return record;
+        }
+    }
+    static const ActivationRecord empty;
+    return empty;
+}
+
 std::vector<FaultEvent> flattenEvents(
     const std::vector<std::vector<FaultEvent>>& events) {
     std::vector<FaultEvent> flat;
