@@ -138,6 +138,12 @@ void runSingleAgentBudgetTests(TestCounter& counter);
 // Runs the run loop tests (RL1, OB5, OB6).
 void runRunLoopTests(TestCounter& counter);
 
+// Runs the naive agent tests (C0-1 to C0-5, OB7).
+void runNaiveAgentTests(TestCounter& counter);
+
+// Runs the agent demo test (AD1).
+void runAgentDemoTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

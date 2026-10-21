@@ -1,0 +1,112 @@
+STAGE 3f PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.3.
+This file is docs/prompts/stage_3f_prompt.txt. (The file with the same name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 3f of the rebuild, and ONLY Stage 3f: C0, the C0
+run loop, the agent demonstrations, the program and the stage number.
+Stages 3a-3e are finished and committed. Do not change their behaviour.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/ (it creates __pycache__ folders);
+   read the reference files instead.
+2. Read docs/stages/STAGE_03.md v1.3: sections 3.10, 3.11 (the C0 overload
+   and NaiveRunWatchers), 3.12 (the demonstrations and the program), 3.13,
+   4 (the 3f rows), 5, 6.6, 7 (step 7) and 9 (the README text).
+3. Read tools/reference/stage3/ref_agents.py (the C0 class, run_c0,
+   c0_run_lines) and checks.py (check_naive_agent, C0_4, C0_5,
+   C0_5_FIRST_TEN, AD1_TEXT, agent_demo_text), and
+   tools/reference/stage3/expected_program_output.txt (the whole program
+   output, exactly). They are the authority where the plan uses words.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 7)
+Create exactly these files, and no others:
+  src/agent/naive_agent.h          src/agent/naive_agent.cpp
+  src/agent/run_loop_naive.cpp
+  src/demo/agent_demo.h            src/demo/agent_demo.cpp
+  tests/test_naive_agent.cpp       (C0-1, C0-2, C0-3a, C0-3b, C0-4, C0-5, OB7)
+  tests/test_agent_demo.cpp        (AD1)
+Change exactly these existing files:
+  src/agent/run_loop.h            declare NaiveRunWatchers {afterDecision}
+                                  and the C0 overload
+                                  runSingleAgent(trueInitialState, NaiveAgent&,
+                                  settings, watchers = {}).
+  src/main.cpp                    the three header lines of plan 3.12, then
+                                  runScriptedDemo, runPredictionDemos and
+                                  runAgentDemos, all to std::cout.
+  src/core/project_info.cpp       currentStage() returns 3.
+  tests/test_project_info.cpp     P2 now checks 3 (and its description).
+  CMakeLists.txt                  add the three new src .cpp files to
+                                  ai_hologram_core and the two new test .cpp
+                                  files to ai_hologram_tests. Do NOT run
+                                  clang-format on CMakeLists.txt.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups.
+  README.md                       the status of plan Section 9, exactly.
+  notes/handoff_notes.md          append one note at the end.
+tests/agent_test_support.h/.cpp is full: do not add to it. Shared test inputs
+belong in tests/agent_test_fixtures (plan 4); the demos' expected run lines
+are in tests/expected_demo_lines (use them for AD1, R4).
+Do NOT create anything of 3g (no trace readers, catalogue, writer or gate).
+
+DETAILS
+A. NaiveAgentState and NaiveAgent exactly as plan 3.10 and ref_agents.py:
+   the activation hook (H1) is called at the START of every decision, right
+   after startStep(); C0 plans only when its plan is empty (search with
+   reserve 0, then the fallback, then the first action predicted Moved or
+   Pushed, else North with the unchanged belief); it sets its belief to the
+   taken step's STORED expected state; it never reads an observation after
+   the first; searchCount() and totalEvaluations(). Its copy operations are
+   deleted (its predictor's model captures the state).
+B. run_loop_naive.cpp: the C0 run loop of plan 3.11 (no safe stops, no final
+   check; the four result lines with zero safe stops, mismatches and
+   corrections), calling afterDecision after each decision.
+C. runAgentDemos exactly as plan 3.12: settings 200, 5, 100, 3; demo 1 on
+   demoLayout(); demo 2 with a wall added at (4, 3) to the true world and the
+   demo layout as the hand-written starting belief; the exact 46 lines of
+   AD1_TEXT; "Agent demo layout is invalid." if parsing ever failed. The
+   layout comes only from demoLayout() (R4).
+D. The program prints exactly tools/reference/stage3/expected_program_output.txt:
+   102 lines, 94 non-blank.
+E. Tests exactly as plan 6.6 and checks.py. Every fixture is a valid world.
+   Each check's description starts with its id. Expected after 3f: 317
+   checks, 0 failures.
+F. Three-part header in every new file (Introduced in: Stage 3f (rebuild)).
+   Beginner comments: why C0 exists and never reads observations after the
+   first; why its activation point is at the start of the step.
+G. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (163 preserved files, 317 checks, 160 code files checked, formatting checked)
+and show "program output: 102 lines, 94 non-blank". If any expected value
+does not match, do NOT change it: stop and report the id, the expected and
+the actual value (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 7):
+  DF3f-1  make C0 clear its plan at the start of every decision (so it
+          searches at every step).
+          Expected failing: exactly C0-2, C0-4, C0-5 and OB7.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

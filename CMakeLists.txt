@@ -47,10 +47,12 @@ add_library(ai_hologram_core STATIC
             src/agent/history_checks.cpp
             src/agent/investigation.cpp
             src/agent/model_v1.cpp
+            src/agent/naive_agent.cpp
             src/agent/planner.cpp
             src/agent/planner_expand.cpp
             src/agent/planner_fallback.cpp
             src/agent/run_loop.cpp
+            src/agent/run_loop_naive.cpp
             src/agent/single_agent.cpp
             src/agent/single_agent_active_test.cpp
             src/agent/single_agent_check.cpp
@@ -63,6 +65,7 @@ add_library(ai_hologram_core STATIC
             src/agent/verification.cpp
             src/core/project_info.cpp
             src/core/text_words.cpp
+            src/demo/agent_demo.cpp
             src/demo/prediction_demo.cpp
             src/demo/scripted_demo.cpp
             src/compare/difference_text.cpp
@@ -120,6 +123,8 @@ add_executable(ai_hologram_tests
                tests/test_investigation.cpp
                tests/test_investigation_more.cpp
                tests/test_model_v1.cpp
+               tests/test_naive_agent.cpp
+               tests/test_agent_demo.cpp
                tests/test_planner.cpp
                tests/test_planner_budget.cpp
                tests/test_run_loop.cpp

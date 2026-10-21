@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Stage 2 of the rebuild is complete** (tag `stage-2-v2`, October 20, 2026): prediction and comparison (belief, world model, budget counter, comparison and difference text), checked against 1,000 golden prediction cases produced from the original code, with 177 checks. Nothing plans, chooses actions or corrects beliefs yet. No experiment has been run. Next: Stage 3, the C1 agent.
+**Stage 3 of the rebuild: the competent single agent C1 and the naive agent C0.** The project contains a 10×10 grid world with tested movement rules; a world model, budget counter and comparison (Stage 2); and C1, the competent single agent defined in the approved Experiment 1 protocol (Phase B). C1 plans with a budgeted search over its own belief, checks each prediction against the observation, investigates mismatches, verifies corrections, and can take safe stops. C0, a naive agent used only as a reference, plans from its belief and never checks a prediction. Demonstrations use a hand-written wrong belief. **No faults are injected, no two-agent reasoning exists, and no experiments have been run.** The step-by-step check against 789 runs recorded from the original code (the first part of the M1.4 equivalence gate) is added in sub-stage 3g.
 
 This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude.
 

@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "agent/agent_types.h"
+#include "agent/naive_agent.h"
 #include "agent/observation.h"
 #include "agent/single_agent.h"
 #include "world/environment.h"
@@ -59,6 +60,23 @@ RunResult runSingleAgent(const WorldState& trueInitialState, SingleAgent& agent,
 RunResult continueRun(Environment& environment, Observation current,
                       int worldSteps, SingleAgent& agent,
                       AgentSettings settings, RunWatchers watchers);
+
+// Watch-only watcher for a C0 run (plan 3.11, D-071). It
+// only watches (rule R6): a std::function taking const
+// references and returning void, an empty one is not
+// called, and nothing in the run reads it back.
+struct NaiveRunWatchers {
+    std::function<void(const NaiveAgent&, const Observation&, const Decision&)>
+        afterDecision;
+};
+
+// Runs C0 from a true initial state (plan 3.11). The same
+// loop as C1's, but C0 has no final check, never safe-stops
+// and writes no log lines: its lines are only the four
+// result lines, with zero mismatches and corrections.
+RunResult runSingleAgent(const WorldState& trueInitialState, NaiveAgent& agent,
+                         AgentSettings settings,
+                         NaiveRunWatchers watchers = {});
 
 }  // namespace aih
 
