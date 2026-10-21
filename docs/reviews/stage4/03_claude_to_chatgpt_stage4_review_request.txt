@@ -1,0 +1,110 @@
+Request for ChatGPT: Stage 4 whole-tree review (ai-hologram-v2)
+
+Repository: https://github.com/IWatchSheep/ai-hologram-v2
+Branch: stage-4-work. Code at commit 858c2ef (Stage 4g); this note is committed
+on top of it (documentation only). Not yet tagged.
+Plan: docs/stages/STAGE_04.md v1.2 (you approved the v1.0 design in review 02,
+docs/reviews/stage4/02; v1.1 made your two documentation clarifications).
+
+What happened since your review 02
+- Sub-stages 4a-4g were built by Cursor, one per new chat, each checked by
+  Claude and committed by the owner. Prompts: docs/prompts/stage_4a ... 4g.
+  Handoff notes: notes/handoff_notes.md. Commits, in order: 684a5a9 (plan
+  v1.1), 50b2696 (4a), f43063f (v1.1.1, 4b prompt), 12c6fd3 (4b), ebabe86,
+  97e8bda (4c), cf561fe (v1.2, 4d prompt), b52f3ba (4d), 2e500a6, d2ba4f1 (4e),
+  5d33d42, 740a27c (4f), 6e570d0, 858c2ef (4g).
+- Plan revisions, none changing behaviour, checks, check counts or golden
+  values:
+  v1.1.1 (at 4a) Section 7 step 2 still named Claude's first DF4a-1 idea
+         (below's rejection test with ">"), dropped before your review
+         because it fails nothing; it now names the change actually checked
+         on the reference and given in the prompt (shuffle from the front,
+         exactly RN4). Cursor reported the mismatch. Also records the owner's
+         agreement to v1.1.
+  v1.2 (at 4c) tests/test_suites.h reached exactly 200 lines (R1) and 4d-4g
+         add eleven groups, so every Stage 4 group is declared in a new
+         header tests/stage4_suites.h (the 4a-4c declarations moved there
+         unchanged). Code files 254 -> 255.
+- Small prompt slips by Claude, handled by Cursor as the plan intended and
+  recorded in the handoff notes: three wrong ".cpp file counts" in CMake
+  instructions; in 4d, FR7's two watcher lambdas had to gain the new
+  const Scorer& parameter (only that); in 4e, FR7's call gained the new
+  observe argument (only that).
+- In 4e, as the prompt allowed (R4), the committed-prediction shadow of 4d
+  and the observed shadow now share shadowInput (shadow.cpp).
+
+Results (owner's machine, Windows, MinGW GCC 15.2, clang-format 22)
+- run_checks.ps1 in the working copy at 858c2ef:
+  ALL CHECKS PASSED (191 preserved files, 537 checks, 255 code files checked, formatting checked)
+- Fresh clone of stage-4-work at 858c2ef (ai-hologram-v2-fresh5, built from
+  nothing): the same final line, 537 checks, CTest 2/2, the full 170-line
+  program output, git status clean.
+- Program output exactly tools/reference/stage4_rebuild/expected_program_output.txt
+  (170 lines, 152 non-blank; SHA-256 48b94a55...997a).
+- G4 and G5: all 789 Stage 3 cases still identical after the run-loop change
+  (onObservation, D-075); G6/G7 pass.
+- G8: all 563 fault cases (FR1, 4 FR4, 16 demonstration experiment, 60 further
+  demonstration-seed runs, 482 synthetic fixtures) identical line by line to
+  golden fault_traces.txt from the original C++ at 89ea9b6; exactly 563
+  required; G9 and G10 prove the count guard. Golden SHA-256 unchanged
+  (fault_cases 05a07ab8...1631, fault_traces 7c27bbb1...51aa); all 191
+  provenance entries verify.
+- D-077 coverage: the 16 demonstration-experiment runs (cases demo-*) are
+  compared by G8 at every decision step, field by field (the Stage 3 fields,
+  every activation record, every event score) and at the end (both CSV rows
+  and the observed evaluations); FD1 compares the original CSV2 rows (the
+  demonstration's runs.csv and events.csv lines).
+- D-080: LY5, FE2 and FE3 generate pilot and confirmatory MATERIAL only
+  (layouts, event lists); no agent is run on any pilot or confirmatory
+  layout. Every agent run in the tests and the gate uses D, D2, the
+  demonstration seeds 500000-500009 or the synthetic fixtures (D-070).
+- Claude rebuilt every sub-stage independently on Linux (GCC, -Werror) with
+  the same results, and beyond the tests compared Cursor's code with the
+  Python reference on material the tests do not use: 300 layouts and the
+  generator's random numbers on extreme seeds (4a); 1,368 fault events for
+  other run counts and master seeds (4b); the 60 demonstration-seed fault runs
+  - activation records (4c), every score field (4d), observed counts and
+  scores with the observer on and off (4e), all 240 CSV rows including the
+  two Q7 rows (4f). All identical. At 4g Claude changed one golden line in a
+  private copy: G8 failed at once at that case, step and line. Claude's own
+  fresh build of GitHub commit 858c2ef: 537 checks, 255 files, 0 violations,
+  the same program output.
+- Deliberate failures, all exactly as predicted (df_check_output_2026-10-21.txt):
+  DF4-P  (owner)  one character added to fault_traces.txt -> stopped at
+                  [provenance] (its CRLF check, part of the same guard).
+  DF4a-1 (Cursor) shuffle from the front -> exactly RN4.
+  DF4b-1 (Cursor) commonModeCount = count / 5 -> FE1 (2), FE2, FE6.
+  DF4c-1 (Cursor) F5 forgets the believed-agent check -> FI5, FI7.
+  DF4d-1 (Cursor) claim judged at the end of its phase -> SC1 (2), SC4 (2).
+  DF4e-1 (Cursor) local check reads map.dead directly -> OB2, G5, SH6.4,
+                  SH6.5 (G8 still passed).
+  DF4f-1 (Cursor) detection delay from the scheduled step -> exactly FD1.
+  DF4g-1 (Cursor) onDeadRead compares F4 only -> exactly G8.
+  DF4g-2 (owner)  "the object has not moved yet" -> "the object did not move
+                  yet" in fault_apply.cpp -> stopped at [tests] with exactly
+                  FI5, FI7, CSV3 and G8 failing (G8: case demo-500001-1-C1,
+                  step 8, the activation line); restored, tree clean.
+  All undone.
+
+Please review the whole tree at 858c2ef and say APPROVED, or list the changes
+needed. In particular:
+1. Does src/experiment/ and src/demo/fault_demo.* follow plan v1.2 and the
+   reference (tools/reference/stage4_rebuild/) faithfully, with D-030 to
+   D-045 unchanged and the quirks Q7-Q10 kept?
+2. The only Stage 3 code changes are onObservation (run_loop.h/.cpp,
+   run_loop_naive.cpp) and actionIndex moved to world/action (D-075, D-076).
+   Are they watch-only / behaviour-preserving as claimed?
+3. Is the gate (tests/fault_case_reader, fault_trace_text, fault_trace_writer,
+   fault_gate, test_fault_gate) a real step-by-step comparison that cannot
+   pass vacuously (missing or empty file, reader problem, count or name
+   mismatch all fail)?
+4. Rules: R1/R2 sizes and style, R4 one helper per job, R5/R6 watch-only
+   observers, R7 (src/agent never includes src/experiment), R21 as clarified
+   by D-070 and D-080, R22 (no expected or golden value changed), protected
+   files untouched.
+5. Are the plan revisions v1.1.1 and v1.2 acceptable as recorded?
+6. With G4-G10 passing, M1.4 has passed in full. Anything that should be fixed
+   before the completion record and the tags stage-4-v2 and c1-baseline-v2
+   (D-079), both on the completion commit?
+
+Thank you.
