@@ -58,3 +58,15 @@ What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from t
 The run showed `70 checks, 0 failures`, CTest 2/2, `code checks: 32 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 2 lines, 2 non-blank`. No Git operation other than the `git status` inside `run_checks.ps1` was run, and nothing was committed.
 
 Unsure about: `declaration_rule.cpp` (200) and `function_rule.cpp` / `text_cleaner.cpp` (199) are at or near the 200-line limit again, even after Change 1 freed lines; they fit cleanly, but any later change to those files will have almost no room and may need a plan-approved split rather than squeezing.
+
+## Stage 0b follow-up 2 (rebuild) — 2026-10-20
+
+What changed: CK54 only. In `tests/test_code_checker_declarations.cpp`, next to CK53 in `checkFirstCharacter`, one check was added with the exact text from `tools/reference/stage0/snippets.py` (`"{\n    int a, b;\n}\nint x\n"`), path `src/a.cpp`, kind Cpp, expected exactly `[(2, STYLE-DECLARATIONS)]`, description starting `CK54:`. No file in `tools/code_checker/` was changed, no expected value was changed, and no Stage 3-baseline files were touched (none exist yet). The file is 117 lines (all lines, after clang-format). CLion's clang-format was run with `-i` on that one test file only.
+
+What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from the repository root. Its exact final line was:
+
+`ALL CHECKS PASSED (83 preserved files, 71 checks, 32 code files checked, formatting checked)`
+
+The run showed `71 checks, 0 failures`, CTest 2/2, `code checks: 32 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 2 lines, 2 non-blank`. No Git operation other than the `git status` inside `run_checks.ps1` was run, and nothing was committed.
+
+Unsure about: nothing. CK54 passed as plan v1.5 predicts.

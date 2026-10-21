@@ -73,10 +73,13 @@ void checkOperatorDeclarations(TestCounter& counter) {
                  FileKind::Cpp, {{4, "STYLE-DECLARATIONS"}});
 }
 
-// CK53: a '<' at the very first character of the file.
+// CK53 and CK54: a '<' or '{' at the very first character.
 void checkFirstCharacter(TestCounter& counter) {
     checkSnippet(counter, "CK53: less-than at the first character", "src/a.cpp",
                  "<\nint p, q;\ntemplate\n", FileKind::Cpp,
+                 {{2, "STYLE-DECLARATIONS"}});
+    checkSnippet(counter, "CK54: brace at the first character starts a block",
+                 "src/a.cpp", "{\n    int a, b;\n}\nint x\n", FileKind::Cpp,
                  {{2, "STYLE-DECLARATIONS"}});
 }
 
