@@ -7,6 +7,7 @@
 // and each description starts with its check id.
 
 #include "agent/agent_model.h"
+#include "agent_test_fixtures.h"
 #include "agent_test_support.h"
 #include "model/world_model.h"
 #include "test_suites.h"
@@ -18,27 +19,6 @@
 
 namespace aih {
 namespace {
-
-// The wrong base model of checks.py: an East push moves the
-// object North instead of East; everything else is standard.
-ActionResult pushNorth(const WorldState& state, Action action) {
-    const ActionResult standard = applyAction(state, action);
-    if (action != Action::East) {
-        return standard;
-    }
-    if (standard.outcome != MoveOutcome::Pushed) {
-        return standard;
-    }
-    ActionResult wrong = standard;
-    wrong.state.object = moved(state.object, Action::North);
-    return wrong;
-}
-
-// A model that always blocks, leaving the state unchanged.
-ActionResult alwaysBlocked(const WorldState& state, Action action) {
-    (void)action;
-    return ActionResult{state, MoveOutcome::Blocked};
-}
 
 void checkAm1Am2(TestCounter& counter) {
     WorldState state = demoWorld();

@@ -16,6 +16,7 @@
 #include "agent/records.h"
 #include "agent/step_predictor.h"
 #include "agent/verification.h"
+#include "agent_test_fixtures.h"
 #include "agent_test_support.h"
 #include "model/world_model.h"
 #include "test_suites.h"
@@ -27,40 +28,6 @@
 
 namespace aih {
 namespace {
-
-// One observation with the fields the fixture needs.
-Observation makeObservation(int step, const WorldState& state) {
-    Observation observation;
-    observation.decisionStep = step;
-    observation.state = state;
-    return observation;
-}
-
-// The two observations of one action on the true world.
-std::vector<Observation> twoObservations(const WorldState& trueBefore,
-                                         Action action) {
-    const ActionResult after = applyAction(trueBefore, action);
-    Observation second = makeObservation(2, after.state);
-    second.lastAction = action;
-    second.lastOutcome = after.outcome;
-    return {makeObservation(1, trueBefore), second};
-}
-
-// The 4-entry East history of checks.py: the demo world,
-// then three East actions, each recorded.
-std::vector<Observation> eastHistory() {
-    std::vector<Observation> history;
-    history.push_back(makeObservation(1, demoWorld()));
-    for (int step = 2; step <= 4; step = step + 1) {
-        const ActionResult after =
-            applyAction(history.back().state, Action::East);
-        Observation next = makeObservation(step, after.state);
-        next.lastAction = Action::East;
-        next.lastOutcome = after.outcome;
-        history.push_back(next);
-    }
-    return history;
-}
 
 void checkIv9Iv10(TestCounter& counter) {
     const WorldState demo = demoWorld();

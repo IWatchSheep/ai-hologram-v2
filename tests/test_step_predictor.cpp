@@ -12,6 +12,7 @@
 
 #include "agent/computation_observer.h"
 #include "agent/step_predictor.h"
+#include "agent_test_fixtures.h"
 #include "agent_test_support.h"
 #include "core/text_words.h"
 #include "model/prediction.h"
@@ -25,11 +26,6 @@
 
 namespace aih {
 namespace {
-
-// A model that always blocks, leaving the state unchanged.
-ActionResult alwaysBlocked(const WorldState& state, Action) {
-    return ActionResult{state, MoveOutcome::Blocked};
-}
 
 void checkSp1(TestCounter& counter) {
     const WorldState demo = demoWorld();

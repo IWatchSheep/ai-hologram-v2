@@ -12,6 +12,7 @@
 #include "agent/observation.h"
 #include "agent/records.h"
 #include "agent/step_predictor.h"
+#include "agent_test_fixtures.h"
 #include "agent_test_support.h"
 #include "model/world_model.h"
 #include "test_suites.h"
@@ -23,45 +24,6 @@
 
 namespace aih {
 namespace {
-
-// The two observations of one action: before, and after
-// with the action and its outcome recorded.
-std::vector<Observation> twoObservations(const WorldState& trueBefore,
-                                         Action action) {
-    const ActionResult after = applyAction(trueBefore, action);
-    Observation first;
-    first.decisionStep = 1;
-    first.state = trueBefore;
-    Observation second;
-    second.decisionStep = 2;
-    second.state = after.state;
-    second.lastAction = action;
-    second.lastOutcome = after.outcome;
-    return {first, second};
-}
-
-// A model that pushes the object North instead of East.
-ActionResult pushNorth(const WorldState& state, Action action) {
-    const ActionResult standard = applyAction(state, action);
-    if (action != Action::East || standard.outcome != MoveOutcome::Pushed) {
-        return standard;
-    }
-    ActionResult wrong = standard;
-    wrong.state.object = moved(state.object, Action::North);
-    return wrong;
-}
-
-// A model under which East always "moves" one cell.
-ActionResult alwaysMovedEast(const WorldState& state, Action action) {
-    if (action != Action::East) {
-        return applyAction(state, action);
-    }
-    ActionResult result;
-    result.state = state;
-    result.state.agent = moved(state.agent, Action::East);
-    result.outcome = MoveOutcome::Moved;
-    return result;
-}
 
 bool isWallCandidate(const BeliefCandidate& c, Position cell, bool blocked) {
     bool ok = c.element.kind == ElementKind::Wall && c.element.cell == cell;

@@ -123,6 +123,21 @@ void runVerificationTests(TestCounter& counter);
 // Runs the trap and consequence tests (VF9a to VF13).
 void runTrapChecksTests(TestCounter& counter);
 
+// Runs the single agent tests (C1-1, C1-10, C1-2, C1-5,
+// C1-9, C1-12a, C1-12b).
+void runSingleAgentTests(TestCounter& counter);
+
+// Runs the single agent case tests (C1-3, C1-4, C1-6a,
+// C1-6b, VF5b, C1-6c-1, C1-6c-2, C1-7).
+void runSingleAgentCasesTests(TestCounter& counter);
+
+// Runs the single agent budget tests (C1-11a, C1-11b, VF6,
+// SP7-B1 to SP7-B11).
+void runSingleAgentBudgetTests(TestCounter& counter);
+
+// Runs the run loop tests (RL1, OB5, OB6).
+void runRunLoopTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

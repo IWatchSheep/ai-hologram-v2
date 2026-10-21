@@ -50,6 +50,15 @@ add_library(ai_hologram_core STATIC
             src/agent/planner.cpp
             src/agent/planner_expand.cpp
             src/agent/planner_fallback.cpp
+            src/agent/run_loop.cpp
+            src/agent/single_agent.cpp
+            src/agent/single_agent_active_test.cpp
+            src/agent/single_agent_check.cpp
+            src/agent/single_agent_choose.cpp
+            src/agent/single_agent_investigate.cpp
+            src/agent/single_agent_pending.cpp
+            src/agent/single_agent_records.cpp
+            src/agent/single_agent_search.cpp
             src/agent/step_predictor.cpp
             src/agent/verification.cpp
             src/core/project_info.cpp
@@ -95,7 +104,9 @@ ai_hologram_apply_warnings(code_checker)
 # The test program lists its files by name, so nothing is picked
 # up by accident.
 add_executable(ai_hologram_tests
+               tests/agent_test_fixtures.cpp
                tests/agent_test_support.cpp
+               tests/expected_demo_lines.cpp
                tests/golden_files.cpp
                tests/golden_parse_reader.cpp
                tests/golden_prediction_reader.cpp
@@ -111,6 +122,10 @@ add_executable(ai_hologram_tests
                tests/test_model_v1.cpp
                tests/test_planner.cpp
                tests/test_planner_budget.cpp
+               tests/test_run_loop.cpp
+               tests/test_single_agent.cpp
+               tests/test_single_agent_budget.cpp
+               tests/test_single_agent_cases.cpp
                tests/test_step_predictor.cpp
                tests/test_trap_checks.cpp
                tests/test_verification.cpp
