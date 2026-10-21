@@ -1,0 +1,141 @@
+STAGE 4b PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_04.md version 1.1.1.
+This file is docs/prompts/stage_4b_prompt.txt. (The file with a similar name in
+docs/history/ is the ORIGINAL project's prompt: do not use it.)
+
+You are implementing Stage 4b of the rebuild, and ONLY Stage 4b: the
+fault-event list. Stage 4a (seeded random, the experimenter's search, the
+layout generator) is committed. Do not change its behaviour or Stage 3's.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+   Do not run Python in tools/reference/; read the reference files instead.
+2. Read docs/stages/STAGE_04.md: sections 1, 2, 3.3, 3.13, 4 (the 4b rows and
+   the R4 list), 5, 6.1 (FE), 7 (step 3), 8 (D-080), 9 and 13.
+3. Read tools/reference/stage4_rebuild/ref_material.py, section "3.3 the
+   fault-event list" (FaultEvent, common_mode_count, run_stream_seed,
+   candidates_for, assign_type_targets, fill_event_detail, make_events,
+   generate_fault_events, cell_text, detail_text, fault_event_text), and
+   checks.py, section "4b: fault-event lists" (DEMO_TEXTS, material, texts,
+   type_counts_ok, directions_ok, list_valid, check_events). They are the
+   authority where the plan uses words. The original's declarations are in
+   tools/reference/stage4_rebuild/orig_trace/original_src/experiment/
+   fault_event.h and fault_events.h (namespace there is the original's; ours
+   is aih). Read them; do not copy their file layout where the plan differs.
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 3)
+Create exactly these files, and no others:
+  src/experiment/fault_event.h        src/experiment/fault_event.cpp
+  src/experiment/fault_events.h       src/experiment/fault_events.cpp
+  src/experiment/fault_event_text.cpp
+  tests/fault_test_material.h         tests/fault_test_material.cpp
+  tests/test_fault_events.cpp         (FE1, FE4 demonstration list, FE5, FE6)
+  tests/test_fault_event_sets.cpp     (FE2, FE3, FE4 pilot and confirmatory)
+Change exactly these existing files:
+  CMakeLists.txt                  add the four new src .cpp files to
+                                  ai_hologram_core and the three new test .cpp
+                                  files to ai_hologram_tests. Do NOT run
+                                  clang-format on CMakeLists.txt.
+  tests/test_suites.h, tests/test_main.cpp   add the new groups (gather the
+                                  Stage 4 groups so main stays short, as 4a did).
+  notes/handoff_notes.md          append one note at the end.
+Do NOT create anything of 4c-4g (no injector, fault application, activation
+records, run with faults, scorer, CSV, demonstration or gate), and do not
+change currentStage() or the program output. src/agent/ must never include
+src/experiment/ (R7).
+
+DETAILS
+A. fault_event.h/.cpp: enum class FaultType {F1, F2, F3, F4, F5};
+   FaultTarget {R1, R2, Both}; F1Direction {FreeToBlocked, BlockedToFree};
+   Rotation {Left, Right}; struct FaultEvent with exactly the original's
+   fields and defaults (id, layoutSeed, runSeed, index, step, type, target,
+   commonMode, hasCell, cell, direction, order (std::array<Action, 4>), action,
+   rotation). The one copy of each name (R4): faultTypeName ("F1".."F5"),
+   faultTargetName ("R1", "R2", "both"), f1DirectionName ("free->blocked",
+   "blocked->free"), rotationName ("left", "right"). Later sub-stages use
+   these; nothing else may spell these words.
+B. fault_events.h: RunKey {std::uint64_t layoutSeed; int runSeed;};
+   int commonModeCount(int count) = (2 * count + 5) / 10;
+   std::uint64_t runStreamSeed(std::uint64_t masterSeed,
+   std::uint64_t layoutSeed, int runSeed) = (master << 40) + (layout << 8)
+   + runSeed, all in std::uint64_t;
+   generateFaultEvents(const std::vector<RunKey>& runs,
+   const std::vector<WorldState>& layouts, std::uint64_t masterSeed)
+   -> std::vector<std::vector<FaultEvent>> (empty when the two lists differ
+   in length; otherwise 3 events per run, in run order);
+   std::string faultEventText(const FaultEvent&).
+C. fault_events.cpp: the generation of plan 3.3, draw by draw as
+   ref_material.generate_fault_events. Experiment-level draws from
+   SeededRandom(masterSeed): the 3R types F(i mod 5 + 1) shuffled once; then
+   for F1..F5 in order the target permutation (common-mode first, then R1, R2
+   alternating) and, for F1 only, the second permutation for the directions.
+   Per-run draws from SeededRandom(runStreamSeed(...)): the three steps
+   pickDistinct(1..10, 3) sorted ascending, then each event's detail in order
+   (F1: a matching interior cell other than the destination, from the walls;
+   F4: a true dead interior cell other than the destination, from
+   computeDeadSquares with no overrides; no candidate -> no cell and NO draw;
+   F2: a shuffled copy of kActionOrder; F3: action then rotation; F5: nothing).
+   Interior cells are scanned y 1..8 outer, x 1..8 inner. One reordered draw
+   changes every later number: follow the reference exactly.
+D. fault_event_text.cpp: faultEventText exactly as plan 3.3 and
+   ref_material.fault_event_text: "<id> step <s> <type> target <target> |
+   <details>". Use positionText (core/text_words.h) for cells and actionName
+   (world/action.h) for directions (R4); do not write new copies.
+E. tests/fault_test_material.h/.cpp: the shared demonstration material (R4):
+   a helper that builds the runs (layout seed, then run seed), the layouts
+   (generateLayout) and the event list for a first layout seed, a layout
+   count, a run-seed count and a master seed (like checks.py material()); the
+   demonstration material (500000-500003 x run seeds 1-2, master 4242) built
+   with it; and the flattened list of an event list. Only what 4b's tests use:
+   the hand-built events and findActivation of plan Section 4 are added in 4c,
+   when they are first needed.
+F. Tests exactly as plan 6.1 and checks.py check_events: FE1 (3), FE2 (3),
+   FE3 (4), FE4 (3), FE5 (3), FE6 (2) = 18 new checks. Every expected value
+   (the 24 DEMO_TEXTS lines, the pilot and confirmatory counts, the events per
+   step, the first/last run lines, master seed 4243's first line) is copied
+   from checks.py. FE2, FE3 and FE4 pilot/confirmatory generate MATERIAL ONLY
+   (layouts and event lists, D-080): no agent is run on them. Each check's
+   description starts with its id. Expected after 4b: 397 checks, 0 failures.
+G. Three-part header in every new file (Introduced in: Stage 4b (rebuild)).
+   Beginner comments: what a fault event is and why the list is generated
+   once per experiment and is identical for every condition; why there are
+   two random streams (experiment-level and per run), so changing one run
+   never changes another run's events; what common-mode means (both
+   reasoners hit at once).
+H. Format every new or changed C++ file (not CMakeLists.txt) with CLion's
+   clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (191 preserved files, 397 checks, 196 code files checked, formatting checked)
+and the program output must be unchanged (102 lines, 94 non-blank). If any
+expected value does not match, do NOT change it: stop and report the id, the
+expected and the actual value (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 3):
+  DF4b-1  make commonModeCount round down: return count / 5.
+          Expected failing, exactly these 4 checks: FE1 (the 24 lines),
+          FE1 (the common-mode check), FE2 (the pilot counts) and
+          FE6 (commonModeCount's values). Nothing else.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

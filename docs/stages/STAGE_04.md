@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 4 of the rebuild (Brief Section 10, Stage 4: fault injection and measurement) |
-| **Plan version** | 1.1 (after ChatGPT's review 02: two documentation clarifications) |
+| **Plan version** | 1.1.1 (1.1 after ChatGPT's review 02: two documentation clarifications; 1.1.1 corrects one stale table cell, Section 7 step 2) |
 | **Date** | October 21, 2026 |
-| **Status** | **APPROVED by ChatGPT** (review 02: "APPROVE THE STAGE 4 TECHNICAL DESIGN, SUBJECT TO TWO DOCUMENTATION CLARIFICATIONS AND THE OWNER'S EXPLICIT APPROVAL"; D-073 to D-080 accepted, D-077, D-079 and D-080 with conditions recorded here). v1.1 makes the two clarifications. **Awaits the owner's agreement** (D-064, D-065). |
+| **Status** | **APPROVED by ChatGPT** (review 02: "APPROVE THE STAGE 4 TECHNICAL DESIGN, SUBJECT TO TWO DOCUMENTATION CLARIFICATIONS AND THE OWNER'S EXPLICIT APPROVAL"; D-073 to D-080 accepted, D-077, D-079 and D-080 with conditions recorded here). v1.1 makes the two clarifications. **Agreed by the owner** (D-064, D-065): "yes I agree, when you say so I will run step 3." |
 | **Governing documents** | The brief v1.1; the frozen protocol v1.0 (Phase A 4.2–4.4 and 5, Phase B 12.2–12.6, Sections 13.8, 13.12 and 14; amendments A3 and A4); **Migration Addendum M1** (M1.3, M1.4, M1.5); `docs/RULES.md` (R1–R24); `AGENTS.md`; decisions D-030 to D-045 of the original (carried over, unchanged), D-064 to D-072. |
 | **Builds on** | Stage 3, complete and tagged `stage-3-v2` (`ec4613f`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 4 (plan `docs/history/ai-hologram/docs/stages/STAGE_04.md` v1.2.2), **code-complete at `89ea9b6`** (618 checks; the original's Stage 4 gate and `stage-4` tag were never done, Section 12 of that plan). Its `src/experiment/` and `src/demo/fault_demo.*` are what this stage rebuilds. |
@@ -329,7 +329,7 @@ Each check's description starts with its id. Exact values are in `checks.py`, wh
 | Step | Sub-stage | Content | Tests (total) | Deliberate failure checks (tried by Claude first, R11; `df_check.py`) |
 |---|---|---|---|---|
 | 1 | — | The owner commits this plan, `tools/reference/stage4_rebuild/`, the provenance update (191), the decisions and the 4a prompt, on a new branch `stage-4-work` | | **Owner, DF4-P:** add one character to `fault_traces.txt`. It must stop at `[provenance]`; restore it with `git checkout`. |
-| 2 | **4a** | seeded random, the experimenter's search, layouts | RN, LY (379) | **Cursor, DF4a-1:** `below`'s rejection test uses `>` instead of `>=`. **Exactly RN4 must fail.** |
+| 2 | **4a** | seeded random, the experimenter's search, layouts | RN, LY (379) | **Cursor, DF4a-1:** `shuffle` runs from the front (i = 0 .. size - 2, j = i + below(size - i)) instead of from the end. **Exactly RN4 must fail.** |
 | 3 | **4b** | fault events | FE (397) | **Cursor, DF4b-1:** `commonModeCount` rounds down (count / 5). **Exactly these must fail:** FE1 (the 24 lines and the common-mode check: 2 of its 3 checks), FE2 (the pilot counts), FE6 (`commonModeCount`): 4 checks. |
 | 4 | **4c** | applying faults, records, the run with faults, `onObservation`, `actionIndex` | FI, FR, IE-T1, RL2, RL3 (445) | **Cursor, DF4c-1:** F5 forgets A3's believed-agent-square check. **Exactly these must fail:** FI5 (the believed agent square) and FI7 (`500003-1-1` is applied at a different step): 2 checks. |
 | 5 | **4d** | the scorer: views, claims, the event life, the committed shadow | SC (465) | **Cursor, DF4d-1:** a claim is judged against the events active at the end of its phase instead of the start. **Exactly these must fail:** SC1 (the event and the run: 2 checks) and SC4 (corrected at step 3, and the totals at the end: 2 checks): 4 checks. |
@@ -400,5 +400,6 @@ Every prompt says:
 ## Revision history
 | Version | Date | Change |
 |---|---|---|
+| 1.1.1 | 2026-10-21 | Correction of one stale table cell, reported by Cursor at 4a: Section 7 step 2 still named the first DF4a-1 idea (`below`'s rejection test with `>`), which Claude had dropped before review because it fails nothing (a draw exactly equal to the threshold practically never occurs). It now names the change that was checked on the reference (`df_check_output_2026-10-21.txt`) and given in the 4a prompt: `shuffle` from the front, exactly RN4. Also records the owner's agreement to v1.1 in the Status. No change to behaviour, checks, counts or golden values. |
 | 1.1 | 2026-10-21 | After ChatGPT's review 02 (design approved; D-073 to D-080 accepted, D-077, D-079 and D-080 with conditions). The two documentation clarifications: the 4a prompt names this approved version; the completion checklist states that G4/G5 must still pass all 789 fault-free cases after the run-loop change, that G8 must pass all 563 fault cases and G9/G10 prove the count guard, that the golden records stay unchanged, and that the completion evidence states D-077's coverage and the owner's fresh clone. Also recorded: how later readers handle Q7 (3.11), and the conditions of D-079 and D-080. No change to behaviour, checks, counts or golden values. |
 | 1.0 | 2026-10-21 | First draft. Built first (R9, R11): the golden fault traces from the original C++ at `89ea9b6` (563 cases, each cross-checked against the original `runWithFaults`); the reference, which reproduces them byte for byte, the original demonstration text and the program output; the 195-check mirror; the deliberate failure predictions. |
