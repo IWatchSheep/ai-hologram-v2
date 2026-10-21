@@ -144,6 +144,12 @@ void runNaiveAgentTests(TestCounter& counter);
 // Runs the agent demo test (AD1).
 void runAgentDemoTests(TestCounter& counter);
 
+// Runs the trace reader tests (TN1 to TN15).
+void runTraceReaderTests(TestCounter& counter);
+
+// Runs the trace gate tests (MC1 to MC5, TW1, G4, G5).
+void runTraceGateTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

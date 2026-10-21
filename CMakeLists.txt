@@ -132,7 +132,16 @@ add_executable(ai_hologram_tests
                tests/test_single_agent_budget.cpp
                tests/test_single_agent_cases.cpp
                tests/test_step_predictor.cpp
+               tests/test_trace_gate.cpp
+               tests/test_trace_reader.cpp
                tests/test_trap_checks.cpp
+               tests/trace_blocks.cpp
+               tests/trace_case_parts.cpp
+               tests/trace_cases.cpp
+               tests/trace_models.cpp
+               tests/trace_printer.cpp
+               tests/trace_text.cpp
+               tests/trace_writer.cpp
                tests/test_verification.cpp
                tests/test_code_checker_declarations.cpp
                tests/test_code_checker_size.cpp

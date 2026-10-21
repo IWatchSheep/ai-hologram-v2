@@ -84,16 +84,36 @@ ActionResult alwaysBlocked(const WorldState& state, Action action);
 // A model under which East always "moves" one cell.
 ActionResult alwaysMovedEast(const WorldState& state, Action action);
 
-// Seeds wall corrections with ids 1, 2, ... in order, all
-// Consistent and untested at step 0, and sets
-// nextCorrectionId to the count + 1 (plan 3.14, seed wall).
-// The belief already shows the new values; nothing is applied.
+// One seeded wall correction of a golden case: the cell
+// and its new and old values, which may differ per wall.
+struct WallSeed {
+    Position cell{0, 0};
+    bool newBlocked = false;
+    bool oldBlocked = false;
+};
+
+// Seeds wall corrections with ids 1, 2, ... in the list's
+// order, all Consistent and untested at step 0, and sets
+// nextCorrectionId to the count + 1 (plan 3.14, seed wall),
+// exactly as make_c1 in ref_trace.py. The belief already
+// shows the new values; nothing is applied.
+void seedWallCorrections(SingleAgent& agent,
+                         const std::vector<WallSeed>& seeds);
+
+// The same, when every wall shares one new and old value:
+// it builds the list above and calls it (one copy, R4).
 void seedWallCorrections(SingleAgent& agent, const std::vector<Position>& cells,
                          bool newBlocked, bool oldBlocked);
 
-// Seeds model V1 work for East with its history, from the
-// demo world (plan 3.14, seed v1): count recorded East
-// steps are appended, pending indices 1 to count.
+// Seeds model V1 work: the action is replayed count times
+// from world, each step appended to the history, with
+// pending indices 1 to count (plan 3.14, seed v1), exactly
+// as make_c1 in ref_trace.py.
+void seedModelV1(SingleAgent& agent, const WorldState& world, Action action,
+                 int count);
+
+// The same for East from the demo world: it calls the
+// general form above (one copy, R4).
 void seedModelV1(SingleAgent& agent, int count);
 
 // Seeds a plan in place: one step, the given action with

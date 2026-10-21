@@ -82,38 +82,52 @@ ActionResult alwaysMovedEast(const WorldState& state, Action action) {
     return result;
 }
 
-void seedWallCorrections(SingleAgent& agent, const std::vector<Position>& cells,
-                         bool newBlocked, bool oldBlocked) {
+void seedWallCorrections(SingleAgent& agent,
+                         const std::vector<WallSeed>& seeds) {
     int nextId = 1;
-    for (const Position& cell : cells) {
+    for (const WallSeed& seed : seeds) {
         CorrectionRecord record;
         record.id = nextId;
         nextId = nextId + 1;
         record.element.kind = ElementKind::Wall;
-        record.element.cell = cell;
-        record.newBlocked = newBlocked;
-        record.oldBlocked = oldBlocked;
+        record.element.cell = seed.cell;
+        record.newBlocked = seed.newBlocked;
+        record.oldBlocked = seed.oldBlocked;
         agent.state.corrections.push_back(record);
     }
-    agent.state.nextCorrectionId = static_cast<int>(cells.size()) + 1;
+    agent.state.nextCorrectionId = static_cast<int>(seeds.size()) + 1;
 }
 
-void seedModelV1(SingleAgent& agent, int count) {
-    WorldState state = demoWorld();
+void seedWallCorrections(SingleAgent& agent, const std::vector<Position>& cells,
+                         bool newBlocked, bool oldBlocked) {
+    std::vector<WallSeed> seeds;
+    for (const Position& cell : cells) {
+        seeds.push_back(WallSeed{cell, newBlocked, oldBlocked});
+    }
+    seedWallCorrections(agent, seeds);
+}
+
+void seedModelV1(SingleAgent& agent, const WorldState& world, Action action,
+                 int count) {
+    WorldState state = world;
     std::vector<int> indices;
     for (int index = 1; index <= count; index = index + 1) {
-        const ActionResult after = applyAction(state, Action::East);
+        const ActionResult after = applyAction(state, action);
         state = after.state;
         Observation entry = makeObservation(index + 1, state);
-        entry.lastAction = Action::East;
+        entry.lastAction = action;
         entry.lastOutcome = after.outcome;
         agent.state.history.push_back(entry);
         indices.push_back(index);
     }
     ModelV1Work work;
-    work.action = Action::East;
+    work.action = action;
     work.pendingIndices = indices;
     agent.state.pendingV1 = work;
+}
+
+void seedModelV1(SingleAgent& agent, int count) {
+    seedModelV1(agent, demoWorld(), Action::East, count);
 }
 
 void seedPlan(SingleAgent& agent, Action action) {

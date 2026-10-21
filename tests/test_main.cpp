@@ -59,6 +59,8 @@ void runAgentTestGroups(TestCounter& counter) {
     runRunLoopTests(counter);
     runNaiveAgentTests(counter);
     runAgentDemoTests(counter);
+    runTraceReaderTests(counter);
+    runTraceGateTests(counter);
 }
 
 }  // namespace aih
