@@ -15,9 +15,11 @@
 #include "experiment/scorer.h"
 
 #include <cstddef>
+#include <optional>
 #include <vector>
 
 #include "agent/footprint.h"
+#include "experiment/shadow.h"
 #include "model/world_model.h"
 #include "world/rules.h"
 #include "world/world_state.h"
@@ -39,40 +41,16 @@ bool Scorer::committedF3Effective(const FaultEvent& event,
     return standard.outcome != resultOutcome || standard.state != resultState;
 }
 
-bool Scorer::makeCommittedShadow(const FaultEvent& event, const WorldState& pre,
-                                 const ScoredView& view,
-                                 WorldState& shadow) const {
-    if (event.type == FaultType::F1) {
-        const bool trueWall = isWall(trueLayout_, event.cell);
-        if (isWall(pre, event.cell) == trueWall) {
-            return false;
-        }
-        if (!isInsideGrid(event.cell)) {
-            return false;
-        }
-        const std::size_t row = static_cast<std::size_t>(event.cell.y);
-        const std::size_t column = static_cast<std::size_t>(event.cell.x);
-        shadow.walls[row][column] = trueWall;
-        return true;
+Position Scorer::committedTrueObject(const WorldState& pre,
+                                     const ScoredView& view) const {
+    Position trueObject = pre.object;
+    if (view.belief != nullptr) {
+        trueObject = view.belief->object;
     }
-    // F2 and F5: the shadow holds the true current object,
-    // but only when the prediction started from the
-    // reasoner's current believed object position.
-    if (view.belief == nullptr) {
-        return false;
+    if (trueHistory_ != nullptr && !trueHistory_->empty()) {
+        trueObject = trueHistory_->back().state.object;
     }
-    if (trueHistory_ == nullptr || trueHistory_->empty()) {
-        return false;
-    }
-    const Position trueObject = trueHistory_->back().state.object;
-    if (view.belief->object == trueObject) {
-        return false;
-    }
-    if (pre.object != view.belief->object) {
-        return false;
-    }
-    shadow.object = trueObject;
-    return true;
+    return trueObject;
 }
 
 bool Scorer::committedEffective(int index, const WorldState& pre, Action action,
@@ -87,11 +65,14 @@ bool Scorer::committedEffective(int index, const WorldState& pre, Action action,
         return committedF3Effective(event, pre, action, resultState,
                                     resultOutcome, view);
     }
-    WorldState shadow = pre;
-    if (!makeCommittedShadow(event, pre, view, shadow)) {
+    // F1, F2 and F5 build the same shadow state as the
+    // observed evaluations, so both use shadowInput (R4).
+    const std::optional<WorldState> shadow = shadowInput(
+        event, pre, view, trueLayout_, committedTrueObject(pre, view));
+    if (!shadow.has_value()) {
         return false;
     }
-    if (!isValidWorld(shadow)) {
+    if (!isValidWorld(*shadow)) {
         // An invalid shadow counts as effective: the fault
         // is the only reason the true version is impossible.
         return true;
@@ -99,12 +80,12 @@ bool Scorer::committedEffective(int index, const WorldState& pre, Action action,
     if (view.model == nullptr) {
         return false;
     }
-    const ActionResult shadowResult = view.model->current()(shadow, action);
+    const ActionResult shadowResult = view.model->current()(*shadow, action);
     if (shadowResult.outcome != resultOutcome) {
         return true;
     }
     const std::vector<Position> cells = computeFootprintForTwoPredictions(
-        pre, resultOutcome, shadow, shadowResult.outcome, action);
+        pre, resultOutcome, *shadow, shadowResult.outcome, action);
     const FootprintComparison compared =
         compareFootprint(resultState, resultOutcome, shadowResult.state,
                          shadowResult.outcome, cells);

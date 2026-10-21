@@ -54,6 +54,23 @@ void runScorerTests(TestCounter& counter);
 // Runs the scorer life tests (SC4, SC6).
 void runScorerLifeTests(TestCounter& counter);
 
+// Runs the shadow tests (SH1, F1 and F2).
+void runShadowTests(TestCounter& counter);
+
+// Runs the shadow more tests (SH1, F3 and F4).
+void runShadowMoreTests(TestCounter& counter);
+
+// Runs the observed runs tests (SH2, SH3, SH4, SH5).
+void runObservedRunsTests(TestCounter& counter);
+
+// Runs the read sites tests (SH6, heuristic, planner,
+// cautious choice).
+void runReadSitesTests(TestCounter& counter);
+
+// Runs the read sites more tests (SH6, consequence check,
+// local check, trap V2 test).
+void runReadSitesMoreTests(TestCounter& counter);
+
 }  // namespace aih
 
 #endif  // AI_HOLOGRAM_TESTS_STAGE4_SUITES_H

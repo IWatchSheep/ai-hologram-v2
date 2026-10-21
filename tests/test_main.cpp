@@ -80,6 +80,11 @@ void runStage4TestGroups(TestCounter& counter) {
     runFaultRunMoreTests(counter);
     runScorerTests(counter);
     runScorerLifeTests(counter);
+    runShadowTests(counter);
+    runShadowMoreTests(counter);
+    runObservedRunsTests(counter);
+    runReadSitesTests(counter);
+    runReadSitesMoreTests(counter);
 }
 
 }  // namespace aih

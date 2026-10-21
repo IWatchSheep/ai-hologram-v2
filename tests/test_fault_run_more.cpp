@@ -105,7 +105,7 @@ void checkFr7(TestCounter& counter) {
     SingleAgent agent(makeObservation(1, d2), AgentSettings{});
     const FaultRunResult run =
         runWithFaults(d2, agent, AgentSettings{},
-                      std::vector<FaultEvent>{demo1Event()}, watchers);
+                      std::vector<FaultEvent>{demo1Event()}, true, watchers);
     SingleAgent plainAgent(makeObservation(1, d2), AgentSettings{});
     const FaultRunResult plain = runWithFaults(
         d2, plainAgent, AgentSettings{}, std::vector<FaultEvent>{demo1Event()});

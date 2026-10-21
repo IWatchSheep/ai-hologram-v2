@@ -33,14 +33,16 @@ namespace aih {
 
 // One run with faults: the RunResult exactly as
 // runSingleAgent returned it, how many decision steps the
-// agent took, one activation record per event, and the
-// scores (Stage 4d). Observed evaluations are added in 4e.
+// agent took, one activation record per event, the scores
+// (Stage 4d), and how many evaluations the watch-only
+// observer saw (Stage 4e; 0 when observe is false).
 struct FaultRunResult {
     RunResult run;
     int decisionSteps = 0;
     std::vector<ActivationRecord> activations;
     std::vector<EventScore> eventScores;
     RunScore score;
+    int observedEvaluations = 0;
 };
 
 // Optional extra watchers for a C1 run with faults, called
@@ -68,16 +70,23 @@ struct NaiveFaultRunWatchers {
 // observation history kept through onObservation, the
 // injector and the scorer connected to the agent's
 // activation hook, and the hook emptied again after the
-// loop returns.
+// loop returns. With observe true (the default), a
+// watch-only ComputationObserver that only calls the scorer
+// is attached to the predictor and the dead-square cache
+// (IE-1 H3, H4); with observe false nothing is attached and
+// observedEvaluations stays 0. Primary scoring never
+// depends on the observer: it only sets opportunity steps.
 FaultRunResult runWithFaults(const WorldState& trueInitialState,
                              SingleAgent& agent, AgentSettings settings,
                              const std::vector<FaultEvent>& events,
+                             bool observe = true,
                              FaultRunWatchers watchers = {});
 
 // The same for C0, through its Stage 3 loop.
 FaultRunResult runWithFaults(const WorldState& trueInitialState,
                              NaiveAgent& agent, AgentSettings settings,
                              const std::vector<FaultEvent>& events,
+                             bool observe = true,
                              NaiveFaultRunWatchers watchers = {});
 
 }  // namespace aih

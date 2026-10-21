@@ -16,7 +16,7 @@
 #include "agent/dead_squares.h"
 #include "agent/heuristic.h"
 #include "agent_test_support.h"
-#include "core/text_words.h"
+#include "recording_observer.h"
 #include "test_suites.h"
 #include "test_support.h"
 #include "world/position.h"
@@ -25,37 +25,14 @@
 namespace aih {
 namespace {
 
-// Builds an observer that records every report as one line of
-// text, so the whole sequence can be compared at once.
-ComputationObserver recordingObserver(std::vector<std::string>& events) {
-    ComputationObserver observer;
-    observer.onDeadRead = [&events](Position cell, bool value) {
-        std::string text = "dead " + positionText(cell);
-        if (value) {
-            text = text + " true";
-        }
-        if (!value) {
-            text = text + " false";
-        }
-        events.push_back(text);
-    };
-    observer.onHeuristic = [&events](const WorldState& state, int value) {
-        const std::string text = "heuristic " + positionText(state.agent) +
-                                 " " + positionText(state.object) + " " +
-                                 std::to_string(value);
-        events.push_back(text);
-    };
-    return observer;
-}
-
 void checkOb1(TestCounter& counter) {
     const WorldState demo = demoWorld();
     FreeComputationCounts counts;
     DeadSquareMap map = computeDeadSquares(demo, {}, {}, counts);
     const bool silentFirst = readDeadStatus(map, Position{1, 1});
     const bool silentSecond = readDeadStatus(map, Position{5, 3});
-    std::vector<std::string> events;
-    ComputationObserver observer = recordingObserver(events);
+    RecordingObserver recorder;
+    ComputationObserver observer = recorder.observer();
     map.observer = &observer;
     const bool watchedFirst = readDeadStatus(map, Position{1, 1});
     const bool watchedSecond = readDeadStatus(map, Position{5, 3});
@@ -63,7 +40,7 @@ void checkOb1(TestCounter& counter) {
                                                "dead (5, 3) false"};
     const bool values =
         silentFirst && !silentSecond && watchedFirst && !watchedSecond;
-    check(counter, isValidWorld(demo) && values && events == expected,
+    check(counter, isValidWorld(demo) && values && recorder.events == expected,
           "OB1: readDeadStatus reports (1, 1) true, then (5, 3) false");
 }
 
@@ -71,8 +48,8 @@ void checkOb2(TestCounter& counter) {
     const WorldState demo = demoWorld();
     FreeComputationCounts counts;
     DeadSquareMap map = computeDeadSquares(demo, {}, {}, counts);
-    std::vector<std::string> events;
-    ComputationObserver observer = recordingObserver(events);
+    RecordingObserver recorder;
+    ComputationObserver observer = recorder.observer();
     map.observer = &observer;
     FreeComputationCounts freeCounts;
     heuristic(demo, map, freeCounts);
@@ -84,7 +61,7 @@ void checkOb2(TestCounter& counter) {
         "dead (1, 1) true",  "heuristic (3, 3) (1, 1) 1000000000",
         "dead (2, 1) true",  "dead (3, 2) false"};
     const bool valid = isValidWorld(demo) && isValidWorld(stuck);
-    check(counter, valid && events == expected,
+    check(counter, valid && recorder.events == expected,
           "OB2: heuristic and local check report exactly OB2_EVENTS");
 }
 
@@ -96,8 +73,8 @@ void checkOb3(TestCounter& counter) {
     const std::array<std::array<bool, gridSize>, gridSize> plainDead =
         plain.dead;
     const ComputationObserver* plainObserver = plain.observer;
-    std::vector<std::string> events;
-    ComputationObserver observer = recordingObserver(events);
+    RecordingObserver recorder;
+    ComputationObserver observer = recorder.observer();
     cache.observer = &observer;
     const DeadSquareMap& watched = cache.get(demo, {}, {}, counts);
     const bool passed = isValidWorld(demo) && plainObserver == nullptr &&

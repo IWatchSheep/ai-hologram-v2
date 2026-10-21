@@ -26,7 +26,10 @@
 #include "experiment/fault_event.h"
 #include "experiment/fault_injector.h"
 #include "experiment/scorer_types.h"
+#include "model/prediction.h"
+#include "model/world_model.h"
 #include "world/action.h"
+#include "world/position.h"
 #include "world/rules.h"
 #include "world/world_state.h"
 
@@ -84,6 +87,24 @@ public:
     // Records each Corrected event's final record status.
     void finish(const ScoredView& view);
 
+    // The live view used by the three callbacks below. The
+    // view's pointers stay valid while the agent lives; the
+    // scorer only reads through them and never writes.
+    void attachView(const ScoredView& view);
+    // The watch-only observer callbacks (IE-1 H3, H4). Each
+    // looks only at activated, still-active events with no
+    // opportunity step yet, and records the first effective
+    // use (plan 3.9). Primary scoring never depends on them:
+    // they only set opportunity steps, and no other part of
+    // the scorer reads those back as a cause or a claim.
+    void onEvaluation(const WorldState& state, Action action,
+                      const ActionModel* variantModel,
+                      const Prediction& result);
+    void onDeadRead(Position cell, bool value);
+    void onHeuristic(const WorldState& state, int value);
+    // How many onEvaluation calls have been seen (IE-T3).
+    int observedEvaluations() const;
+
     const std::vector<EventScore>& eventScores() const;
     const RunScore& runScore() const;
 
@@ -120,10 +141,14 @@ private:
                               Action action, const WorldState& resultState,
                               MoveOutcome resultOutcome,
                               const ScoredView& view) const;
-    // Fills shadow with pre corrected to the true value;
-    // false means this event has no shadow here.
-    bool makeCommittedShadow(const FaultEvent& event, const WorldState& pre,
-                             const ScoredView& view, WorldState& shadow) const;
+    // The true object for a committed shadow: the latest
+    // true object, or the believed one when there is no
+    // true history yet (which makes shadowInput decline).
+    Position committedTrueObject(const WorldState& pre,
+                                 const ScoredView& view) const;
+    // One event's part of onHeuristic (scorer_observe.cpp).
+    void observeHeuristicEvent(std::size_t index, const WorldState& state,
+                               int value, FreeComputationCounts& counts);
     bool anyActiveEvent() const;
     void scoreCommittedPrediction(const ScoredView& view);
 
@@ -133,6 +158,9 @@ private:
     const std::vector<Observation>* trueHistory_;
     RunScore run_;
     int currentStep_ = 0;
+    ScoredView liveView_;
+    bool hasLiveView_ = false;
+    int observedEvaluations_ = 0;
     std::size_t seenCorrections_ = 0;
     std::size_t seenMismatches_ = 0;
     std::vector<int> committedCauses_;
