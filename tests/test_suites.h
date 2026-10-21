@@ -61,6 +61,12 @@ void runWorldGoldenRulesTests(TestCounter& counter);
 // Runs the demo tests (D1).
 void runDemoTests(TestCounter& counter);
 
+// Runs the budget counter tests (BC1 to BC4b).
+void runBudgetCounterTests(TestCounter& counter);
+
+// Runs the world model tests (WM1a to WM8).
+void runWorldModelTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

@@ -37,6 +37,8 @@ endfunction()
 add_library(ai_hologram_core STATIC
             src/core/project_info.cpp
             src/demo/scripted_demo.cpp
+            src/model/budget_counter.cpp
+            src/model/world_model.cpp
             src/world/action.cpp
             src/world/environment.cpp
             src/world/rules.cpp
@@ -82,12 +84,14 @@ add_executable(ai_hologram_tests
                tests/test_demo.cpp
                tests/test_environment.cpp
                tests/test_layouts.cpp
+               tests/test_budget_counter.cpp
                tests/test_main.cpp
                tests/test_project_info.cpp
                tests/test_rules.cpp
                tests/test_support.cpp
                tests/test_world_golden.cpp
                tests/test_world_golden_rules.cpp
+               tests/test_world_model.cpp
                tests/test_world_parse.cpp
                tests/test_world_render.cpp
                tests/test_world_state.cpp)

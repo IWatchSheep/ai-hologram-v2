@@ -124,3 +124,21 @@ What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from t
 The final run showed `141 checks, 0 failures`, CTest 2/2, `code checks: 61 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 34 lines, 31 non-blank`.
 
 Unsure about: nothing. The program output is exactly plan 3.8 (34 lines, 31 non-blank), D1 and GN7 pass as predicted, and DF1c-1 failed exactly D1 as predicted.
+
+## Stage 2a (rebuild) — 2026-10-20
+
+What was built: Stage 2a only (plan Section 7, step 2). `Belief` (a separate type wrapping a `WorldState`, so "what I think" cannot be passed as "what is") and `Prediction` (action, outcome, state, one member per line); `BudgetCounter` (a negative limit counts as 0; `tryUse` adds 1 only when used < limit and otherwise changes nothing; `used`, `remaining`, `reset`); and `WorldModel` with the `ActionModel` alias (`std::function<ActionResult(const WorldState&, Action)>`, used instead of inheritance), the default constructor using `applyAction`, the supplied-model constructor falling back to `applyAction` when the supplied function is empty so an empty function is never called, and `predict` paying with `tryUse` first, returning an empty `std::optional` ("no prediction") when refused, and never changing the belief (a `const` member function that changes the caller's budget through its non-const reference parameter). Tests BC1, BC2, BC3, BC4a, BC4b and WM1a–WM1d, WM2–WM8, using the Stage 1 test layouts (OPEN, `at`) from `tests/test_layouts`, each description starting with its id. No comparison, difference text or demo was created (2b, 2c), `currentStage()` and the program output are unchanged, no expected value was changed, no Stage 3-baseline files were touched (none exist yet in this part of the rebuild), and no Git operation other than the `git status` inside `run_checks.ps1` plus read-only `git diff`/`git status` was run; nothing was committed.
+
+Files created, with line counts (all lines, after clang-format): `src/model/belief.h` (26), `src/model/prediction.h` (28), `src/model/budget_counter.h` (43), `src/model/budget_counter.cpp` (39), `src/model/world_model.h` (61), `src/model/world_model.cpp` (45), `tests/test_budget_counter.cpp` (57), `tests/test_world_model.cpp` (189).
+
+Files changed, with line counts (all lines, after clang-format): `CMakeLists.txt` (110, adds `src/model/budget_counter.cpp` and `src/model/world_model.cpp` to `ai_hologram_core` and `tests/test_budget_counter.cpp` and `tests/test_world_model.cpp` to `ai_hologram_tests`), `tests/test_suites.h` (83, two new group declarations), `tests/test_main.cpp` (68, two new group calls), and this file (144, this note appended only). CLion's clang-format was run with `-i` on every new or changed C++ file and on nothing else.
+
+Deliberate failure checks, each made once, built, run with `cmake-build-checks\ai_hologram_tests.exe`, then undone exactly: DF2a-1 (`tryUse` compares with `>` instead of `>=`) failed exactly BC2, BC4a, BC4b and WM3 (`FAIL: BC2: tryUse four times gives true, true, true, false; used 3`, `FAIL: BC4a: BudgetCounter(0) refuses tryUse; used 0; remaining 0`, `FAIL: BC4b: BudgetCounter(-2) behaves like 0; used 0; remaining 0`, `FAIL: WM3: used-up BudgetCounter(1) gives no prediction, belief kept`; `157 checks, 4 failures`). DF2a-2 (the `WorldModel(ActionModel)` constructor ignores its argument and always uses `applyAction`) failed exactly WM6 (`FAIL: WM6: custom Blocked model gives Blocked although rules say Moved`; `157 checks, 1 failures`); for that run only, the constructor parameter was left unnamed so the ignored parameter did not trip the warnings-as-errors build, and everything was restored exactly afterwards, then reformatted.
+
+What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from the repository root, before the deliberate failures and again at the end after both were undone. Its exact final line was:
+
+`ALL CHECKS PASSED (111 preserved files, 157 checks, 69 code files checked, formatting checked)`
+
+The final run showed `157 checks, 0 failures`, CTest 2/2, `code checks: 69 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 34 lines, 31 non-blank`.
+
+Unsure about: nothing in the behaviour. The only adjustment was the DF2a-2 unnamed-parameter detail noted above.
