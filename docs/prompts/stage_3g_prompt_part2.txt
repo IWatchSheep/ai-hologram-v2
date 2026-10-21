@@ -1,0 +1,60 @@
+STAGE 3g PROMPT, PART 2 (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.4.
+This file is docs/prompts/stage_3g_prompt_part2.txt. It continues
+docs/prompts/stage_3g_prompt.txt in the SAME chat; everything there still
+applies except what this part changes.
+
+Thank you for stopping: that was right (R1: never squeeze). Claude and the
+owner decided as follows, recorded in plan v1.4 (Section 4 and the revision
+history row 1.4). Read those rows of docs/stages/STAGE_03.md first.
+
+1. THE READER IN THREE FILES (instead of one pair)
+     tests/trace_cases.h / .cpp        TraceCase and readTraceCases only: the
+                                       case stages, in ref_trace_reader.py's
+                                       order, with its exact problem texts.
+     tests/trace_case_parts.h / .cpp   the line and word readers that
+                                       readTraceCases uses (non-negative
+                                       integer, settings, the 10-row world and
+                                       belief, the model word, the notdead
+                                       cells, the seed lines with their
+                                       duplicate rules), each the one copy (R4).
+     tests/trace_blocks.h / .cpp       TraceBlock, splitTraceBlocks,
+                                       firstTraceDifference.
+   Split your existing reader at its function boundaries; do not change what
+   it does. Move the two inline utilities out of trace_cases.h into
+   trace_blocks.h/.cpp (ordinary functions in the .cpp, not inline). If the
+   model word check is simply "is this one of the catalogue's six names",
+   it may call trace_models instead of keeping its own list (R4); either way
+   there must be only one list of the six names.
+
+2. GENERAL SEEDING HELPERS (do NOT seed by calling the old helpers repeatedly
+   and renumbering)
+   In tests/agent_test_fixtures.h / .cpp (this existing file may now change):
+     - add a small struct WallSeed {Position cell; bool newBlocked;
+       bool oldBlocked;} and
+       seedWallCorrections(SingleAgent&, const std::vector<WallSeed>&):
+       ids 1, 2, ... in the list's order, nextCorrectionId = count + 1,
+       exactly as make_c1 in ref_trace.py. The existing
+       seedWallCorrections(agent, cells, newBlocked, oldBlocked) builds the
+       list and calls the new one.
+     - add seedModelV1(SingleAgent&, const WorldState& world, Action action,
+       int count): replays the action count times from world, exactly as
+       make_c1. The existing seedModelV1(agent, count) calls it with
+       demoWorld() and East.
+   The existing tests that use the old forms must still pass unchanged.
+   The trace writer uses the new forms.
+
+3. NEW TOTALS
+   Files created in 3g: the ten of part 1 plus trace_case_parts.h/.cpp and
+   trace_blocks.h/.cpp (14). Existing files changed: those of part 1 plus
+   tests/agent_test_fixtures.h/.cpp. CMakeLists.txt gets the eight new test
+   .cpp files of 3g.
+   run_checks.ps1 must end with:
+     ALL CHECKS PASSED (163 preserved files, 340 checks, 174 code files checked, formatting checked)
+   The number of checks does not change (340).
+
+4. EVERYTHING ELSE is as in part 1: no change in src/, no change to any
+   expected or golden value, DF3g-1 exactly as described there (expected
+   failing: exactly G4 and G5), no Python, no Git changes, the handoff note,
+   and the full report. If any planned file still cannot hold its code
+   cleanly, stop and tell the owner again.
