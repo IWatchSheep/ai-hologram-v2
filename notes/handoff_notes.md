@@ -70,3 +70,21 @@ What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from t
 The run showed `71 checks, 0 failures`, CTest 2/2, `code checks: 32 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 2 lines, 2 non-blank`. No Git operation other than the `git status` inside `run_checks.ps1` was run, and nothing was committed.
 
 Unsure about: nothing. CK54 passed as plan v1.5 predicts.
+
+## Stage 1a (rebuild) — 2026-10-20
+
+What was built: Stage 1a only (plan Section 7, step 2). The world value types and text format: `Position`, `Action` with `actionName` / `offsetFor` / `moved`, `WorldState` with `gridSize`, `operator==` / `!=`, `isInsideGrid`, `isWall` (outside the grid is a wall, walls read only after a bounds check), `isValidWorld` and `isGoalReached`, and `ParseResult` with `parseWorld` (the original's checks in the original's order, with its exact messages) and `renderWorld` (wall, `+`, `*`, `A`, `O`, `D`, floor), all in namespace `aih`. The test helpers `test_layouts` (DEMO, STAR, PLUS, OPEN, `withLine`, `at`) and `golden_files` (`readLines`), the tests T1–T20, RT1–RT3, V1–V5, V6a–d, N1 and G2 (all 1,009 golden parse cases through `AIH_SOURCE_DIR`, D-063), and the CMake entries and test-suite wiring for them. No rules, environment or demo was created; `currentStage()` still returns 0 and the program output is unchanged. No Stage 3-baseline files were touched (none exist yet), no expected value was changed, and no Git operation other than the `git status` inside `run_checks.ps1` was run; nothing was committed.
+
+Files created, with line counts (all lines): `src/world/position.h` (37), `src/world/action.h` (34), `src/world/action.cpp` (60), `src/world/world_state.h` (57), `src/world/world_state.cpp` (82), `src/world/world_text.h` (42), `src/world/world_parse.cpp` (159), `src/world/world_render.cpp` (53), `tests/test_layouts.h` (46), `tests/test_layouts.cpp` (64), `tests/golden_files.h` (25), `tests/golden_files.cpp` (35), `tests/test_world_parse.cpp` (157), `tests/test_world_render.cpp` (42), `tests/test_world_state.cpp` (79), `tests/test_world_golden.cpp` (135).
+
+Files changed, with line counts (all lines): `CMakeLists.txt` (97, adds the four `src/world` sources to `ai_hologram_core`, the six new test files to `ai_hologram_tests`, and the `AIH_SOURCE_DIR` compile definition), `tests/test_suites.h` (65, four new group declarations), `tests/test_main.cpp` (62, four new group calls), and this file (90, this note appended only). CLion's clang-format was run with `-i` on every new or changed C++ file and on nothing else. One code-checker violation was fixed during the work: `applyCellCharacter` in `world_parse.cpp` was 45 lines with braces on every switch case, so the case braces (not required by the checker, and absent in the original) were removed, bringing it under 40 lines without squeezing.
+
+Deliberate failure checks, each made once, built, run with `cmake-build-checks\ai_hologram_tests.exe`, then undone exactly: DF1a-1 (removed `y == gridSize - 1` from the border-cell test in `world_parse.cpp`) failed exactly T8 and G2 (`FAIL: T8: line 9 with a floor border cell gives the border message` and `FAIL: G2: case 39 expected [ERROR Every border cell must be a wall (#).] actual [ERROR A world must contain exactly one agent (A or +).]`; `105 checks, 2 failures`). DF1a-2 (made `isWall` return false outside the grid in `world_state.cpp`) failed exactly V6a, V6b, V6c and V6d (`105 checks, 4 failures`).
+
+What was run: `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from the repository root, before the deliberate failures, after each was undone, and again at the end. Its exact final line was:
+
+`ALL CHECKS PASSED (98 preserved files, 105 checks, 48 code files checked, formatting checked)`
+
+The final run showed `105 checks, 0 failures`, CTest 2/2, `code checks: 48 files, 0 violations`, `[format] clang-format 22.0.0git`, and `program output: 2 lines, 2 non-blank`.
+
+Unsure about: nothing in the behaviour. Two small judgement calls, both following the plan: `Position`'s operators are defined in `position.h` because the plan names no `position.cpp`, and the switch cases in `applyCellCharacter` and `actionName` carry no braces, matching the original source, because the braces rule (R2) names `if`/`else`/`for`/`while`/`do` bodies.

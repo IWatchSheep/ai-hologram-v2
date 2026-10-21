@@ -49,6 +49,10 @@ int main(int argc, char* argv[]) {
     aih::runCodeCheckerStyleTests(counter);
     aih::runCodeCheckerDeclarationTests(counter);
     aih::runCodeCheckerArchitectureTests(counter);
+    aih::runWorldParseTests(counter);
+    aih::runWorldRenderTests(counter);
+    aih::runWorldStateTests(counter);
+    aih::runWorldGoldenTests(counter);
     std::cout << counter.checks << " checks, " << counter.failures
               << " failures\n";
     if (counter.failures == 0) {

@@ -37,6 +37,18 @@ void runCodeCheckerDeclarationTests(TestCounter& counter);
 // tests for which files checkedKind checks.
 void runCodeCheckerArchitectureTests(TestCounter& counter);
 
+// Runs the world parse tests (T1 to T20).
+void runWorldParseTests(TestCounter& counter);
+
+// Runs the world render tests (RT1 to RT3).
+void runWorldRenderTests(TestCounter& counter);
+
+// Runs the world state tests (V1 to V5, V6a to V6d, N1).
+void runWorldStateTests(TestCounter& counter);
+
+// Runs the world golden tests (G2 in Stage 1a; G1 in 1b).
+void runWorldGoldenTests(TestCounter& counter);
+
 // One checker snippet check: checkText on text must return
 // exactly the expected (line, rule) pairs, in order.
 void checkSnippet(TestCounter& counter, const std::string& description,

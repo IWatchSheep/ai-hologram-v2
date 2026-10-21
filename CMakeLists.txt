@@ -34,7 +34,12 @@ function(ai_hologram_apply_warnings target_name)
 endfunction()
 
 # The library holds the code shared by the program and the tests.
-add_library(ai_hologram_core STATIC src/core/project_info.cpp)
+add_library(ai_hologram_core STATIC
+            src/core/project_info.cpp
+            src/world/action.cpp
+            src/world/world_parse.cpp
+            src/world/world_render.cpp
+            src/world/world_state.cpp)
 target_include_directories(ai_hologram_core PUBLIC src)
 ai_hologram_apply_warnings(ai_hologram_core)
 
@@ -64,13 +69,23 @@ ai_hologram_apply_warnings(code_checker)
 # The test program lists its files by name, so nothing is picked
 # up by accident.
 add_executable(ai_hologram_tests
+               tests/golden_files.cpp
                tests/test_code_checker_architecture.cpp
                tests/test_code_checker_declarations.cpp
                tests/test_code_checker_size.cpp
                tests/test_code_checker_style.cpp
+               tests/test_layouts.cpp
                tests/test_main.cpp
                tests/test_project_info.cpp
-               tests/test_support.cpp)
+               tests/test_support.cpp
+               tests/test_world_golden.cpp
+               tests/test_world_parse.cpp
+               tests/test_world_render.cpp
+               tests/test_world_state.cpp)
+# Tests find data files through this definition (D-063), so a
+# fresh clone anywhere can locate the golden files.
+target_compile_definitions(ai_hologram_tests PRIVATE
+                           AIH_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries(ai_hologram_tests
                       PRIVATE ai_hologram_core code_checker_core)
 ai_hologram_apply_warnings(ai_hologram_tests)
