@@ -40,3 +40,17 @@ original_specifiers = ref.only_specifiers
 ref.only_specifiers = no_specifier_groups
 print('DF0b-6 (noexcept(...) not allowed in lambda heads) failing:', snippets.failing())
 ref.only_specifiers = original_specifiers
+
+original_kind = ref.checked_kind
+
+
+def kind_without_reference_exemption(rel):
+    if rel.startswith('tools/reference/'):
+        return 'ps1' if rel.endswith('.ps1') else ('cpp' if rel.endswith(('.h', '.cpp')) else '')
+    return original_kind(rel)
+
+
+snippets.checked_kind = kind_without_reference_exemption
+print('DF0b-7 (tools/reference/ not exempt) failing:', snippets.files_failing())
+snippets.checked_kind = original_kind
+print('file-kind baseline failing:', snippets.files_failing())

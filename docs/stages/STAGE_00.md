@@ -4,12 +4,12 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 0 of the rebuild (Brief Section 10, Stage 0: project skeleton) |
-| **Plan version** | 1.2 (ChatGPT approved v1.1 with one clarification, made here) |
+| **Plan version** | 1.3 (revision for Stage 0b, after Stage 0a was completed and committed at `f1f8086`) |
 | **Date** | October 20, 2026 |
-| **Status** | **APPROVED.** ChatGPT approved v1.1, with the clarification made in v1.2; the owner approved v1.2 on 2026-10-20 ("i approve"). Code may be written only after this plan is committed. |
+| **Status** | **APPROVED.** v1.2 approved by ChatGPT and the owner (Stage 0a was built under it). v1.3, which changes only Stage 0b, approved by ChatGPT (with the DF0b-4 correction made) and by the owner on 2026-10-20 ("i approve"). Stage 0b code may be written only after v1.3 is committed. |
 | **Governing documents** | The brief v1.1; `docs/RULES.md` (R1–R24, approved); `AGENTS.md`. The Experiment 1 protocol is not affected by Stage 0. |
 | **Builds on** | The first commit of `ai-hologram-v2` (`0484b6d`): governing documents, provenance, history, references, `run_checks.ps1` (provenance only). |
-| **Reference** | `tools/reference/stage0/ref_code_checker.py` and `snippets.py` (R9, R10): the code checker's rules, built and run before this plan, producing every expected value in Section 6.2. `snippets.py` checks itself (`mismatches: none (51 cases)`). |
+| **Reference** | `tools/reference/stage0/ref_code_checker.py` and `snippets.py` (R9, R10): the code checker's rules, built and run before this plan, producing every expected value in Section 6.2. `snippets.py` checks itself (`mismatches: none (51 cases)`, `file-kind mismatches: none (12 cases)`). |
 
 ---
 
@@ -89,7 +89,14 @@ The first line is built from `projectName()` ("AI Hologram") and `currentStage()
 
 **PowerShell files** (`run_checks.ps1`): `SIZE-FILE` as above. `SIZE-FUNCTION`: a line starting with `function <name>` begins a function, which ends at the line where its braces balance (counting `{` and `}`). The other rules do not apply to PowerShell.
 
-**Which files are checked** (R1 scope): every `.h` and `.cpp` under `src/`, `tests/` and `tools/` (including `tools/code_checker/`), and `run_checks.ps1`. **Not checked:** `docs/`, `tools/reference/` (Python, preserved), generated files, and anything under a `cmake-build-*` folder.
+**Which files are checked** (R1 scope), decided by **one** function, `checkedKind(relativePath)`, which returns `cpp`, `ps1` or nothing (not checked):
+1. any path with a folder whose name starts with `cmake-build-` → not checked;
+2. any path starting with `tools/reference/` → not checked (Claude's preserved Python reference);
+3. a `.ps1` file at the repository root or anywhere under `tools/` → `ps1`;
+4. a `.h` or `.cpp` file inside `src/`, `tests/` or `tools/` (not directly at the root) → `cpp`;
+5. anything else (for example `docs/`, `.txt` files, a `.cpp` at the root) → not checked.
+
+The tool walks the root folder (not recursively) and `src/`, `tests/` and `tools/` (recursively), skipping any folder named `.git`, and applies `checkedKind` to each file. Tests FS1–FS12 (6.2) fix the answers. The formatting step (3.5 step 8) gets its list of C++ files from the same function, through `code_checker --list-cpp <root>`, which prints the relative path of every `cpp` file, one per line, sorted, and nothing else (R4: one list of checked files, used twice).
 
 **Output.** One line per violation, sorted by path, then line, then rule: `<path>:<line>: <RULE> <message>`. The messages are exactly:
 - `file is <n> lines (limit 200)`
@@ -102,7 +109,7 @@ The first line is built from `projectName()` ("AI Hologram") and `currentStage()
 
 Then a summary line: `code checks: <files> files, <violations> violations`. The exit code is 0 only with no violations.
 
-**Calibration (from the reference).** Run over the original repository's C++ code (`IWatchSheep/ai-hologram` at `89ea9b6`, 66 source and test files), the rules find 125 violations, all genuine:
+**Calibration (from the reference).** Run over the original repository's C++ code (`IWatchSheep/ai-hologram` at `89ea9b6`, 141 `.h` and `.cpp` files under `src/` and `tests/`; v1.0–v1.2 wrongly said 66), the rules find 125 violations, all genuine:
 - 10 files over 200 lines;
 - 28 functions over 40 lines;
 - 58 one-line `if`/`for` bodies;
@@ -127,10 +134,10 @@ Run as `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from the repo
 2. `[provenance]`: as now (83 files; no carriage returns; SHA-256 matches).
 3. `[configure]`: `cmake -S . -B cmake-build-checks -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DAI_HOLOGRAM_WARNINGS_AS_ERRORS=ON`. A separate folder, so CLion's own `cmake-build-debug` is never touched. Fails on a non-zero exit code. **Generator choice (O2):** "MinGW Makefiles" when `mingw32-make.exe` exists in CLion's MinGW `bin` folder; otherwise Ninja, when `C:\Program Files\JetBrains\CLion 2026.2.3.1\bin\ninja\win\x64\ninja.exe` exists (`-G Ninja -DCMAKE_MAKE_PROGRAM=<that path>`); otherwise fail, naming both paths. The step prints the generator it used. If the generator ever changes, CMake refuses to reuse the old folder; the owner then deletes `cmake-build-checks` (it holds only build output) and runs again.
 4. `[build]`: `cmake --build cmake-build-checks`. Fails on a non-zero exit code (any warning is an error, 3.1), **and also** if the output contains `warning:` (second net); the compiler's messages are printed either way.
-5. `[tests]`: `cmake-build-checks\ai_hologram_tests.exe` (quiet). Prints its last line. Fails on a non-zero exit code.
+5. `[tests]`: `cmake-build-checks\ai_hologram_tests.exe` (quiet). Prints **all** its output lines. In quiet mode that is just the summary line when everything passes, and the `FAIL:` lines plus the summary when something fails, so the owner sees which test failed. Fails on a non-zero exit code.
 6. `[ctest]`: `ctest --test-dir cmake-build-checks --output-on-failure`. Fails on a non-zero exit code.
-7. `[code]`: `cmake-build-checks\code_checker.exe .`. Prints its summary line, or its violations. Fails on a non-zero exit code.
-8. `[format]`: the formatter is CLion's own copy at `C:\Program Files\JetBrains\CLion 2026.2.3.1\plugins\clion-radler\DotFiles\windows-x64\clang-format.exe` (found by the owner on 2026-10-20; there is none on `PATH`). The step prints `[format] clang-format <version>` from `--version`, then runs `clang-format --style=file --dry-run --Werror` on every checked C++ file. It fails on any difference. **If that file is missing** (for example after a CLion update moves it), the run **fails**: `CHECKS FAILED: clang-format not found at <path>; formatting was not checked - ask Claude` (D-054). There is no partial pass.
+7. `[code]`: `cmake-build-checks\code_checker.exe <root>`. Prints its violations (if any) and its summary line. Fails on a non-zero exit code.
+8. `[format]`: the formatter is CLion's own copy at `C:\Program Files\JetBrains\CLion 2026.2.3.1\plugins\clion-radler\DotFiles\windows-x64\clang-format.exe` (found by the owner on 2026-10-20; there is none on `PATH`). The step prints `[format] clang-format <version>` from `--version`, then runs `clang-format --style=file --dry-run --Werror` on every file listed by `code_checker --list-cpp <root>` (3.4). It fails on any difference, printing clang-format's messages. **If that file is missing** (for example after a CLion update moves it), the run **fails**: `CHECKS FAILED: clang-format not found at <path>; formatting was not checked - ask Claude` (D-054). There is no partial pass.
 9. `[program]`: run `cmake-build-checks\ai_hologram.exe`. Print `program output: <total> lines, <non-blank> non-blank`. Fails on a non-zero exit code.
 10. `[git]`: `git status --short --branch`.
 11. Final line, in green: `ALL CHECKS PASSED (<p> preserved files, <c> checks, <v> code files checked, formatting checked)`. It is printed **only** when every step 1–10 ran and passed; no step is ever skipped with a warning. So this line always means every mandatory check was done.
@@ -138,7 +145,17 @@ Run as `powershell -ExecutionPolicy Bypass -File .\run_checks.ps1` from the repo
 
 **Running programs from the script.** In Windows PowerShell 5.1, with `$ErrorActionPreference = "Stop"`, a program that writes to its error stream (as CMake and the compiler do for warnings) would stop the script with a confusing PowerShell error. So every external program (`cmake`, `ctest`, the built programs, `clang-format`, `git`) is run through **one** helper, `Invoke-Tool`, which sets `$ErrorActionPreference` to `Continue` for that call only, captures both streams as plain text lines (`2>&1`, each line converted to a string), restores the setting, and returns the lines and `$LASTEXITCODE`. Each step decides pass or fail from that exit code (R4: one helper for this job).
 
-The script itself is checked by the code checker (at most 200 lines, functions at most 40 lines).
+**The script is split by job (v1.3, D-057).** `run_checks.ps1` reached 198 of its 200 lines in 0a, with steps 7 and 8 still to come (the plan had estimated 180). It is therefore split into five files, each checked by the code checker (at most 200 lines, functions at most 40 lines):
+| File | Holds |
+|---|---|
+| `run_checks.ps1` | The header, the settings (`$ErrorActionPreference`, `$root`, the build folder and the CLion paths), dot-sourcing the four files below, `Set-CompilerPath`, `Show-GitStatus`, the sequence of steps 1–10, and the final line. |
+| `tools/checks/common.ps1` | `Stop-Checks`, `Invoke-Tool`, `Write-ToolLines` (the helpers every step uses). |
+| `tools/checks/provenance.ps1` | `Test-OneFile`, `Test-Provenance` (step 2). |
+| `tools/checks/build_steps.ps1` | `Invoke-Configure`, `Invoke-Build`, `Invoke-TestProgram`, `Invoke-Ctest`, `Invoke-Program` (steps 3–6 and 9). |
+| `tools/checks/code_steps.ps1` | `Invoke-CodeChecker`, `Invoke-FormatCheck` (steps 7–8). |
+
+The functions moved from 0a's `run_checks.ps1` keep their behaviour, except the `[tests]` change in step 5. They are moved, not rewritten. The four files contain only function definitions. `run_checks.ps1` dot-sources them (`. (Join-Path $root "tools/checks/common.ps1")`, and so on) before it runs any step. `Stop-Checks` still ends the whole run, because dot-sourced functions run in the script's own scope.
+
 
 ## 4. Files
 
@@ -151,19 +168,23 @@ The script itself is checked by the code checker (at most 200 lines, functions a
 | `tests/test_suites.h` | 20 | Declarations of the test groups | 0a |
 | `tests/test_main.cpp` | 30 | Runs the groups, prints the summary | 0a |
 | `tests/test_project_info.cpp` | 30 | P1, P2, TS1–TS3 | 0a |
-| `run_checks.ps1` | 180 | 3.5 (steps 7–8 added in 0b) | 0a, 0b |
+| `run_checks.ps1` | 198 in 0a → about 80 in 0b | 3.5; in 0b it keeps the sequence and dot-sources the files below | 0a, 0b |
+| `tools/checks/common.ps1` | 45 | `Stop-Checks`, `Invoke-Tool`, `Write-ToolLines` (moved from `run_checks.ps1`) | 0b |
+| `tools/checks/provenance.ps1` | 45 | Step 2 (moved) | 0b |
+| `tools/checks/build_steps.ps1` | 110 | Steps 3–6 and 9 (moved; step 5 prints all lines) | 0b |
+| `tools/checks/code_steps.ps1` | 70 | Steps 7–8 (new) | 0b |
 | `tools/code_checker/text_cleaner.h` / `.cpp` | 30 / 120 | Cleaning and tokens | 0b |
 | `tools/code_checker/size_rules.h` / `.cpp` | 20 / 70 | `SIZE-FILE`; `SIZE-FUNCTION` for PowerShell | 0b |
 | `tools/code_checker/function_rule.h` / `.cpp` | 20 / 170 | Scope stack, lambda introducers, `SIZE-FUNCTION` for C++ functions and lambdas | 0b |
 | `tools/code_checker/style_rules.h` / `.cpp` | 30 / 190 | `STYLE-BRACES`, `STYLE-STATEMENTS`, `STYLE-RAW-STRING` | 0b |
 | `tools/code_checker/declaration_rule.h` / `.cpp` | 20 / 170 | `STYLE-DECLARATIONS` (including the lambda-body exception) | 0b |
 | `tools/code_checker/architecture_rule.h` / `.cpp` | 20 / 60 | `ARCH-INCLUDE` (include paths, relative paths, backslashes) | 0b |
-| `tools/code_checker/checker.h` / `.cpp` | 30 / 100 | `checkText(path, text)` combining the rules; sorting and formatting | 0b |
-| `tools/code_checker/checker_main.cpp` | 90 | Walks the folders, reads files (CRLF → LF), prints, exit code | 0b |
+| `tools/code_checker/checker.h` / `.cpp` | 30 / 120 | `checkText(path, text, kind)` combining the rules; `checkedKind(path)`; sorting and formatting | 0b |
+| `tools/code_checker/checker_main.cpp` | 110 | Walks the folders (3.4), reads files (CRLF → LF), prints, exit code; `--list-cpp` | 0b |
 | `tests/test_code_checker_size.cpp` | 180 | CK1–CK5, CK20, CK22, CK25, CK26, CK29–CK33, CK35–CK38, CK50–CK52 | 0b |
 | `tests/test_code_checker_style.cpp` | 120 | CK6–CK13, CK17, CK23, CK24, CK28 | 0b |
 | `tests/test_code_checker_declarations.cpp` | 140 | CK14–CK16, CK21, CK27, CK34, CK39–CK46 | 0b |
-| `tests/test_code_checker_architecture.cpp` | 60 | CK18, CK19, CK47–CK49 | 0b |
+| `tests/test_code_checker_architecture.cpp` | 110 | CK18, CK19, CK47–CK49 and FS1–FS12 (which files are checked) | 0b |
 | `tools/reference/stage0/` | — | Claude's reference (committed with this plan) | plan |
 
 **One shared helper per job (R4):** text cleaning and tokens live only in `text_cleaner`; the matching-bracket search only in `text_cleaner` (`findMatching`); the lambda-introducer test only in `function_rule` (`isLambdaIntroducer`), used by the declaration rule too. Long snippet texts in the tests are built by one helper (`repeatLine(text, count)`) in `tests/test_support`.
@@ -172,16 +193,17 @@ The script itself is checked by the code checker (at most 200 lines, functions a
 
 **The program** (3.2): exactly the two lines shown.
 
-**The tests:** `57 checks, 0 failures`, made up of:
+**The tests:** `69 checks, 0 failures`, made up of:
 - P1, P2: 2;
 - TS1–TS3: 3;
-- CK1–CK52: 52.
+- CK1–CK52: 52;
+- FS1–FS12: 12.
 
 **CTest:** 2 tests, both passing.
 
-**The code checker on the repository:** `code checks: <n> files, 0 violations`. Here *n* is the number of checked files at the end of 0b: 27 C++ files (Section 4) plus `run_checks.ps1`, so 28. Cursor reports the exact count; if a split adds a file, the count changes, and that is not an error.
+**The code checker on the repository:** `code checks: <n> files, 0 violations`. Here *n* is the number of checked files at the end of 0b: 27 C++ files (Section 4) plus 5 PowerShell files, so 32. Cursor reports the exact count. If a split approved by plan revision adds a file, the count changes; that is not an error.
 
-**`run_checks.ps1`:** ends with `ALL CHECKS PASSED (83 preserved files, 57 checks, 28 code files checked, formatting checked)`, with the file count as just described.
+**`run_checks.ps1`:** ends with `ALL CHECKS PASSED (83 preserved files, 69 checks, 32 code files checked, formatting checked)`, with the file count as just described.
 
 ## 6. Tests
 
@@ -252,6 +274,23 @@ Each CKn is **one** check: `checkText(path, text)` returns exactly the listed (l
 
 (CK25 and CK26 are checked with the PowerShell rules. The exact texts are in `tools/reference/stage0/snippets.py`; where this table describes a text in words, that file is the authority. Lines such as "39 lines `    h();`" are built with `repeatLine`.)
 
+**Which files are checked (FS1–FS12), one check each:** `checkedKind(path)` returns exactly the value shown (`—` means not checked).
+
+| Test | Path | Expected |
+|---|---|---|
+| FS1 | `src/core/a.cpp` | `cpp` |
+| FS2 | `tests/test_main.cpp` | `cpp` |
+| FS3 | `tools/code_checker/checker.h` | `cpp` |
+| FS4 | `tools/reference/stage0/x.cpp` | — |
+| FS5 | `cmake-build-checks/CMakeFiles/a.cpp` | — |
+| FS6 | `src/cmake-build-debug/a.cpp` | — |
+| FS7 | `docs/a.cpp` | — |
+| FS8 | `run_checks.ps1` | `ps1` |
+| FS9 | `tools/checks/build_steps.ps1` | `ps1` |
+| FS10 | `tools/reference/stage4/gen.ps1` | — |
+| FS11 | `src/notes.txt` | — |
+| FS12 | `main.cpp` | — |
+
 **What v1.0 missed (found by ChatGPT's review, confirmed on the v1.0 reference).** The v1.0 rules gave no violation for CK29, CK32, CK33, CK34 and CK47, and for CK48 they reported the commented-out include (line 3) instead of the real one (line 5). The v1.1 rules gave no violation for CK51 and missed the size violation in CK52 (ChatGPT's v1.1 review). The v1.2 rules give the results above.
 
 ## 7. Implementation order
@@ -259,7 +298,7 @@ Each CKn is **one** check: `checkText(path, text)` returns exactly the listed (l
 |---|---|---|---|---|
 | 1 | — | The owner commits this approved plan, the reference (`tools/reference/stage0/`) and the 0a prompt | | |
 | 2 | **0a** | CMake (core library, program, tests), project info, test runner, `run_checks.ps1` steps 1–6 and 9–11 | P1, P2, TS1–TS3 | DF0a: edit one character in `docs/EXPERIMENT_1_PROTOCOL.md`. `run_checks.ps1` must stop at `[provenance]` naming that file; the owner restores it with `git checkout -- docs/EXPERIMENT_1_PROTOCOL.md`. |
-| 3 | **0b** | The code checker (library, tool, CTest `code_checks`), its tests, `run_checks.ps1` steps 7–8 | CK1–CK52 | DF0b-1: change the function-length limit from 40 to 41 (the C++ and the PowerShell rule use the one constant). Exactly CK3, CK22, CK25, CK29, CK31, CK32, CK33, CK35, CK36, CK37, CK50, CK51 and CK52 must fail. DF0b-2: make the braces rule ignore `else`. Exactly CK7 must fail. DF0b-3: make `isLambdaIntroducer` always return false. Exactly CK29, CK31, CK32, CK33, CK50, CK51 and CK52 must fail. DF0b-6: make the lambda-head rule reject every `(` after the parameter list (no `noexcept(...)` or `decltype(...)` groups). Exactly CK51 and CK52 must fail. (DF0b-1, -2, -3 and -6 were tried on the reference: `df_check.py`.) DF0b-4: add `int a, b;` inside `main()` in `src/main.cpp`. `run_checks.ps1` must stop at `[code]` with `src/main.cpp:<line>: STYLE-DECLARATIONS ...`, and `code_checks` fails in CTest. DF0b-5: add an unused local variable `int unused = 0;` inside `main()`. `run_checks.ps1` must stop at `[build]`, showing the compiler's `-Werror=unused-variable` message. |
+| 3 | **0b** | The code checker (library, tool, CTest `code_checks`, `--list-cpp`), its tests, the split of `run_checks.ps1` into five files (3.5), steps 7–8, and the formatting of the 0a files (`src/main.cpp` and `tests/test_project_info.cpp` differ from `.clang-format` in two places: line wrapping only) | CK1–CK52, FS1–FS12 | DF0b-1: change the function-length limit from 40 to 41 (the C++ and the PowerShell rule use the one constant). Exactly CK3, CK22, CK25, CK29, CK31, CK32, CK33, CK35, CK36, CK37, CK50, CK51 and CK52 must fail. DF0b-2: make the braces rule ignore `else`. Exactly CK7 must fail. DF0b-3: make `isLambdaIntroducer` always return false. Exactly CK29, CK31, CK32, CK33, CK50, CK51 and CK52 must fail. DF0b-6: make the lambda-head rule reject every `(` after the parameter list (no `noexcept(...)` or `decltype(...)` groups). Exactly CK51 and CK52 must fail. DF0b-7: make `checkedKind` stop exempting `tools/reference/`. Exactly FS4 and FS10 must fail. (DF0b-1, -2, -3, -6 and -7 were tried on the reference: `df_check.py`.) DF0b-4: add `int a, b;` inside `main()` in `src/main.cpp`. The CTest test `code_checks` fails, so `run_checks.ps1` stops at `[ctest]` (step 6 runs before step 7) with a non-zero exit code; running `cmake-build-checks\code_checker.exe .` directly reports `src/main.cpp:<line>: STYLE-DECLARATIONS more than one declaration in one statement`. After the line is removed, the full run passes. (v1.0–v1.3 wrongly said `[code]`; corrected after ChatGPT's v1.3 review. The order of the steps is unchanged.) DF0b-5: add an unused local variable `int unused = 0;` inside `main()`. `run_checks.ps1` must stop at `[build]`, showing the compiler's `-Werror=unused-variable` message. DF0b-8: in `src/main.cpp`, join the two lines of the second `std::cout` statement into one line longer than 80 columns. `run_checks.ps1` must stop at `[format]`, naming `src/main.cpp`. |
 | 4 | — | Fresh clone check: the owner clones the repository into a new folder, and `run_checks.ps1` passes there | | |
 | 5 | — | Completion gate (Section 10), review by ChatGPT, tag `stage-0-v2` | | |
 
@@ -275,6 +314,8 @@ Work goes on a branch `stage-0-work` (R17). The owner commits and pushes it, Cla
 | D-054 | The formatting check uses CLion's bundled `clang-format.exe` (plugin folder) and prints its version. If it is missing, `run_checks.ps1` **fails**; `ALL CHECKS PASSED` is printed only when every mandatory step ran. | ChatGPT: the owner must never have to guess whether a mandatory check was done. It is the only copy on the owner's computer. |
 | D-055 | Lambda bodies are functions for the 40-line limit, at every scope (namespace, function, nested lambda), as defined in 3.4, including heads with `noexcept(...)` and `decltype(...)`. | ChatGPT: v1.0 missed namespace-level and argument lambdas; v1.1 missed `noexcept(false)`. |
 | D-056 | The code checker is a deterministic text heuristic. Its known limitations L1–L4 are listed in 3.4; L1 and L2 have tests with exact results (CK46, CK45). | ChatGPT (O3): accepted provided the limitations are tested and documented. |
+| D-057 | `run_checks.ps1` is split by job into itself plus four dot-sourced files in `tools/checks/` (3.5). The moved functions keep their behaviour, except that `[tests]` now prints all of the quiet run's lines. | It reached 198 of 200 lines in 0a, before steps 7–8. The plan's estimate (180) was wrong. Splitting by job is the honest fix; squeezing is forbidden. Showing the `FAIL:` lines tells the owner which test failed. |
+| D-058 | One function, `checkedKind`, decides which files are checked and how. The formatting step takes its list from `code_checker --list-cpp`. | One list of checked files, used twice (R4). PowerShell files under `tools/` are now checked too. |
 
 ## 9. Documentation
 - **Headers.** Every new file has the three-part header (Purpose / "Introduced in Stage 0 (rebuild)" / Architecture).
@@ -284,11 +325,11 @@ Work goes on a branch `stage-0-work` (R17). The owner commits and pushes it, Cla
 ## 10. Completion checklist (owner verification gate)
 - [ ] The plan was approved and committed before any code.
 - [ ] `run_checks.ps1` passes on the owner's computer, **and on a fresh clone** (step 4).
-- [ ] Program output exactly as in 3.2; tests `57 checks, 0 failures`; CTest 2/2.
+- [ ] Program output exactly as in 3.2; tests `69 checks, 0 failures`; CTest 2/2.
 - [ ] The code checker finds 0 violations in the repository, including in its own code and in `run_checks.ps1`.
 - [ ] The deliberate failure checks gave exactly the predicted failures.
 - [ ] No warnings in the build (enforced by step 4).
-- [ ] D-050 to D-056 recorded; handoff notes appended; prompts saved in `docs/prompts/`.
+- [ ] D-050 to D-058 recorded; handoff notes appended; prompts saved in `docs/prompts/`.
 - [ ] The owner can explain: what each `run_checks.ps1` step does; why the checker exists; what a deliberate failure check proves.
 
 ## 11. Things the owner should understand by the end
@@ -319,3 +360,4 @@ Every sub-stage prompt says: follow `AGENTS.md`; implement only that sub-stage; 
 | 1.0 | 2026-10-20 | First draft, with the reference built first (R9). O1 settled the same day: CLion's plugin copy of `clang-format` (D-054). |
 | 1.1 | 2026-10-20 | ChatGPT's four corrections. (1) Lambda bodies count as functions at every scope (3.4, D-055); tests CK29–CK33, CK35–CK38, CK50. (2) Adversarial declaration tests CK34, CK39–CK46, and relative, angle-bracket and backslash include paths CK47–CK49; known limitations L1–L4 documented (D-056). (3) A missing `clang-format` fails the run; `ALL CHECKS PASSED` only when every step ran (D-054). (4) Warnings are compiler errors (`-Werror` / `/WX`), with the text search kept as a second net (D-051); DF0b-5 added. O2 and O3 settled. Tests 33 → 55. Files: `function_rule` added; the checker tests split into four named files. All new expected values come from the revised reference. One of Claude's hand predictions (CK50, line 47) was miscounted; the reference's line 46 is correct. |
 | 1.2 | 2026-10-20 | ChatGPT approved v1.1 after re-running the reference (49 cases, DF0b-1/2/3 as predicted), with one clarification: a lambda with a conditional exception specification, `[]() noexcept(false) { ... }`, was not recognised. The lambda-head rule now allows one balanced `(...)` after `noexcept` and after `decltype` (3.4, D-055). New tests CK51, CK52 and deliberate failure DF0b-6. Tests 55 → 57. Again one of Claude's hand predictions was miscounted (CK52, line 44); the reference's line 43 is correct. Calibration unchanged (125). Also added before the owner's approval: the exact 0a final line, and the `Invoke-Tool` helper for running programs from PowerShell 5.1 (3.5). DF0a was tried by Claude on a copy of the repository: `CHECKS FAILED: docs/EXPERIMENT_1_PROTOCOL.md was changed (SHA-256 differs from docs/PROVENANCE.sha256)`, exit code 1; after `git checkout` the run passed again. |
+| 1.3 | 2026-10-20 | Revision for Stage 0b, after 0a was completed (`f1f8086`; DF0a passed). (1) `run_checks.ps1` reached 198 of 200 lines in 0a, so it is split by job into five files (3.5, D-057). (2) `[tests]` prints all lines, so a failing test is named. (3) One `checkedKind` function decides which files are checked, PowerShell files under `tools/` included; the formatting step uses the same list via `--list-cpp` (3.4, D-058); tests FS1–FS12, deliberate failures DF0b-7 and DF0b-8. (4) Two formatting differences in 0a files are fixed in 0b. (5) Calibration file count corrected from 66 to 141 (the 125 violations were right). Tests 57 → 69; files checked 28 → 32. After ChatGPT's v1.3 review (reference re-run: all 51 snippets, FS1–FS12 and DF0b-1/2/3/6/7 as predicted; D-057 and D-058 accepted), DF0b-4's expected stopping point was corrected from `[code]` to `[ctest]`, because CTest's `code_checks` test runs first. |

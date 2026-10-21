@@ -342,6 +342,23 @@ def check_ps1_functions(ls):
     return v
 
 
+def checked_kind(rel):
+    """Which rules apply to a file, from its path relative to the repository root
+    (forward slashes): 'cpp', 'ps1' or '' (not checked). Plan 3.4, 'Which files are checked'."""
+    parts = rel.split('/')
+    if any(x.startswith('cmake-build-') for x in parts):
+        return ''
+    if rel.startswith('tools/reference/'):
+        return ''
+    if rel.endswith('.ps1'):
+        if len(parts) == 1 or parts[0] == 'tools':
+            return 'ps1'
+        return ''
+    if rel.endswith(('.h', '.cpp')) and parts[0] in ('src', 'tests', 'tools') and len(parts) > 1:
+        return 'cpp'
+    return ''
+
+
 def format_v(path, vs):
     return [f'{path}:{l}: {r} {m}' for l, r, m in vs]
 
@@ -349,12 +366,18 @@ def format_v(path, vs):
 if __name__ == '__main__':
     root = sys.argv[1]
     total = 0
-    for base in ('src', 'tests', 'tools'):
-        for d, _, fs in sorted(os.walk(os.path.join(root, base))):
-            for f in sorted(fs):
-                if not f.endswith(('.h', '.cpp')): continue
-                full = os.path.join(d, f); rel = os.path.relpath(full, root).replace('\\', '/')
-                vs = check_text(rel, open(full, encoding='utf-8').read().replace('\r\n', '\n'), 'cpp')
-                for s in format_v(rel, vs): print(s)
-                total += len(vs)
-    print(f'{total} violations')
+    files = 0
+    for d, dirs, fs in os.walk(root):
+        dirs[:] = sorted(x for x in dirs if x != '.git')
+        for f in sorted(fs):
+            full = os.path.join(d, f)
+            rel = os.path.relpath(full, root).replace('\\', '/')
+            kind = checked_kind(rel)
+            if kind == '':
+                continue
+            files += 1
+            vs = check_text(rel, open(full, encoding='utf-8').read().replace('\r\n', '\n'), kind)
+            for line in format_v(rel, vs):
+                print(line)
+            total += len(vs)
+    print(f'code checks: {files} files, {total} violations')

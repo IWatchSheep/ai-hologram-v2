@@ -50,3 +50,16 @@ CK50 [(1, 'SIZE-FUNCTION'), (2, 'SIZE-FUNCTION'), (46, 'STYLE-DECLARATIONS')]
 CK25 [(1, 'SIZE-FUNCTION')]
 CK26 []
 mismatches: none (51 cases)
+FS1 src/core/a.cpp 'cpp'
+FS2 tests/test_main.cpp 'cpp'
+FS3 tools/code_checker/checker.h 'cpp'
+FS4 tools/reference/stage0/x.cpp ''
+FS5 cmake-build-checks/CMakeFiles/a.cpp ''
+FS6 src/cmake-build-debug/a.cpp ''
+FS7 docs/a.cpp ''
+FS8 run_checks.ps1 'ps1'
+FS9 tools/checks/build_steps.ps1 'ps1'
+FS10 tools/reference/stage4/gen.ps1 ''
+FS11 src/notes.txt ''
+FS12 main.cpp ''
+file-kind mismatches: none (12 cases)

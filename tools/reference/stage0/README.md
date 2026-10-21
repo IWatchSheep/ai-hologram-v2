@@ -4,9 +4,9 @@ Claude's Python reference for the Stage 0 code checker, built and run **before**
 
 | File | What it is |
 |---|---|
-| `ref_code_checker.py` | The checker's rules, exactly as plan Section 3.4 describes them. `python3 ref_code_checker.py <folder>` checks a folder. |
-| `snippets.py` | CK1–CK27 and CK29–CK52 (CK28 is a formatting test in C++ only): the snippet texts and their expected (line, rule) lists. Running it prints each result and `mismatches: none (51 cases)`. |
-| `df_check.py` | The deliberate failure checks DF0b-1, DF0b-2, DF0b-3 and DF0b-6 tried on the reference first (R11). |
+| `ref_code_checker.py` | The checker's rules, exactly as plan Section 3.4 describes them. `python3 ref_code_checker.py <folder>` checks a repository folder, choosing files with `checked_kind` (plan 3.4), and prints `code checks: <files> files, <violations> violations`. Run the scripts from this folder. |
+| `snippets.py` | CK1–CK27 and CK29–CK52 (CK28 is a formatting test in C++ only): the snippet texts and their expected (line, rule) lists. Running it prints each result and `mismatches: none (51 cases)`; it also holds FS1–FS12 (which files are checked) and prints `file-kind mismatches: none (12 cases)`. |
+| `df_check.py` | The deliberate failure checks DF0b-1, DF0b-2, DF0b-3, DF0b-6 and DF0b-7 tried on the reference first (R11). |
 | `snippets_output_2026-10-20.txt`, `df_check_output_2026-10-20.txt` | The recorded outputs. |
 
 Predicted and confirmed on the reference:
@@ -14,9 +14,10 @@ Predicted and confirmed on the reference:
 - DF0b-2 (the braces rule ignores `else`): exactly CK7 fails.
 - DF0b-3 (lambda introducers never recognised): exactly CK29, CK31, CK32, CK33, CK50, CK51, CK52 fail.
 - DF0b-6 (no `noexcept(...)`/`decltype(...)` groups in lambda heads): exactly CK51, CK52 fail.
+- DF0b-7 (`tools/reference/` no longer exempt): exactly FS4, FS10 fail.
 
-Plan version: STAGE_00 v1.2 (v1.1: lambda bodies, lambda-aware declarations, include paths; v1.2: `noexcept(...)` and `decltype(...)` in lambda heads).
+Plan version: STAGE_00 v1.3 (v1.3: which files are checked, `checked_kind`; v1.1: lambda bodies, lambda-aware declarations, include paths; v1.2: `noexcept(...)` and `decltype(...)` in lambda heads).
 
-Calibration: on the original repository's C++ at `89ea9b6` the reference finds 125 violations (10 SIZE-FILE, 28 SIZE-FUNCTION, 58 STYLE-BRACES, 29 STYLE-STATEMENTS), all genuine on review.
+Calibration: on the original repository's C++ at `89ea9b6` (141 `.h`/`.cpp` files) the reference finds 125 violations (10 SIZE-FILE, 28 SIZE-FUNCTION, 58 STYLE-BRACES, 29 STYLE-STATEMENTS), all genuine on review.
 
 The coding assistant never edits these files. A disagreement between the C++ and this reference is reported, never "fixed" by changing an expected value (R22).

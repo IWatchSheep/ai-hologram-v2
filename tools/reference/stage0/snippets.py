@@ -90,6 +90,28 @@ EXPECTED = {
  'CK50': [(1, 'SIZE-FUNCTION'), (2, 'SIZE-FUNCTION'), (46, 'STYLE-DECLARATIONS')],
 }
 
+# Which files are checked (plan 3.4): FS1-FS10, path -> kind.
+from ref_code_checker import checked_kind
+FILES = [
+ ('FS1', 'src/core/a.cpp', 'cpp'),
+ ('FS2', 'tests/test_main.cpp', 'cpp'),
+ ('FS3', 'tools/code_checker/checker.h', 'cpp'),
+ ('FS4', 'tools/reference/stage0/x.cpp', ''),
+ ('FS5', 'cmake-build-checks/CMakeFiles/a.cpp', ''),
+ ('FS6', 'src/cmake-build-debug/a.cpp', ''),
+ ('FS7', 'docs/a.cpp', ''),
+ ('FS8', 'run_checks.ps1', 'ps1'),
+ ('FS9', 'tools/checks/build_steps.ps1', 'ps1'),
+ ('FS10', 'tools/reference/stage4/gen.ps1', ''),
+ ('FS11', 'src/notes.txt', ''),
+ ('FS12', 'main.cpp', ''),
+]
+
+
+def files_failing():
+    return [fid for fid, path, kind in FILES if checked_kind(path) != kind]
+
+
 def results():
     out = {}
     for sid, path, text in S:
@@ -107,3 +129,7 @@ if __name__ == '__main__':
         print(sid, vs)
     bad = failing()
     print('mismatches:', bad if bad else 'none', f'({len(EXPECTED)} cases)')
+    for fid, path, kind in FILES:
+        print(fid, path, repr(checked_kind(path)))
+    fbad = files_failing()
+    print('file-kind mismatches:', fbad if fbad else 'none', f'({len(FILES)} cases)')

@@ -1,0 +1,133 @@
+STAGE 0b PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use, as rule R24 requires. Plan: docs/stages/STAGE_00.md version 1.3.
+
+You are implementing Stage 0b of the rebuild, and ONLY Stage 0b.
+Stage 0a is finished and committed. Do not change its behaviour except where
+this prompt says so.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely.
+   Never run a Git command that changes anything; never commit; never edit
+   docs/, tools/reference/, .cursor/, LICENSE, .gitignore, .gitattributes,
+   .clang-format or AGENTS.md; never create scratch files; never rename, move
+   or delete files. If you think one of those is needed, write it in your
+   report under "NEEDS THE OWNER:" and stop.
+2. Read these sections of docs/stages/STAGE_00.md: 2, 3.1, 3.4 (all of it),
+   3.5 (all of it), 4, 5, 6.2, 7 (step 3), 8, 9, 13.
+3. Read the reference in tools/reference/stage0/: ref_code_checker.py (the
+   rules), snippets.py (the EXACT snippet texts and expected results) and
+   README.md. The C++ checker must give the same answers as the reference on
+   every snippet. Where plan 6.2 describes a text in words, snippets.py is the
+   authority: copy its texts exactly.
+4. Read every existing file you will change and tell the owner briefly what is
+   in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 3)
+Create exactly these files (plan Section 4), and no others:
+  tools/code_checker/text_cleaner.h        tools/code_checker/text_cleaner.cpp
+  tools/code_checker/size_rules.h          tools/code_checker/size_rules.cpp
+  tools/code_checker/function_rule.h       tools/code_checker/function_rule.cpp
+  tools/code_checker/style_rules.h         tools/code_checker/style_rules.cpp
+  tools/code_checker/declaration_rule.h    tools/code_checker/declaration_rule.cpp
+  tools/code_checker/architecture_rule.h   tools/code_checker/architecture_rule.cpp
+  tools/code_checker/checker.h             tools/code_checker/checker.cpp
+  tools/code_checker/checker_main.cpp
+  tests/test_code_checker_size.cpp
+  tests/test_code_checker_style.cpp
+  tests/test_code_checker_declarations.cpp
+  tests/test_code_checker_architecture.cpp
+  tools/checks/common.ps1
+  tools/checks/provenance.ps1
+  tools/checks/build_steps.ps1
+  tools/checks/code_steps.ps1
+Change exactly these existing files:
+  CMakeLists.txt         add code_checker_core (static library: every
+                         tools/code_checker/*.cpp except checker_main.cpp,
+                         listed by name), code_checker (program:
+                         checker_main.cpp), the four new test files in
+                         ai_hologram_tests (linked to code_checker_core too),
+                         and the CTest test code_checks:
+                         code_checker ${CMAKE_SOURCE_DIR}. Same warning
+                         flags on every target.
+  run_checks.ps1         split by job into itself plus tools/checks/*.ps1,
+                         exactly as the table in plan 3.5 says; then add
+                         steps 7 and 8, and the full final line.
+  tests/test_support.h / .cpp    add repeatLine(text, count) (plan 4).
+  tests/test_suites.h / tests/test_main.cpp   add the four checker groups.
+  src/main.cpp and tests/test_project_info.cpp   formatting only (below).
+  README.md              status line: Stage 0 complete apart from its gate.
+  notes/handoff_notes.md append one note at the end; change nothing above it.
+
+DETAILS
+A. The checker (plan 3.4). Port the reference rule by rule, keeping the same
+   structure: cleaning and tokens and findMatching only in text_cleaner;
+   isLambdaIntroducer only in function_rule (the declaration rule calls it);
+   checkedKind and checkText in checker. Messages exactly as plan 3.4 lists.
+   Output sorted by path, then line, then rule. Summary line exactly:
+     code checks: <files> files, <violations> violations
+   --list-cpp <root> prints only the sorted relative paths of the cpp files.
+   Read files in binary, turn CRLF into LF, use forward slashes in paths.
+B. The tests (plan 6.2). One check per CK and per FS. Each check's
+   description starts with its id, for example "CK29: namespace-level lambda
+   over 40 lines". Each CK compares the FULL list of (line, rule) pairs, in
+   order. CK28 compares the formatted line exactly. CK25 and CK26 use the
+   PowerShell rules. Build long texts with repeatLine. Write the snippet texts
+   as ordinary string literals with \n and escaped quotes; raw string
+   literals are forbidden (STYLE-RAW-STRING), including for CK17's text.
+   Expected: 69 checks, 0 failures.
+C. run_checks.ps1 split (plan 3.5, D-057). MOVE the existing functions into
+   the files the table names; keep their behaviour. The only behaviour change
+   is step 5: print ALL the lines of the quiet test run. New in code_steps.ps1:
+   Invoke-CodeChecker (step 7) and Invoke-FormatCheck (step 8, CLion's
+   clang-format at the exact path in plan 3.5; missing -> CHECKS FAILED with
+   the exact message in plan 3.5; prints "[format] clang-format <version>").
+   Final line exactly, numbers from the run:
+     ALL CHECKS PASSED (83 preserved files, 69 checks, 32 code files checked, formatting checked)
+   The Stage 0a final line must no longer appear anywhere.
+D. Formatting. After writing the code, run CLion's clang-format with -i
+   (C:\Program Files\JetBrains\CLion 2026.2.3.1\plugins\clion-radler\DotFiles\windows-x64\clang-format.exe
+   --style=file -i <file>) on every file printed by
+   cmake-build-checks\code_checker.exe --list-cpp .
+   and on nothing else. This also fixes the two known differences in
+   src/main.cpp and tests/test_project_info.cpp (line wrapping only). Do not
+   change those two files in any other way.
+E. Every new file starts with the three-part header comment:
+     Purpose / Introduced in: Stage 0b (rebuild) / Architecture
+
+SIZE AND STYLE (now checked by your own checker)
+Files at most 200 lines; functions and lambdas at most 40 lines ({ line to
+} line, inclusive); braces on every body; one statement per line; one
+declaration per statement; no raw strings. NEVER squeeze code to fit a limit
+and never split a file only to pass a limit; if the planned files cannot hold
+the code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with the exact final line in C. If any snippet result differs from
+the reference, do NOT change the expected value: stop and report the test id,
+the expected list and the actual list (rule R22).
+
+DELIBERATE FAILURE CHECKS YOU DO (plan 7, step 3), one at a time:
+  DF0b-1  function-length limit 40 -> 41. Expected failing: exactly CK3, CK22,
+          CK25, CK29, CK31, CK32, CK33, CK35, CK36, CK37, CK50, CK51, CK52.
+  DF0b-2  braces rule ignores else. Expected failing: exactly CK7.
+  DF0b-3  isLambdaIntroducer always returns false. Expected failing: exactly
+          CK29, CK31, CK32, CK33, CK50, CK51, CK52.
+  DF0b-6  lambda heads reject every ( after the parameter list. Expected
+          failing: exactly CK51, CK52.
+  DF0b-7  checkedKind stops exempting tools/reference/. Expected failing:
+          exactly FS4, FS10.
+For each: make the one change, build, run cmake-build-checks\ai_hologram_tests.exe,
+copy the FAIL lines into your report, then undo the change exactly, and
+confirm with run_checks.ps1 at the end that everything passes again.
+DF0b-4, DF0b-5 and DF0b-8 are done by the owner, not by you. (For reference:
+DF0b-4 stops run_checks.ps1 at [ctest], DF0b-5 at [build], DF0b-8 at [format].)
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines, blank ones
+   included), the five deliberate failure results, the exact final line of
+   run_checks.ps1, and anything you were unsure about.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.
