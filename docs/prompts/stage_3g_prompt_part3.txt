@@ -1,0 +1,33 @@
+STAGE 3g PROMPT, PART 3 (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_03.md version 1.5.
+This file is docs/prompts/stage_3g_prompt_part3.txt. It continues parts 1 and
+2 in the SAME chat; everything there still applies except what this changes.
+
+Stopping again was right. Claude rebuilt your current code independently on
+Linux and confirmed: 340 checks, 0 failures; the program output unchanged; the
+three golden files unchanged; the code checker's only violation is
+trace_writer.cpp's size. Your proposed split is approved as plan v1.5 (read
+its Section 4 rows and the revision history row 1.5):
+
+  tests/trace_printer.h / .cpp   the Printer (C1Printer of ref_trace.py), its
+                                 Tally, the counting observer maker and the
+                                 plan-kind word. It only reads agent state
+                                 (R6).
+  tests/trace_writer.h / .cpp    building and seeding the agents, the C1 and
+                                 C0 runs, and the two public write functions.
+
+Move whole functions and types only; change no behaviour and no text. Put
+only what trace_writer.cpp needs in trace_printer.h (no more than that). Add
+tests/trace_printer.cpp to ai_hologram_tests in CMakeLists.txt (do not
+clang-format CMakeLists.txt). Format the changed C++ files with clang-format -i.
+
+DF3g-1 does not need repeating: the result you reported (exactly G4 and G5,
+then undone) stands. Then:
+1. Run run_checks.ps1. It must end with:
+     ALL CHECKS PASSED (163 preserved files, 340 checks, 176 code files checked, formatting checked)
+2. Append the handoff note to notes/handoff_notes.md (everything listed in
+   part 1, including the two stops and the v1.4 / v1.5 splits, every file
+   with its final line count, the DF3g-1 FAIL lines, and the exact final line).
+3. Report to the owner with the full output of run_checks.ps1.
+No Git changes, no Python, no change in src/ or to any expected or golden
+value. If anything still does not fit cleanly, stop and tell the owner.

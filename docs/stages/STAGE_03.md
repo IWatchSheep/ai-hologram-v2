@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 3 of the rebuild (Brief Section 10, Stage 3: the competent single agent) |
-| **Plan version** | 1.4 (during 3g: the trace reader split over three files; general seeding helpers) |
+| **Plan version** | 1.5 (during 3g: the trace printer gets its own file) |
 | **Date** | October 21, 2026 |
-| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). v1.2 (after 3c: one more test file) agreed by the owner: "sure I agree." v1.3 (after 3d: the shared test fixtures, R4) agreed by the owner: "yes I agree." **v1.4 (during 3g: the trace reader in three files, general seeding helpers) awaits the owner's agreement.** |
+| **Status** | **APPROVED.** ChatGPT approved the v1.0 technical design (review 02), subject to one R21 clarification and the owner's approval; v1.1 records that clarification (D-070). The owner on 2026-10-21: "remember the rule, I already detailed my plan and now I grant you two creative freedom and all you do is say do you agree then I say yes I agree." (D-064, D-065). v1.2 (after 3c: one more test file) agreed by the owner: "sure I agree." v1.3 (after 3d: the shared test fixtures, R4) agreed by the owner: "yes I agree." v1.4 (during 3g: the trace reader in three files, general seeding helpers) committed by the owner (`43f47eb`) and given to Cursor. **v1.5 (during 3g: the trace printer in its own file) awaits the owner's agreement.** |
 | **Governing documents** | The brief v1.1; the frozen protocol v1.0 (Phase B Sections 10–12 define C1 and C0); **Migration Addendum M1** (M1.3, M1.4); `docs/RULES.md` (R1–R24); `AGENTS.md`; decisions D-064 and D-065. |
 | **Builds on** | Stage 2, complete and tagged `stage-2-v2` (`a1a32d9`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 3 (plan `docs/history/ai-hologram/docs/stages/STAGE_03.md` v1.2, tag `stage-3`, commit `7587f38`) **plus the IE-1 instrumentation hooks H1–H4 as built at `89ea9b6`** (M1.3 item 1; R5: instrumentation is designed in from the start). The original's `src/agent/` is the frozen C1 baseline. |
@@ -665,13 +665,14 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 | `tests/trace_blocks.h` / `.cpp` | 40 / 120 | v1.4: `TraceBlock`, `splitTraceBlocks`, `firstTraceDifference` | 3g |
 | `tests/trace_models.h` / `.cpp` | 40 / 150 | the model catalogue | 3g |
 | `tests/trace_text.h` / `.cpp` | 60 / 190 | the state, observation, mismatch, correction and result text | 3g |
-| `tests/trace_writer.h` / `.cpp` | 50 / 195 | building an agent from a case, running it with watchers, writing the trace or the observer lines | 3g |
+| `tests/trace_printer.h` / `.cpp` | 50 / 195 | v1.5: the printer (`C1Printer` of `ref_trace.py`), its tally, the counting observer and the plan-kind word: it turns the watchers' reports into trace lines and only reads the agent's state (R6) | 3g |
+| `tests/trace_writer.h` / `.cpp` | 50 / 195 | building and seeding an agent from a case, running it with watchers (C1 and C0), and the two public write functions (trace and observer lines) | 3g |
 | `tests/test_trace_reader.cpp` | 170 | TN1–TN15 | 3g |
 | `tests/test_trace_gate.cpp` | 170 | MC1–MC5, TW1, G4, G5 | 3g |
 | `tests/test_suites.h`, `test_main.cpp`, `test_project_info.cpp`, `test_layouts.h`/`.cpp` (if a layout helper is needed), `CMakeLists.txt` | — | new groups and files; P2 checks 3 from 3f | 3a–3g (changed) |
 | `tools/reference/stage3/` | — | the reference, the golden files, the original-code tools (committed with this plan) | plan |
 
-**95 new code files** (v1.4; 91 before). The code checker sees 79 → 92 (3a) → 103 (3b) → 116 (3c) → 132 (3d) → 153 (3e) → 160 (3f) → **174** (3g).
+**97 new code files** (v1.5; 95 in v1.4, 91 before). The code checker sees 79 → 92 (3a) → 103 (3b) → 116 (3c) → 132 (3d) → 153 (3e) → 160 (3f) → **176** (3g).
 
 **One shared helper per job (R4):**
 - `positionText` and `blockedText` live only in `text_words`;
@@ -708,7 +709,7 @@ All new code is in namespace `aih`. Source files go into `ai_hologram_core`, tes
 
   The 340 are the 177 Stage 2 checks (P2 now checks 3) and the 163 of Section 6. `checks.py` mirrors all 163: `failing: none (163 checks)`.
 - **CTest:** 2/2. **Code checker:** 0 violations (the file counts above).
-- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (163 preserved files, 340 checks, 174 code files checked, formatting checked)`.
+- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (163 preserved files, 340 checks, 176 code files checked, formatting checked)`.
 
 ## 6. Tests
 Each description starts with its id. Every fixture is a valid world unless the check is about invalid states. D is the demo layout; D2 is D with a wall at (4, 3). LP, L2, LT, LG, LTa, BOXED and SMALL are the layouts in `checks.py`, the same as the original's tests. `checks.py` holds the exact data of every check. Where this table and `checks.py` differ, `checks.py` wins, and Claude must be told.
@@ -909,7 +910,7 @@ Each sub-stage is committed by the owner on `stage-3-work`, after Claude's revie
 ## 10. Completion checklist (owner verification gate)
 - [ ] The plan was agreed and committed before any Stage 3 code.
 - [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
-- [ ] The program output is exactly 3.12, at 102 lines; the tests show `340 checks, 0 failures`; CTest 2/2; 0 checker violations (174 files).
+- [ ] The program output is exactly 3.12, at 102 lines; the tests show `340 checks, 0 failures`; CTest 2/2; 0 checker violations (176 files).
 - [ ] G4 and G5 pass all 789 cases, and TN1–TN15 pass.
 - [ ] All deliberate failure checks gave exactly the predicted failures.
 - [ ] D-068 to D-072 recorded (D-070 with the owner's approval of the R21 clarification); handoff notes appended; prompts and review notes saved.
@@ -949,3 +950,4 @@ Every prompt says:
 | 1.2 | 2026-10-21 | After 3c (242 checks; Claude also compared the new planner with the reference on 3,156 searches over the 789 case worlds: identical). Cursor put the search helpers shared by the two planner test files into `tests/agent_test_support` (R4), which is now at 196 lines, so the seeding helpers planned for it in 3e get their own file, `tests/agent_test_seeds.h/.cpp`. 91 new code files; the final line says 170 code files. No change to behaviour, checks or golden values. |
 | 1.3 | 2026-10-21 | After 3d (277 checks). An R4 finding in Claude's review: five small test helpers are written twice. `makeObservation`, `twoObservations` and `eastHistory` are in two 3d test files; `pushNorth` and `alwaysBlocked` are in a 3c and a 3d file (`agent_test_support` was full, and Cursor kept them local). In 3e, the file planned in v1.2 for the seeding helpers becomes `tests/agent_test_fixtures.h/.cpp` and also holds these five; the copies are deleted. No change to behaviour, checks, counts or golden values. |
 | 1.4 | 2026-10-21 | During 3g, before any 3g file was finished. Cursor stopped, as R1 requires, and reported that a faithful, unsqueezed `readTraceCases` alone is about 240 lines, so `trace_cases.cpp` cannot also hold `splitTraceBlocks` and `firstTraceDifference` within 200 lines. The reader is split at its natural seams into `trace_cases` (the case stages), `trace_case_parts` (the line and word readers) and `trace_blocks` (the golden-file blocks and the first difference). Cursor also found that the seeding helpers of v1.3 cover only one (new, old) pair for all wall seeds and only the demo world for V1 seeds; they gain general forms that the existing helpers call (R4), instead of renumbering after repeated calls. 95 new code files; the final line says 174 code files. No change to behaviour, checks (340), reader texts or golden values. |
+| 1.5 | 2026-10-21 | During 3g. With everything else finished, Cursor stopped again (R1): `trace_writer.cpp` is 331 lines after formatting. At that point the tests showed 340 checks and 0 failures, G4 and G5 identical on all 789 cases, DF3g-1 failing exactly G4 and G5, and the program output unchanged (confirmed independently by Claude). The writer splits at its natural seam: `trace_printer` (turning the watchers' reports into lines) and `trace_writer` (building, seeding and running the agents). The code moves as whole functions. 97 new code files; the final line says 176 code files. No change to behaviour, checks (340) or golden values. |
