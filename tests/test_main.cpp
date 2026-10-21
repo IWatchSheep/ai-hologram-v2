@@ -85,6 +85,8 @@ void runStage4TestGroups(TestCounter& counter) {
     runObservedRunsTests(counter);
     runReadSitesTests(counter);
     runReadSitesMoreTests(counter);
+    runCsvOutputTests(counter);
+    runFaultDemoTests(counter);
 }
 
 }  // namespace aih

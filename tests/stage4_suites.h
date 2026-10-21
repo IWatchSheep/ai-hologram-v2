@@ -71,6 +71,12 @@ void runReadSitesTests(TestCounter& counter);
 // local check, trap V2 test).
 void runReadSitesMoreTests(TestCounter& counter);
 
+// Runs the CSV output tests (CSV1, CSV3, CSV4).
+void runCsvOutputTests(TestCounter& counter);
+
+// Runs the fault demo tests (FD1).
+void runFaultDemoTests(TestCounter& counter);
+
 }  // namespace aih
 
 #endif  // AI_HOLOGRAM_TESTS_STAGE4_SUITES_H

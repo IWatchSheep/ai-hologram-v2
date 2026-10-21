@@ -55,7 +55,7 @@ void runProjectInfoTests(TestCounter& counter) {
     }
     check(counter, projectName() == "AI Hologram",
           "P1: projectName returns AI Hologram");
-    check(counter, currentStage() == 3, "P2: currentStage returns 3");
+    check(counter, currentStage() == 4, "P2: currentStage returns 4");
     check(counter, quietPassWritesNothing(),
           "TS1: quiet passing check writes nothing");
     check(counter, failureWritesFailLine(),

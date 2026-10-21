@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Stage 3 of the rebuild: the competent single agent C1 and the naive agent C0, checked step by step against 789 runs recorded from the original code (the first part of the M1.4 equivalence gate). No faults are injected, no two-agent reasoning exists, and no experiment has been run.**
+**Stage 4 of the rebuild: fault injection and measurement for C0 and C1, and the full M1.4 equivalence gate (789 fault-free and 563 fault runs recorded from the original code, compared step by step). Faults are injected only on demonstration material; no two-agent reasoning exists, and no experiment has been run.**
 
 This repository continues the project from [`IWatchSheep/ai-hologram`](https://github.com/IWatchSheep/ai-hologram), which is archived as the permanent record (final tag `archive-2026-10-20`). The C++ code and tests are being rebuilt from the beginning under the development rules in [`docs/RULES.md`](docs/RULES.md), agreed between the owner, ChatGPT and Claude.
 

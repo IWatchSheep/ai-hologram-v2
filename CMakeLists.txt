@@ -66,8 +66,13 @@ add_library(ai_hologram_core STATIC
             src/core/project_info.cpp
             src/core/text_words.cpp
             src/demo/agent_demo.cpp
+            src/demo/fault_demo.cpp
+            src/demo/fault_demo_runs.cpp
             src/demo/prediction_demo.cpp
             src/demo/scripted_demo.cpp
+            src/experiment/csv_event_row.cpp
+            src/experiment/csv_fields.cpp
+            src/experiment/csv_output.cpp
             src/experiment/fault_apply.cpp
             src/experiment/fault_event.cpp
             src/experiment/fault_event_text.cpp
@@ -127,6 +132,7 @@ add_executable(ai_hologram_tests
                tests/agent_test_fixtures.cpp
                tests/agent_test_support.cpp
                tests/expected_demo_lines.cpp
+               tests/expected_fault_demo.cpp
                tests/fault_test_material.cpp
                tests/golden_files.cpp
                tests/golden_parse_reader.cpp
@@ -189,6 +195,8 @@ add_executable(ai_hologram_tests
                tests/test_shadow.cpp
                tests/test_shadow_more.cpp
                tests/test_seeded_random.cpp
+               tests/test_csv_output.cpp
+               tests/test_fault_demo.cpp
                tests/test_budget_counter.cpp
                tests/test_compare_predictions.cpp
                tests/test_compare_states.cpp
