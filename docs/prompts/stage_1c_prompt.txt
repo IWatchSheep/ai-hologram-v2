@@ -1,0 +1,87 @@
+STAGE 1c PROMPT (ai-hologram-v2) - for the coding assistant (Cursor)
+Saved before use (rule R24). Plan: docs/stages/STAGE_01.md version 1.3.
+
+You are implementing Stage 1c of the rebuild, and ONLY Stage 1c.
+Stages 1a and 1b are finished and committed. Do not change their behaviour.
+
+BEFORE YOU START
+1. Read AGENTS.md and .cursor/rules/ai-hologram.mdc and follow them completely
+   (no Git changes, no commits, no edits to docs/, tools/reference/ or other
+   protected files, no scratch files, no renames/moves/deletes; anything that
+   seems to need one goes under "NEEDS THE OWNER:" and you stop).
+2. Read docs/stages/STAGE_01.md v1.3: sections 3.8, 4, 5, 6.7 (the reader
+   rules, GN7), 6.8, 7 (step 4), 9, and the revision history row 1.3.
+3. Read tools/reference/stage1/ref_world.py (scripted_demo), checks.py
+   (DEMO_TEXT, READER_CASES) and ref_golden_readers.py (parse_integer).
+4. Read every existing file you will change and tell the owner briefly what
+   is in it now.
+5. If anything is unclear, impossible, or disagrees with the plan: STOP and ask.
+
+WHAT TO BUILD (plan Section 7, step 4)
+Create exactly these files, and no others:
+  src/demo/scripted_demo.h        src/demo/scripted_demo.cpp
+  tests/test_demo.cpp             (D1)
+Change exactly these existing files:
+  src/main.cpp                    the two header lines of plan 3.8, then
+                                  runScriptedDemo(std::cout).
+  src/core/project_info.cpp       currentStage() returns 1.
+  tests/test_project_info.cpp     P2 now checks 1 (and its description).
+  CMakeLists.txt                  add src/demo/scripted_demo.cpp to
+                                  ai_hologram_core and tests/test_demo.cpp to
+                                  ai_hologram_tests.
+  tests/test_suites.h, tests/test_main.cpp   add the demo group.
+  tests/golden_files.h / .cpp     (a) move splitWords and startsWith here from
+                                  the two readers, unchanged (R4: one copy);
+                                  (b) parseInteger accepts at most 9 digits
+                                  after the optional '-' (plan 6.7, v1.3), so
+                                  an int can never overflow.
+  tests/golden_parse_reader.cpp, tests/golden_rules_reader.cpp
+                                  use the shared splitWords/startsWith; delete
+                                  their private copies. No other change.
+  tests/test_world_golden.cpp     add GN7 (plan 6.7 table; checks.py).
+  README.md                       status as plan Section 9 says.
+  notes/handoff_notes.md          append one note at the end.
+
+DETAILS
+A. runScriptedDemo(std::ostream& out) writes exactly the demo part of plan
+   3.8 (it starts with an empty line), using parseWorld, Environment, the
+   five hand-written East actions, renderWorld, actionName, outcomeName and
+   isGoalReached. If the demo layout ever failed to parse it would print
+   "Demo layout is invalid: <error>" and return (no exceptions). A comment
+   says plainly: the actions are hand-written; nothing chooses them.
+B. The program prints exactly plan 3.8: 34 lines, 31 non-blank.
+C. D1 compares runScriptedDemo's output in a std::ostringstream with the
+   exact text (checks.py DEMO_TEXT). GN7 compares (ok, cases, problem) with
+   (false, 0, "line 1: invalid case header").
+D. Each check's description starts with its id. Expected after 1c:
+   141 checks, 0 failures.
+E. Three-part headers in new files (Introduced in: Stage 1c (rebuild));
+   beginner comments (std::ostream& as a parameter, and why the demo takes a
+   stream: so the test can capture its output).
+F. Format every new or changed C++ file with CLion's clang-format -i.
+
+SIZE AND STYLE: files at most 200 lines, functions/lambdas at most 40 lines,
+braces on every if/else/for/while/do body, one statement and one declaration
+per line, no raw strings. NEVER squeeze code; if a planned file cannot hold
+its code cleanly, stop and tell the owner.
+
+CHECK YOUR WORK
+  powershell -ExecutionPolicy Bypass -File .\run_checks.ps1
+must end with:
+  ALL CHECKS PASSED (98 preserved files, 141 checks, 61 code files checked, formatting checked)
+and show "program output: 34 lines, 31 non-blank". If any expected value does
+not match, do NOT change it: stop and report (rule R22).
+
+DELIBERATE FAILURE CHECK YOU DO (plan 7, step 4):
+  DF1c-1  make the demo use four East actions instead of five.
+          Expected failing: exactly D1.
+Make the one change, build, run cmake-build-checks\ai_hologram_tests.exe, copy
+the FAIL lines into your report, undo the change exactly, and confirm with
+run_checks.ps1 that everything passes again. DF1c-2 is done by the owner.
+
+WHEN YOU FINISH
+1. Append a handoff note to notes/handoff_notes.md: what you built, every
+   file created or changed with its line count (all lines), the deliberate
+   failure result, the exact final line of run_checks.ps1, anything unsure.
+2. Report to the owner: the same, plus the full output of run_checks.ps1.
+3. Do not commit. Only git status / git diff / git log are allowed.

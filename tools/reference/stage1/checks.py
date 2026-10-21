@@ -208,6 +208,8 @@ READER_CASES = {
     'GN4': ('parse', ['case 1 lines -1', EMPTY_WORLD_ERROR], (False, 0, 'line 1: invalid case header')),
     'GN5': ('parse', ['case 1 lines x', EMPTY_WORLD_ERROR], (False, 0, 'line 1: invalid case header')),
     'GN6': ('parse', ['case 1 lines 0', EMPTY_WORLD_ERROR], (True, 1, '')),
+    'GN7': ('parse', ['case 1 lines 9999999999', EMPTY_WORLD_ERROR],
+            (False, 0, 'line 1: invalid case header')),
     'GR1': ('rules', ['layout L1'] + DEMO[:4], (False, 0, 'line 1: truncated layout L1')),
     'GR2': ('rules', ['layout L1'] + DEMO + ['L1 3 3 5 3'], (False, 0, 'line 12: malformed case line')),
     'GR3': ('rules', ['layout L1'] + DEMO + ['L9 3 3 5 3 East -> Moved 4 3 5 3 0'],

@@ -61,10 +61,11 @@ GN3 PASS
 GN4 PASS
 GN5 PASS
 GN6 PASS
+GN7 PASS
 GR1 PASS
 GR2 PASS
 GR3 PASS
 GR4 PASS
 GR5 PASS
 D1 PASS
-failing: none (69 checks)
+failing: none (70 checks)

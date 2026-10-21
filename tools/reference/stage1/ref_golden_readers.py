@@ -8,11 +8,12 @@ import re
 
 import ref_world as rw
 
-INTEGER = re.compile(r'^-?[0-9]+$')
+INTEGER = re.compile(r'^-?[0-9]{1,9}$')
 
 
 def parse_integer(text):
-    """The one integer test (plan R4): optional '-', then digits only."""
+    """The one integer test (plan R4): optional '-', then 1 to 9 digits only.
+    At most 9 digits, so the C++ int can never overflow (v1.3)."""
     if INTEGER.match(text):
         return True, int(text)
     return False, 0

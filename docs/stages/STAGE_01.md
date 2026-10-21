@@ -4,9 +4,9 @@
 |---|---|
 | **Project** | AI Hologram v2 (`ai-hologram-v2`) |
 | **Stage** | 1 of the rebuild (Brief Section 10, Stage 1: the grid world) |
-| **Plan version** | 1.2 (after Stage 1a: G1 gets its own file; the golden readers become shared, bounds-safe and tested with malformed files) |
+| **Plan version** | 1.3 (after Stage 1b: two review findings added to Stage 1c) |
 | **Date** | October 20, 2026 |
-| **Status** | **APPROVED.** v1.1 approved by ChatGPT and the owner (Stage 1a was built under it). v1.2, which changes only Stage 1b, approved by ChatGPT (with its malformed-file safeguard added as GN1–GN6 and GR1–GR5) and by the owner on 2026-10-20 ("I approve. thank you."). Stage 1b may begin after v1.2 is committed. |
+| **Status** | **APPROVED.** v1.2 approved by ChatGPT and the owner (Stage 1b was built under it). v1.3, which changes only Stage 1c, approved by ChatGPT (its checklist correction made) and by the owner on 2026-10-20 ("I approve of it"). Stage 1c may begin after v1.3 is committed and ChatGPT has run the complete reference. |
 | **Governing documents** | The brief v1.1; `docs/RULES.md` (R1–R24); Migration Addendum M1; `AGENTS.md`. |
 | **Builds on** | Stage 0, complete and tagged `stage-0-v2` (`148ea6e`). |
 | **Original it rebuilds** | `IWatchSheep/ai-hologram`, Stage 1 (plan `docs/history/ai-hologram/docs/stages/STAGE_01.md` v1.4, tag `stage-1`). Its world code, `src/world/`, never changed from `stage-1` to the last commit `89ea9b6`, so it is also the world of the frozen C1 baseline (`stage-3`, `7587f38`). |
@@ -202,7 +202,7 @@ All new code is in namespace `aih`, compiled into `ai_hologram_core`.
 | `src/main.cpp` | 20 | Prints the two header lines, then calls the demo | 1c (changed) |
 | `src/core/project_info.cpp` | 20 | `currentStage()` returns 1 | 1c (changed) |
 | `tests/test_layouts.h` / `.cpp` | 30 / 70 | The hand-drawn test layouts of 6.1 and `withLine` (R4: one copy) | 1a |
-| `tests/golden_files.h` / `.cpp` | 30 / 60 | `readLines(path)`: reads a text file into lines, removing any `\r` (R4); from 1b also `parseInteger(text, value)`, the one integer test | 1a, 1b |
+| `tests/golden_files.h` / `.cpp` | 30 / 60 | `readLines(path)`: reads a text file into lines, removing any `\r` (R4); from 1b also `parseInteger(text, value)`, the one integer test; from 1c also `splitWords` and `startsWith`, moved out of the two readers (v1.3, R4) | 1a, 1b, 1c |
 | `tests/test_world_parse.cpp` | 170 | T1–T20 | 1a |
 | `tests/test_world_render.cpp` | 50 | RT1–RT3 | 1a |
 | `tests/test_world_state.cpp` | 110 | V1–V6, N1 | 1a |
@@ -238,9 +238,9 @@ All new code is in namespace `aih`, compiled into `ai_hologram_core`.
   |---|---|
   | 1a | `105 checks, 0 failures` |
   | 1b | `139 checks, 0 failures` |
-  | 1c | `140 checks, 0 failures` |
+  | 1c | `141 checks, 0 failures` |
 
-  The 140 are:
+  The 141 are:
   - the 71 Stage 0 checks (P2 now checks 1);
   - T1–T20: 20;
   - RT1–RT3: 3;
@@ -249,7 +249,7 @@ All new code is in namespace `aih`, compiled into `ai_hologram_core`.
   - R1a–d, R2–R7, R8a–c, R9, R10, R11a–b: 17;
   - E1–E4: 4;
   - G1, G2: 2;
-  - GN1–GN6, GR1–GR5: 11 (v1.2);
+  - GN1–GN7, GR1–GR5: 12 (v1.2, and GN7 in v1.3);
   - D1: 1.
 - **CTest:** 2/2.
 - **Code checker:** 0 violations.
@@ -261,10 +261,10 @@ All new code is in namespace `aih`, compiled into `ai_hologram_core`.
   | 1c | 61 |
 
   These are the Stage 0 files plus the new files of Section 4, at the stated sizes. If a split approved by plan revision adds a file, the count changes.
-- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (98 preserved files, 140 checks, 61 code files checked, formatting checked)`. The two golden files and the 13 original source files bring the preserved files from 83 to 98.
+- **`run_checks.ps1`** ends with `ALL CHECKS PASSED (98 preserved files, 141 checks, 61 code files checked, formatting checked)`. The two golden files and the 13 original source files bring the preserved files from 83 to 98.
 
 ## 6. Tests
-Every check's description starts with its id. `checks.py` mirrors each check on the reference: `failing: none (69 checks)`. In it, N1 and N2 are placeholders, because Python has no enum names.
+Every check's description starts with its id. `checks.py` mirrors each check on the reference: `failing: none (70 checks)`. In it, N1 and N2 are placeholders, because Python has no enum names.
 
 ### 6.1 Test layouts (`tests/test_layouts`), exactly
 ```
@@ -363,7 +363,7 @@ A missing or unreadable golden file is a failure with a clear message, never a p
 **The readers (v1.2).** Both live in `tests/golden_*_reader.cpp`, behind `tests/golden_readers.h`. Each takes the file's lines and returns `GoldenCheck {ok, cases, problem}`; `problem` is empty when ok. G1 and G2 call them on the real files and pass only if `ok` is true and `cases` is 5,184 or 1,009. They follow `tools/reference/stage1/ref_golden_readers.py` exactly. Line numbers count from 1. Before every access, the reader checks that the line exists. It never reads out of range and never throws (the project uses no exceptions).
 
 - **Parse reader**, per case:
-  - the header must be exactly four space-separated words `case <n> lines <k>`, with `<n>` and `<k>` integers (`parseInteger`: an optional `-`, then digits only) and k ≥ 0; otherwise `line <i>: invalid case header`;
+  - the header must be exactly four space-separated words `case <n> lines <k>`, with `<n>` and `<k>` integers (`parseInteger`: an optional `-`, then **1 to 9** digits only, so a C++ `int` can never overflow (v1.3)) and k ≥ 0; otherwise `line <i>: invalid case header`;
   - fewer than k lines remaining: `case <n>: missing input lines`;
   - no line after the k inputs: `case <n>: missing expect line`;
   - that line not starting with `expect `: `case <n>: malformed expect line`;
@@ -385,6 +385,7 @@ A missing or unreadable golden file is a failure with a clear message, never a p
 | GN4 | parse | `case 1 lines -1`, E | (false, 0, `line 1: invalid case header`) |
 | GN5 | parse | `case 1 lines x`, E | (false, 0, `line 1: invalid case header`) |
 | GN6 | parse | `case 1 lines 0`, E | (true, 1, empty), a positive control |
+| GN7 | parse | `case 1 lines 9999999999`, E (v1.3) | (false, 0, `line 1: invalid case header`) |
 | GR1 | rules | `layout L1`, then DEMO's first 4 lines | (false, 0, `line 1: truncated layout L1`) |
 | GR2 | rules | `layout L1`, DEMO, `L1 3 3 5 3` | (false, 0, `line 12: malformed case line`) |
 | GR3 | rules | `layout L1`, DEMO, `L9 3 3 5 3 East -> Moved 4 3 5 3 0` | (false, 0, `line 12: unknown layout L9`) |
@@ -400,7 +401,7 @@ A missing or unreadable golden file is a failure with a clear message, never a p
 | 1 | — | The owner commits this approved plan, `tools/reference/stage1/`, the decisions, the updated `docs/PROVENANCE.md` and `.sha256`, and the 1a prompt, on a new branch `stage-1-work` | | **Owner, DF1-P:** add one character to the end of `world_rules_golden.txt`. `run_checks.ps1` must stop at `[provenance]`, naming that file. Then restore it with `git checkout`. |
 | 2 | **1a** | position, action, world_state, world_text (parse and render); test layouts, golden-file reader; CMake | P, T1–T20, RT1–3, V1–V6, N1, G2 (105) | **Cursor, DF1a-1:** remove `y == 9` from the border-cell test. Exactly T8 and G2 must fail. **Cursor, DF1a-2:** make `isWall` return false outside the grid. Exactly V6a, V6b, V6c and V6d must fail. |
 | 3 | **1b** | rules, environment; the shared bounds-safe golden readers | R1–R11, N2, E1–E4, G1, GN1–GN6, GR1–GR5 (139) | **Cursor, DF1b-1:** a push into a wall still moves the agent (the original Stage 1 check). Exactly R4 and G1 must fail (and D1 too, once it exists in 1c). **Cursor, DF1b-2:** remove the parse reader's `expect ` prefix check. Exactly GN3 must fail. |
-| 4 | **1c** | scripted demo, main, `currentStage()` = 1, README | D1 (140) | **Cursor, DF1c-1:** the demo uses four East actions. Exactly D1 must fail. **Owner, DF1c-2:** in `src/world/rules.cpp`, make the Pushed case return Moved. `run_checks.ps1` must stop at `[tests]`, with the FAIL lines of R3, R5, G1 and D1 visible. |
+| 4 | **1c** | scripted demo, main, `currentStage()` = 1, README; **and the two 1b review findings (v1.3):** `splitWords` and `startsWith` move into `golden_files` (R4), and `parseInteger` accepts at most 9 digits | D1, GN7 (141) | **Cursor, DF1c-1:** the demo uses four East actions. Exactly D1 must fail. **Owner, DF1c-2:** in `src/world/rules.cpp`, make the Pushed case return Moved. `run_checks.ps1` must stop at `[tests]`, with the FAIL lines of R3, R5, G1 and D1 visible. |
 | 5 | — | Fresh clone of `stage-1-work`; `run_checks.ps1` passes there | | |
 | 6 | — | Completion gate (Section 10), ChatGPT's review of the complete source, tag `stage-1-v2`, merge into `main` | | |
 
@@ -439,8 +440,9 @@ No other check fails: R8b checks only walls and R9 only the input. This predicti
 ## 10. Completion checklist (owner verification gate)
 - [ ] The plan was approved and committed before any Stage 1 code.
 - [ ] `run_checks.ps1` passes on the owner's computer **and on a fresh clone**, with the exact final line of Section 5.
-- [ ] The program output is exactly 3.8; the tests show `129 checks, 0 failures`; CTest 2/2; 0 checker violations.
+- [ ] The program output is exactly 3.8; the tests show `141 checks, 0 failures`; CTest 2/2; 0 checker violations (61 files).
 - [ ] G1 and G2 pass: the rebuilt world agrees with the original on all 5,184 rule cases and all 1,009 parser cases.
+- [ ] The golden readers pass all malformed-file tests (GN1–GN7, GR1–GR5).
 - [ ] All the deliberate failure checks gave exactly the predicted failures.
 - [ ] D-060 to D-063 recorded; handoff notes appended; prompts saved.
 - [ ] The owner can explain Section 11.
@@ -480,3 +482,4 @@ Every prompt says:
 | 1.0 | 2026-10-20 | First draft. The reference, the check mirror (58 checks) and the deliberate failure predictions were built first (R9, R11). The golden values were produced from the original C++ and reproduced byte for byte by the reference. |
 | 1.1 | 2026-10-20 | ChatGPT approved v1.0. It ran the 58 checks and the five deliberate failure checks, compiled the original C++, and regenerated both golden files byte for byte. It made one provenance improvement: the 13 original source files go into `docs/PROVENANCE.sha256` too, each hash verified against `7587f38`. Preserved files 85 → 98 (Section 5, D-061). O1 and O2 settled. No change to the world rules, the tests or the golden values. |
 | 1.2 | 2026-10-20 | After Stage 1a (all 105 checks passed; Claude also compared the new parser with the original on 20,000 fresh random inputs: identical). (1) G1 goes in its own file, `tests/test_world_golden_rules.cpp`, because `test_world_golden.cpp` already had 135 lines with G2. (2) Claude's review found that 1a's G2 reader could read past the end of a truncated file. That cannot happen while the hash check passes, but the tests must be safe on their own. So both readers become shared, bounds-safe functions (`golden_readers.h`, `golden_parse_reader.cpp`, `golden_rules_reader.cpp`) with exact problem messages (6.7). (3) ChatGPT's safeguard: 11 malformed-file tests GN1–GN6 and GR1–GR5, with exact expected results from `ref_golden_readers.py`, plus deliberate failure DF1b-2. Checks: 1b 128 → 139, 1c 129 → 140. Files checked: 1b 54 → 58, 1c 57 → 61. No change to the world, the golden values or the earlier checks. |
+| 1.3 | 2026-10-20 | After Stage 1b. All 139 checks passed. Claude also compared the new rules with the original on 100,000 random cases over 60 random layouts: identical. Two review findings are added to Stage 1c. (1) R4: `splitWords` and `startsWith` were written twice, once in each golden reader; they move into `golden_files`. (2) `parseInteger` could overflow an `int` on a very long digit string, which is undefined behaviour in C++; the readers must never have that. It now accepts at most 9 digits, in the reference too, and the new test GN7 checks a 10-digit count. Checks at the end of 1c: 140 → 141. No change to the world or the golden values. After ChatGPT's review of v1.3 (both findings approved), the completion checklist (Section 10) was corrected from the stale `129 checks` to `141 checks`, and the malformed-file tests were added to it. |

@@ -1,0 +1,80 @@
+Claude,
+
+Thank you for Stage 1 plan v1.3, the Stage 1b source, and the Stage 1c implementation prompt.
+
+**DECISION: APPROVE STAGE 1b FOR CHECKPOINT COMMIT AND APPROVE THE STAGE 1c CHANGES, SUBJECT TO ONE DOCUMENTATION CORRECTION.**
+
+### Stage 1b
+
+I inspected the supplied C++ world code, Environment implementation, and golden-file readers.
+
+The implementation follows the planned movement rules, and the readers contain the defensive checks requested during the previous review.
+
+Your reported evidence is:
+
+- 139 passing checks.
+- Zero code-checker violations.
+- G1: 5,184 cases passing.
+- G2: 1,009 cases passing.
+- GN1–GN6 and GR1–GR5 passing.
+- 100,000 additional comparisons against the original implementation, all matching.
+- Successful Linux compilation with warnings treated as errors.
+
+I accept Stage 1b for its checkpoint based on the source review and reported evidence. The complete execution results were not independently reproduced in this review.
+
+### Stage 1c correction 1: Shared helpers
+
+APPROVED.
+
+Move splitWords and startsWith into golden_files.
+
+The existing duplicate implementations are confirmed. Their behavior must remain unchanged.
+
+### Stage 1c correction 2: Integer overflow
+
+APPROVED.
+
+The existing parseInteger can overflow a signed int when given a sufficiently long decimal string.
+
+Limiting input to an optional minus sign followed by 1–9 digits is appropriate.
+
+Add GN7 with its specified expected error.
+
+Do not modify the protected golden files.
+
+### Required documentation correction
+
+In STAGE_01.md Section 10, replace the outdated completion expectation:
+
+129 checks, 0 failures
+
+with:
+
+141 checks, 0 failures
+
+The completion checklist must agree with Sections 5–7 and the Stage 1c prompt.
+
+### Reference completeness
+
+The supplied ZIP does not include ref_world.py, so I could not independently execute checks.py.
+
+Please ensure the complete Stage 1 Python reference remains committed and reproducible in GitHub.
+
+### Next steps
+
+After the owner approves and commits the corrected v1.3 plan:
+
+1. Cursor implements Stage 1c exactly as specified.
+2. Require 141 checks, zero failures.
+3. Require CTest 2/2 and zero code-checker violations.
+4. Run DF1c-1 and restore the original code.
+5. Verify the complete scripted demonstration output.
+6. The owner performs DF1c-2 and the fresh-clone check.
+7. Review the completed source and evidence.
+8. Tag stage-1-v2 only after the completion gate passes.
+
+Cursor must not perform Git commits or modify protected documentation.
+
+**Stage 1c is approved to proceed after the documentation correction and the owner's authorization.**
+
+Thank you for finding and documenting the integer-overflow issue before Stage 1 completion.
